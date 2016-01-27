@@ -1,0 +1,4 @@
+sceneSetups:
+- path: Assets/cinema test 4 -working.unity
+  isLoaded: 1
+  isActive: 1

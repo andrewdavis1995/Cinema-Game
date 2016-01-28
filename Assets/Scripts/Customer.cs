@@ -9,15 +9,14 @@ public class Customer
     const int ticketsX = 15;
     const int ticketsY = 2;
     #endregion
-
-    int index;
+    
     int characterNum;
     public int currentDirection = 0;     // 1 down, 2 up, 3 left, 4 right, 0 still
 
+    int hourDue;
+    int minuteDue;
 
-    float posX = 0;
-    float posY = 0;
-    
+    public bool arrived = false;
 
     bool needsFood;
     bool needsTickets;
@@ -27,18 +26,43 @@ public class Customer
     int travellingToX = 0;
     int travellingToY = 0;
 
-    public Customer(int id)
+    FilmShowing filmShowing;
+
+    public Customer(FilmShowing fs)
     {
+        filmShowing = fs;
 
         needsFood = Random.Range(0, 10) >= 4;
         needsTickets = Random.Range(0, 10) >= 3;
         needsToilet = Random.Range(0, 10) >= 6;
-                
+
+        int minutesEarly = Random.Range(20, 80);
+
+        int hourStart = fs.timeH;
+        int minuteStart = fs.timeM;
+
+        hourDue = hourStart - (minutesEarly / 60);
+        minuteDue = minuteStart - minutesEarly - ((hourDue-hourStart) * 60);
+
+        if (minuteDue < 0)
+        {
+            minuteDue += 60;
+            hourDue--;
+        }
+
         this.nextPlace();
     }
 
-    public void updatePosition(float x, float y) { posX = x; posY = y; }
+    public bool hasArrived(int hours, int minutes)
+    {
+        if (hours >= hourDue && minutes >= minuteDue)
+        {
+            arrived = true;
+            return true;
+        }       
 
+        return false;
+    }
 
     public void nextPlace()
     {
@@ -58,10 +82,7 @@ public class Customer
         }
     }
 
-
-    public int getIndex() { return index; }
-    public float getXCoordinate() { return posX; }
-    public float getYCoordinate() { return posY; }
+    
     public int getTravellingToX() { return travellingToX; }
     public int getTravellingToY() { return travellingToY; }
     public void ticketsDone() { this.needsTickets = false; }

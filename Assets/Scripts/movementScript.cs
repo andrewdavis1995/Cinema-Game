@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class movementScript : MonoBehaviour {
 
@@ -7,16 +8,21 @@ public class movementScript : MonoBehaviour {
 
     private Animator animator;
 
-    public Customer[] customers = new Customer[5];
-
-    public Animation anim;
+    public Customer customer;
     
+    public Animation anim;
+
+
+    public void setCustomer(Customer cust)
+    {
+        this.customer = cust;
+    }
+
 
     // Use this for initialization
     void Start ()
     {
         animator = GetComponent<Animator>();
-        customers[0] = new Customer(0);
     }
 
     private void moveCustomer(int index)
@@ -30,88 +36,95 @@ public class movementScript : MonoBehaviour {
         //get direction
         int newDir;
 
-        if (theY > customers[index].getTravellingToY() + 0.11f)
+        
+        if (theY > customer.getTravellingToY() + 0.11f)
         {
             // move up
             transform.Translate(new Vector3(0, -moveSpeed, 0));
             //change direction
             newDir = 1;
-            customers[index].updatePosition(theX, theY - moveSpeed);
+            //customers[index].updatePosition(theX, theY - moveSpeed);
             direction = "down";
         }
-        else if (theY < customers[index].getTravellingToY() - 0.11f)
+        else if (theY < customer.getTravellingToY() - 0.11f)
         {
             // move down
             transform.Translate(new Vector3(0, moveSpeed, 0));
             //change direction
             newDir = 2;
-            customers[index].updatePosition(theX, theY + moveSpeed);
+            //customers[index].updatePosition(theX, theY + moveSpeed);
             direction = "up";
         }
-        else if (theX < customers[index].getTravellingToX() - 0.11f)
+        else if (theX < customer.getTravellingToX() - 0.11f)
         {
             // move left
             transform.Translate(new Vector3(+moveSpeed, 0, 0));
             //change direction
             newDir = 4;
-            customers[index].updatePosition(theX + moveSpeed, theY);
+            //customers[index].updatePosition(theX + moveSpeed, theY);
             direction = "right";
         }
-        else if (theX > customers[index].getTravellingToX() + 0.11f)
+        else if (theX > customer.getTravellingToX() + 0.11f)
         {
             // move right
             transform.Translate(new Vector3(-moveSpeed, 0, 0));
             //change direction
             newDir = 3;
-            customers[index].updatePosition(theX - moveSpeed, theY);
+            //customers[index].updatePosition(theX - moveSpeed, theY);
             direction = "left";
         }
         else
         {
             newDir = 0;
-            customers[index].nextPlace();
 
-            //if (!customers[index].isGoingToSeat())
-            //{
-            //    customerTimers[index].Stop();
-            //    customers[index].getPicture().Top = 300 + (ticketsQueue.Count * 50);
-            //    customers[index].ticketsDone();
-            //    customers[index].nextPlace();
-            //    customers[index].getPicture().Left = 520;
+            if (!customer.isGoingToSeat())
+            {            
+                // delay here
+
+                customer.ticketsDone();
+                customer.nextPlace();
 
             //    ticketsQueue.Enqueue(new Customer(index));
-            //}
-            //else
-            //{
-            //    customerTimers[index].Stop();
-            //    customers[index].getPicture().Visible = false;
-            //}
+            }
+            else
+            {
+                // finished
+            }
         }
 
         //Debug.Log("DIRECTION: " + direction);
+        Debug.Log(customer.currentDirection + " v " + newDir);
 
 
-        if (customers[index].currentDirection != newDir)
+        if (customer.currentDirection != newDir)
         {
-            // change image
-
-            Debug.Log(direction);
-            //GetComponent<animation>.Play("down");
-            //GetComponent<Animation>().Play(direction);
-            //animation.Play("down");
-
             animator.SetTrigger(direction);
-
         }
+
         
-        customers[index].currentDirection = newDir;
+        customer.currentDirection = newDir;
+            
 
     }
+
+
+    public Transform greenGuy;
+
 
     // Update is called once per frame
     void Update () {
 
-        moveCustomer(0);        
-        
+        moveCustomer(0);
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Instantiate(greenGuy, new Vector3(15, -10, 0), Quaternion.identity);
+            greenGuy = null;
+        }
+    }
+
+    void OnMouseDown()
+    {
+        Debug.Log("YIPEE!!!");
     }
 }

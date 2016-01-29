@@ -35,6 +35,9 @@ public class Controller : MonoBehaviour {
     // Use this for initialization
     void Start() {
 
+        Image[] inputs = GameObject.Find("Overlay Canvas").GetComponentsInChildren<Image>();
+        //inputs[0].gameObject.SetActive(false);
+
         for (int i = 0; i < 5; i++)
         {
             theScreens[i] = new Screen(i, 0);

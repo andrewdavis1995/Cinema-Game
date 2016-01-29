@@ -1,0 +1,257 @@
+fileFormatVersion: 2
+guid: 51962cc3c0ede1c4caaed6629d0fa185
+timeCreated: 1454003657
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: staffSprite1_0
+    21300002: staffSprite1_1
+    21300004: staffSprite1_2
+    21300006: staffSprite1_3
+    21300008: staffSprite1_4
+    21300010: staffSprite1_5
+    21300012: staffSprite1_6
+    21300014: staffSprite1_7
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -3
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 100
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: staffSprite1_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 234
+        width: 159
+        height: 221
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 79.5, y: 137}
+        - {x: 79.5, y: 211}
+        - {x: 59.5, y: 221}
+        - {x: -43.5, y: 221}
+        - {x: -79.5, y: 207}
+        - {x: -79.5, y: 129}
+        - {x: -78.5, y: 129}
+        - {x: -74.5, y: 41}
+        - {x: -66.5, y: 0}
+        - {x: 78.5, y: 0}
+        - {x: 79.5, y: 4}
+        - {x: 79.5, y: 75}
+        - {x: 72.5, y: 96}
+    - name: staffSprite1_1
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 241
+        width: 163
+        height: 216
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 81.5, y: 120}
+        - {x: 81.5, y: 216}
+        - {x: -59.5, y: 216}
+        - {x: -81.5, y: 192}
+        - {x: -81.5, y: 121}
+        - {x: -76.5, y: 42}
+        - {x: -71.5, y: 0}
+        - {x: 76.5, y: 0}
+        - {x: 81.5, y: 4}
+        - {x: 81.5, y: 49}
+        - {x: 72.5, y: 102}
+    - name: staffSprite1_2
+      rect:
+        serializedVersion: 2
+        x: 335
+        y: 241
+        width: 168
+        height: 216
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 84, y: 204}
+        - {x: 36, y: 216}
+        - {x: -57, y: 216}
+        - {x: -84, y: 202}
+        - {x: -84, y: 102}
+        - {x: -79, y: 73}
+        - {x: -80, y: 19}
+        - {x: -67, y: 7}
+        - {x: -54, y: 0}
+        - {x: 61, y: 0}
+        - {x: 80, y: 17}
+        - {x: 77, y: 105}
+        - {x: 84, y: 133}
+    - name: staffSprite1_3
+      rect:
+        serializedVersion: 2
+        x: 505
+        y: 234
+        width: 169
+        height: 220
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 34.5, y: 220}
+        - {x: -48.5, y: 220}
+        - {x: -84.5, y: 202}
+        - {x: -84.5, y: 97}
+        - {x: -80.5, y: 47}
+        - {x: -84.5, y: 20}
+        - {x: -84.5, y: 14}
+        - {x: -63.5, y: 0}
+        - {x: 40.5, y: 0}
+        - {x: 67.5, y: 3}
+        - {x: 76.5, y: 102}
+        - {x: 84.5, y: 137}
+        - {x: 84.5, y: 205}
+    - name: staffSprite1_4
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 2
+        width: 165
+        height: 220
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 82.5, y: 132}
+        - {x: 82.5, y: 220}
+        - {x: -68.5, y: 220}
+        - {x: -82.5, y: 211}
+        - {x: -82.5, y: 5}
+        - {x: -47.5, y: 0}
+        - {x: 48.5, y: 0}
+        - {x: 66.5, y: 6}
+        - {x: 75.5, y: 42}
+        - {x: 56.5, y: 98}
+    - name: staffSprite1_5
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 6
+        width: 169
+        height: 216
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 36.5, y: 216}
+        - {x: -53.5, y: 216}
+        - {x: -84.5, y: 199}
+        - {x: -84.5, y: 34}
+        - {x: -75.5, y: 0}
+        - {x: 53.5, y: 0}
+        - {x: 70.5, y: 10}
+        - {x: 84.5, y: 103}
+        - {x: 84.5, y: 204}
+      - - {x: 72.5, y: 47}
+        - {x: 70.5, y: 46}
+        - {x: 70.5, y: 12}
+        - {x: 72.5, y: 11}
+        - {x: 75.5, y: 11}
+        - {x: 80.5, y: 17}
+        - {x: 80.5, y: 42}
+        - {x: 74.5, y: 47}
+    - name: staffSprite1_6
+      rect:
+        serializedVersion: 2
+        x: 353
+        y: 5
+        width: 168
+        height: 217
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 84, y: 196}
+        - {x: 74, y: 196}
+        - {x: 35, y: 217}
+        - {x: -55, y: 217}
+        - {x: -84, y: 201}
+        - {x: -84, y: 124}
+        - {x: -79, y: 92}
+        - {x: -84, y: 38}
+        - {x: -84, y: 8}
+        - {x: -59, y: 0}
+        - {x: 54, y: 0}
+        - {x: 72, y: 5}
+        - {x: 78, y: 103}
+        - {x: 84, y: 132}
+    - name: staffSprite1_7
+      rect:
+        serializedVersion: 2
+        x: 523
+        y: 0
+        width: 165
+        height: 222
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 82.5, y: 119}
+        - {x: 82.5, y: 206}
+        - {x: 80.5, y: 215}
+        - {x: 37.5, y: 222}
+        - {x: -34.5, y: 222}
+        - {x: -82.5, y: 202}
+        - {x: -82.5, y: 128}
+        - {x: -74.5, y: 98}
+        - {x: -75.5, y: 19}
+        - {x: -75.5, y: 0}
+        - {x: 82.5, y: 0}
+        - {x: 82.5, y: 37}
+        - {x: 71.5, y: 96}
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

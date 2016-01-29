@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using UnityEngine.UI;
 
 public class movementScript : MonoBehaviour {
 
@@ -107,6 +108,19 @@ public class movementScript : MonoBehaviour {
 
     }
 
+
+    void OnMouseOver()
+    {
+        Image[] inputs = GameObject.Find("Overlay Canvas").GetComponentsInChildren<Image>();
+        inputs[0].enabled = true;
+        inputs[0].transform.position = transform.position;
+    }
+
+    void OnMouseExit()
+    {
+        Image [] inputs = GameObject.Find("Overlay Canvas").GetComponentsInChildren<Image>();
+        inputs[0].enabled = false;
+    }
 
     public Transform greenGuy;
 

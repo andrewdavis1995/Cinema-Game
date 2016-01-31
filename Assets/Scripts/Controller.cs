@@ -6,6 +6,11 @@ using UnityEngine.UI;
 
 public class Controller : MonoBehaviour {
 
+    Image[] imgs;
+    GameObject startDayButton;
+
+    Queue<Customer> ticketQueue = new Queue<Customer>();
+
     public Transform greenGuy;
     public Transform blueGuy;
 
@@ -15,6 +20,8 @@ public class Controller : MonoBehaviour {
     public Text popcornLabel;
 
     Transform myInstance = null;
+
+    public List<StaffMember> staffMembers = new List<StaffMember>();
 
     private Screen[] theScreens = new Screen[5];
     private List<FilmShowing> filmShowings = new List<FilmShowing>();
@@ -27,15 +34,14 @@ public class Controller : MonoBehaviour {
 
     int numScreens = 1;
 
-    int count = 0;
+    float count = 0;
 
     int minutes = 0;
     int hours = 9;
 
     // Use this for initialization
     void Start() {
-
-        Image[] inputs = GameObject.Find("Overlay Canvas").GetComponentsInChildren<Image>();
+        
         //inputs[0].gameObject.SetActive(false);
 
         for (int i = 0; i < 5; i++)
@@ -45,9 +51,28 @@ public class Controller : MonoBehaviour {
         theScreens[0].upgrade();
         theScreens[0].upgradeComplete();
 
+        
+        mouseDrag.addStaff += addStaffMember;
+        mouseDrag.getStaffListSize += getStaffSize;
+        mouseDrag.getStaffJobById += getStaffJobById;
+        mouseDrag.changeStaffJob += updateStaffJob;
+        mouseDrag.getStaffList += getFullStaffList;
+        movementScript.addToQueueTickets += addToQueueTickets;
+        movementScript.getQueueTickets += getTicketQueue;
+        movementScript.getQueueTicketsSize += getTicketQueueSize;
+
+
+        imgs = GameObject.Find("Customer Status").GetComponentsInChildren<Image>();
+
+        for (int i = 0; i < imgs.Length; i++)
+        {
+            imgs[i].enabled = false;
+        }
+
+        startDayButton = GameObject.Find("Start Day Button");
         nextDay(false);
 
-	}
+    }
     
 
     // Update is called once per frame
@@ -55,9 +80,10 @@ public class Controller : MonoBehaviour {
     {
         if (simulationRunning)
         {
-            count++;
+            count += Time.deltaTime;
 
-            if (count > 8)
+            
+            if (count > 0.2)
             {
 
                 count = 0;
@@ -87,18 +113,25 @@ public class Controller : MonoBehaviour {
                         {
                             if (customerArray[j].hasArrived(hours, minutes))
                             {
-                                
+                                float left = 12;
+
+                                if (customerArray[j].NeedsTickets())
+                                {
+                                    left = 16;
+                                }
+
+
                                 int sprite = UnityEngine.Random.Range(0, 2);
 
-                                if (sprite == 0) {
-                                    myInstance = Instantiate(greenGuy, new Vector3(15, -10), Quaternion.identity) as Transform;
+                                if (sprite == 0)
+                                {
+                                    myInstance = Instantiate(greenGuy, new Vector3(left, -15), Quaternion.identity) as Transform;
                                 }
                                 else
                                 {
-                                    myInstance = Instantiate(blueGuy, new Vector3(15, -10), Quaternion.identity) as Transform;
+                                    myInstance = Instantiate(blueGuy, new Vector3(left, -15), Quaternion.identity) as Transform;
                                 }
-                                myInstance.GetComponent<movementScript>().customer = customerArray[j];
-                                
+                                myInstance.GetComponent<movementScript>().customer = customerArray[j];                                
                                                                 
                             }
                         }
@@ -120,22 +153,26 @@ public class Controller : MonoBehaviour {
             }
 
             timeLabel.text = hourString + ":" + minString;
-
-         
-
+            
         }
-        else
+    }
+
+    public void startDay()
+    {
+        // hide the button
+        startDayButton.SetActive(false);
+
+        if (!simulationRunning)
         {
-            if (Input.GetKey(KeyCode.Space) && !simulationRunning)
-            {
-                // start the running of the 'day'
-                simulationRunning = true;
-            }
+            // start the running of the 'day'
+            simulationRunning = true;
         }
+        
     }
 
     void nextDay(bool shouldCollect)
     {
+        startDayButton.SetActive(true);
 
         if (shouldCollect)
         {
@@ -167,6 +204,11 @@ public class Controller : MonoBehaviour {
 
         //// update day output 
         dayLabel.text = "DAY: " + currDay.ToString();
+
+        count = 0;
+        minutes = 0;
+        hours = 9;
+
     }
 
     void nextWeek()
@@ -245,4 +287,44 @@ public class Controller : MonoBehaviour {
 
         }
     }
+
+
+    #region staff events
+    public void addStaffMember(StaffMember staff)
+    {
+        staffMembers.Add(staff);
+    }
+
+    public int getStaffSize()
+    {
+        return staffMembers.Count;
+    }
+
+    public void updateStaffJob(int index, int job)
+    {
+        staffMembers[index].setJob(job);
+    }
+
+    public int getStaffJobById(int index) { return staffMembers[index].getJobID(); }
+
+    public List<StaffMember> getFullStaffList()
+    {
+        return staffMembers;
+    }
+    #endregion
+
+    #region Ticket Queue events
+    private void addToQueueTickets(Customer customer)
+    {
+        ticketQueue.Enqueue(customer);
+    }
+    private Queue<Customer> getTicketQueue()
+    {
+        return this.ticketQueue;
+    }
+    private int getTicketQueueSize()
+    {
+        return this.ticketQueue.Count;
+    }
+    #endregion
 }

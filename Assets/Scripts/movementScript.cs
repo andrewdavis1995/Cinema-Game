@@ -2,8 +2,19 @@
 using System.Collections;
 using System;
 using UnityEngine.UI;
+using System.Timers;
+using System.Collections.Generic;
 
 public class movementScript : MonoBehaviour {
+
+    public delegate void addToTicketQueue(Customer customer);
+    public static event addToTicketQueue addToQueueTickets;
+
+    public delegate Queue<Customer> getTicketQueue();
+    public static event getTicketQueue getQueueTickets;
+
+    public delegate int getTicketQueueSize();
+    public static event getTicketQueueSize getQueueTicketsSize;
 
     public float moveSpeed;
 
@@ -13,113 +24,158 @@ public class movementScript : MonoBehaviour {
     
     public Animation anim;
 
+    Image[] imgs;
+
+    int timeInQueue;
 
     public void setCustomer(Customer cust)
     {
         this.customer = cust;
     }
 
-
     // Use this for initialization
     void Start ()
     {
         animator = GetComponent<Animator>();
+        imgs = GameObject.Find("Customer Status").GetComponentsInChildren<Image>();
     }
 
     private void moveCustomer(int index)
     {
-
-        float theX = transform.position.x;
-        float theY = transform.position.y;
-
+        //get direction
+        int newDir = 0;
         string direction = "idle";
 
-        //get direction
-        int newDir;
+        if (customer != null)
+        {
+            if (!customer.inQueue)
+            {
 
-        
-        if (theY > customer.getTravellingToY() + 0.11f)
-        {
-            // move up
-            transform.Translate(new Vector3(0, -moveSpeed, 0));
-            //change direction
-            newDir = 1;
-            //customers[index].updatePosition(theX, theY - moveSpeed);
-            direction = "down";
-        }
-        else if (theY < customer.getTravellingToY() - 0.11f)
-        {
-            // move down
-            transform.Translate(new Vector3(0, moveSpeed, 0));
-            //change direction
-            newDir = 2;
-            //customers[index].updatePosition(theX, theY + moveSpeed);
-            direction = "up";
-        }
-        else if (theX < customer.getTravellingToX() - 0.11f)
-        {
-            // move left
-            transform.Translate(new Vector3(+moveSpeed, 0, 0));
-            //change direction
-            newDir = 4;
-            //customers[index].updatePosition(theX + moveSpeed, theY);
-            direction = "right";
-        }
-        else if (theX > customer.getTravellingToX() + 0.11f)
-        {
-            // move right
-            transform.Translate(new Vector3(-moveSpeed, 0, 0));
-            //change direction
-            newDir = 3;
-            //customers[index].updatePosition(theX - moveSpeed, theY);
-            direction = "left";
-        }
-        else
-        {
-            newDir = 0;
+                float theX = transform.position.x;
+                float theY = transform.position.y;
 
-            if (!customer.isGoingToSeat())
-            {            
-                // delay here
 
-                customer.ticketsDone();
-                customer.nextPlace();
+                if (theY > customer.getTravellingToY() + 0.11f)
+                {
+                    // move up
+                    transform.Translate(new Vector3(0, -moveSpeed * Time.deltaTime, 0));
+                    //change direction
+                    newDir = 1;
+                    //customers[index].updatePosition(theX, theY - moveSpeed);
+                    direction = "down";
+                }
+                else if (theY < customer.getTravellingToY() - 0.11f)
+                {
+                    // move down
+                    transform.Translate(new Vector3(0, moveSpeed * Time.deltaTime, 0));
+                    //change direction
+                    newDir = 2;
+                    //customers[index].updatePosition(theX, theY + moveSpeed);
+                    direction = "up";
+                }
+                else if (theX < customer.getTravellingToX() - 0.11f)
+                {
+                    // move left
+                    transform.Translate(new Vector3(+moveSpeed * Time.deltaTime, 0, 0));
+                    //change direction
+                    newDir = 4;
+                    //customers[index].updatePosition(theX + moveSpeed, theY);
+                    direction = "right";
+                }
+                else if (theX > customer.getTravellingToX() + 0.11f)
+                {
+                    // move right
+                    transform.Translate(new Vector3(-moveSpeed * Time.deltaTime, 0, 0));
+                    //change direction
+                    newDir = 3;
+                    //customers[index].updatePosition(theX - moveSpeed, theY);
+                    direction = "left";
+                }
+                else
+                {
+                    newDir = 0;
 
-            //    ticketsQueue.Enqueue(new Customer(index));
+                    if (!customer.isGoingToSeat())
+                    {
+
+                        int queueLength = getQueueTicketsSize();
+
+                        float yPos = -4.5f - queueLength * 0.8f;
+
+                        Vector3 temp = gameObject.transform.position;
+                        temp.y = yPos;
+                        temp.x += 2.2f;
+
+                        gameObject.transform.position = temp;
+
+                        // delay here - QUEUE
+                        if (addToQueueTickets != null)
+                        {
+                            addToQueueTickets(customer);
+                            customer.inQueue = true;
+                        }
+
+                        customer.ticketsDone();
+                        customer.nextPlace();
+
+                    }
+                    else
+                    {
+                        // finished
+                    }
+                }
             }
             else
             {
-                // finished
+                timeInQueue++;
+
+                if (timeInQueue % 1000 == 0)
+                {
+                    animator.SetTrigger("bored");
+                }
+                else if (timeInQueue % 1000 == 5)
+                {
+                    animator.SetTrigger("idle");
+                }
             }
-        }
-
-        //Debug.Log("DIRECTION: " + direction);
-        Debug.Log(customer.currentDirection + " v " + newDir);
-
 
         if (customer.currentDirection != newDir)
         {
             animator.SetTrigger(direction);
         }
 
-        
         customer.currentDirection = newDir;
-            
+        }
 
     }
 
 
-    void OnMouseOver()
+    IEnumerator showPatienceBar()
     {
-        Image[] inputs = GameObject.Find("Overlay Canvas").GetComponentsInChildren<Image>();
-        inputs[0].enabled = true;
-        inputs[0].transform.position = transform.position;
+
+        yield return new WaitForSeconds(1.25f);
+
+        if (imgs != null)
+        {
+
+            for (int i = 0; i < imgs.Length; i++)
+            {
+                imgs[i].enabled = false;
+            }
+
+            imgs = null;
+        }
     }
 
-    void OnMouseExit()
+
+    void OnMouseDown()
     {
-        Image [] inputs = GameObject.Find("Overlay Canvas").GetComponentsInChildren<Image>();
-        inputs[0].enabled = false;
+        for (int i = 0; i < imgs.Length; i++)
+        {
+            imgs[i].enabled = true;
+        }
+
+        StartCoroutine(showPatienceBar());       
     }
 
     public Transform greenGuy;
@@ -137,8 +193,14 @@ public class movementScript : MonoBehaviour {
         }
     }
 
-    void OnMouseDown()
+    public int getQueueTicketSize()
     {
-        Debug.Log("YIPEE!!!");
+        if (getQueueTicketsSize != null)
+        {
+            return getQueueTicketsSize();
+        }
+
+        return 0;
+
     }
 }

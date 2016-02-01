@@ -113,6 +113,7 @@ public class movementScript : MonoBehaviour {
                         {
                             addToQueueTickets(customer);
                             customer.inQueue = true;
+                            animator.SetTrigger("queue");
                         }
 
                         customer.ticketsDone();
@@ -133,9 +134,9 @@ public class movementScript : MonoBehaviour {
                 {
                     animator.SetTrigger("bored");
                 }
-                else if (timeInQueue % 1000 == 5)
+                else if (timeInQueue % 1000 == 500)
                 {
-                    animator.SetTrigger("idle");
+                    animator.SetTrigger("queue");
                 }
             }
 
@@ -152,16 +153,21 @@ public class movementScript : MonoBehaviour {
 
     IEnumerator showPatienceBar()
     {
-
-        yield return new WaitForSeconds(1.25f);
-
         if (imgs != null)
         {
+
+            // this will be affected by the patience level
+            imgs[1].color = new Color(152, 100, 0);
+
+            yield return new WaitForSeconds(1.25f);
+
+        
 
             for (int i = 0; i < imgs.Length; i++)
             {
                 imgs[i].enabled = false;
             }
+
 
             imgs = null;
         }

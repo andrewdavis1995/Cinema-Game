@@ -73,6 +73,8 @@
     <Compile Include="Assets\Classes\Screen.cs" />
     <Compile Include="Assets\Classes\StaffMember.cs" />
     <Compile Include="Assets\Classes\TimeTuple.cs" />
+    <Compile Include="Assets\Scripts\Camera Drag.cs" />
+    <Compile Include="Assets\Scripts\CameraControls.cs" />
     <Compile Include="Assets\Scripts\Controller.cs" />
     <Compile Include="Assets\Scripts\Screen_Script.cs" />
     <Compile Include="Assets\Scripts\mouseDrag.cs" />

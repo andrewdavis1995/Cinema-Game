@@ -8,6 +8,7 @@ public class Controller : MonoBehaviour {
 
     Image[] imgs;
     GameObject startDayButton;
+    public float mouseSensitivity = 1.0f;
 
     Queue<Customer> ticketQueue = new Queue<Customer>();
 
@@ -25,6 +26,8 @@ public class Controller : MonoBehaviour {
 
     private Screen[] theScreens = new Screen[5];
     private List<FilmShowing> filmShowings = new List<FilmShowing>();
+
+    List<StaffMember> ticketStaff = new List<StaffMember>();
 
     bool simulationRunning = false;
 
@@ -73,16 +76,27 @@ public class Controller : MonoBehaviour {
         nextDay(false);
 
     }
-    
+
+    void UpdateJobList()
+    {        
+        ticketStaff = staffMembers.FindAll(
+            delegate (StaffMember sm)
+            {
+                return sm.getJobID() == 1;
+            }
+            );
+    }
 
     // Update is called once per frame
     void Update()
     {
+
         if (simulationRunning)
         {
             count += Time.deltaTime;
 
-            
+            QueueController();
+
             if (count > 0.2)
             {
 
@@ -288,6 +302,25 @@ public class Controller : MonoBehaviour {
         }
     }
 
+    int queueCount = 0;
+
+    void QueueController()
+    {
+        
+        if (ticketQueue.Count > 0)
+        {
+            queueCount++;
+
+            Debug.Log("QUEUE SIZE: " + ticketQueue.Count + " | TICKET STAFF: " + ticketStaff.Count);
+
+            if (queueCount > 150)
+            {
+                queueCount = 0;
+                
+                ticketQueue.Dequeue();
+            }
+        }
+    }
 
     #region staff events
     public void addStaffMember(StaffMember staff)
@@ -303,6 +336,7 @@ public class Controller : MonoBehaviour {
     public void updateStaffJob(int index, int job)
     {
         staffMembers[index].setJob(job);
+        UpdateJobList();
     }
 
     public int getStaffJobById(int index) { return staffMembers[index].getJobID(); }

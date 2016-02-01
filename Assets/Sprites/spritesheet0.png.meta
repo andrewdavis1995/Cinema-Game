@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 0fd266c1695393b45bd924fe3d0fc302
-timeCreated: 1453849325
+timeCreated: 1454327044
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -100,15 +100,13 @@ TextureImporter:
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline:
-      - - {x: -40, y: 158}
-        - {x: -73, y: 141}
+      - - {x: -41, y: 158}
         - {x: -76, y: 122}
-        - {x: -76, y: 19}
-        - {x: 1, y: 0}
-        - {x: 66, y: 0}
-        - {x: 76, y: 58}
-        - {x: 76, y: 154}
-        - {x: 69, y: 158}
+        - {x: -76, y: 0}
+        - {x: 72, y: 0}
+        - {x: 76, y: 6}
+        - {x: 76, y: 156}
+        - {x: 59, y: 158}
     - name: spritesheet0_2
       rect:
         serializedVersion: 2
@@ -120,39 +118,34 @@ TextureImporter:
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline:
-      - - {x: 46.5, y: 141}
-        - {x: 30.5, y: 145}
-        - {x: -44.5, y: 145}
-        - {x: -56.5, y: 119}
-        - {x: -72.5, y: 81}
-        - {x: -72.5, y: 15}
-        - {x: -62.5, y: 0}
+      - - {x: 33.5, y: 145}
+        - {x: -35.5, y: 145}
+        - {x: -53.5, y: 140}
+        - {x: -72.5, y: 98}
+        - {x: -72.5, y: 18}
+        - {x: -61.5, y: 0}
         - {x: 56.5, y: 0}
-        - {x: 72.5, y: 21}
-        - {x: 72.5, y: 52}
-        - {x: 66.5, y: 75}
+        - {x: 72.5, y: 13}
+        - {x: 72.5, y: 70}
+        - {x: 48.5, y: 136}
     - name: spritesheet0_3
       rect:
         serializedVersion: 2
-        x: 467
-        y: 577
+        x: 473
+        y: 575
         width: 146
         height: 158
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline:
-      - - {x: 40, y: 132}
-        - {x: 20, y: 157}
-        - {x: 15, y: 158}
-        - {x: -56, y: 158}
-        - {x: -73, y: 140}
-        - {x: -73, y: 38}
-        - {x: -62, y: 0}
-        - {x: -7, y: 0}
-        - {x: -5, y: 11}
-        - {x: 73, y: 15}
-        - {x: 73, y: 66}
+      - - {x: -73, y: 158}
+        - {x: -73, y: 33}
+        - {x: -69, y: 0}
+        - {x: -6, y: 0}
+        - {x: 69, y: 23}
+        - {x: 69, y: 134}
+        - {x: 34, y: 158}
     - name: spritesheet0_4
       rect:
         serializedVersion: 2

@@ -30,6 +30,7 @@ public class mouseDrag : MonoBehaviour {
 
     public delegate List<StaffMember> getFullStaffList();
     public static event getFullStaffList getStaffList;
+    
 
     int numSlots = 2;
     int numTicketSlots = 1;
@@ -84,10 +85,66 @@ public class mouseDrag : MonoBehaviour {
 
     void Update()
     {
+        //Debug.Log("WtS: " + Camera.main.WorldToScreenPoint(Camera.main.transform.transform.position).x);
+        //Debug.Log("WtV: " + Camera.main.WorldToViewportPoint(Camera.main.transform.transform.position).x);
+        ////Debug.Log("VtS: " + Camera.main.ViewportToScreenPoint(Camera.main.transform.transform.position).x);
+        //Debug.Log("VtW: " + Camera.main.ViewportToWorldPoint(Camera.main.transform.transform.position).x);
+        //Debug.Log("StW: " + Camera.main.ScreenToWorldPoint(Camera.main.transform.transform.position).x); // this one
+        //Debug.Log("StV: " + Camera.main.ScreenToViewportPoint(Camera.main.transform.transform.position).x);
+
+        //Debug.Log("WtS: " + Camera.main.WorldToScreenPoint(Input.mousePosition).x);
+        //Debug.Log("WtV: " + Camera.main.WorldToViewportPoint(Input.mousePosition).x);
+        ////Debug.Log("VtS: " + Camera.main.ViewportToScreenPoint(Input.mousePosition).x);
+        //Debug.Log("VtW: " + Camera.main.ViewportToWorldPoint(Input.mousePosition).x);
+        //Debug.Log("StW: " + Camera.main.ScreenToWorldPoint(Input.mousePosition).x); // this one
+        ////Debug.Log("StV: " + Camera.main.ScreenToViewportPoint(Input.mousePosition).x);
+
         if (dragging)
         {
             doDragging();
         }
+
+        //checkForOutOfBounds();
+
+    }
+
+    // dodgy function
+    void checkForOutOfBounds()
+    {
+        // between - 40 and - 10
+        //Debug.Log("StW: " + Camera.main.ScreenToWorldPoint(transform.position).x); // this one
+        float theX = Camera.main.ScreenToWorldPoint(transform.position).x;
+        if (theX < -40)
+        {
+            Vector3 tmp = Camera.main.transform.position;
+            tmp.x = -15f;
+            tmp.z = -10f;
+            Camera.main.transform.position = tmp;
+        }
+        if (theX > - 10)
+        {
+            Vector3 tmp = Camera.main.transform.position;
+            tmp.x = 17f;
+            tmp.z = -10f;
+            Camera.main.transform.position = tmp;
+        }
+
+        //float theY = Camera.main.ScreenToWorldPoint(transform.position).y;
+        //Debug.Log("StW: " + Camera.main.ScreenToWorldPoint(transform.position).y); // this one
+        //if (theY < -12)
+        //{
+        //    Vector3 tmp = Camera.main.transform.position;
+        //    tmp.y = 0f;
+        //    tmp.z = -10f;
+        //    Camera.main.transform.position = tmp;
+        //}
+        //if (theY > -25f)
+        //{
+        //    Vector3 tmp = Camera.main.transform.position;
+        //    tmp.y = -15f;
+        //    tmp.z = -10f;
+        //    Camera.main.transform.position = tmp;
+        //}
     }
 
     void OnMouseDown()
@@ -223,6 +280,30 @@ public class mouseDrag : MonoBehaviour {
                 staffSlot[i].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("empty slot");
             }
         }
+
+
+        
+        if (Camera.main.WorldToScreenPoint(transform.position).x > UnityEngine.Screen.width - 50)
+        {
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0.10f, 0, 0); ;
+        }
+        if (Camera.main.WorldToScreenPoint(transform.position).x < 50)
+        {
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(-0.10f, 0, 0); ;
+        }
+        if (Camera.main.WorldToScreenPoint(transform.position).y > UnityEngine.Screen.height - 50)
+        {
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, 0.10f, 0); ;
+        }
+        if (Camera.main.WorldToScreenPoint(transform.position).y < 50)
+        {
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, -0.10f, 0); ;
+        }
+
+        //Vector3 tmp = Camera.main.WorldToScreenPoint(transform.position);
+        //tmp.z = -10;
+        //tmp.x -= UnityEngine.Screen.width / 2;
+        //tmp.y -= UnityEngine.Screen.height / 2;
     }
     
 }

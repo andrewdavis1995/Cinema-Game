@@ -11,6 +11,7 @@ public class Controller : MonoBehaviour {
     public float mouseSensitivity = 1.0f;
 
     Queue<Customer> ticketQueue = new Queue<Customer>();
+    List<Customer> allCustomers = new List<Customer>();
 
     public Transform greenGuy;
     public Transform blueGuy;
@@ -28,6 +29,10 @@ public class Controller : MonoBehaviour {
     private List<FilmShowing> filmShowings = new List<FilmShowing>();
 
     List<StaffMember> ticketStaff = new List<StaffMember>();
+
+    public delegate void doneWithQueue(Customer c);
+    public static event doneWithQueue queueDone;
+
 
     bool simulationRunning = false;
 
@@ -90,7 +95,6 @@ public class Controller : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-
         if (simulationRunning)
         {
             count += Time.deltaTime;
@@ -117,40 +121,37 @@ public class Controller : MonoBehaviour {
                 }
 
 
-                for (int i = 0; i < filmShowings.Count; i++)
+                
+                for (int j = 0; j < allCustomers.Count; j++)
                 {
-                    List<Customer> customerArray = filmShowings[i].getCustomers();
-
-                    for (int j = 0; j < customerArray.Count; j++)
+                    if (!allCustomers[j].arrived)
                     {
-                        if (!customerArray[j].arrived)
+                        if (allCustomers[j].hasArrived(hours, minutes))
                         {
-                            if (customerArray[j].hasArrived(hours, minutes))
+                            float left = 12;
+
+                            if (allCustomers[j].NeedsTickets())
                             {
-                                float left = 12;
-
-                                if (customerArray[j].NeedsTickets())
-                                {
-                                    left = 16;
-                                }
-
-
-                                int sprite = UnityEngine.Random.Range(0, 2);
-
-                                if (sprite == 0)
-                                {
-                                    myInstance = Instantiate(greenGuy, new Vector3(left, -15), Quaternion.identity) as Transform;
-                                }
-                                else
-                                {
-                                    myInstance = Instantiate(blueGuy, new Vector3(left, -15), Quaternion.identity) as Transform;
-                                }
-                                myInstance.GetComponent<movementScript>().customer = customerArray[j];                                
-                                                                
+                                left = 17;
                             }
+
+
+                            int sprite = UnityEngine.Random.Range(0, 2);
+
+                            if (sprite == 0)
+                            {
+                                myInstance = Instantiate(greenGuy, new Vector3(left, -15), Quaternion.identity) as Transform;
+                            }
+                            else
+                            {
+                                myInstance = Instantiate(blueGuy, new Vector3(left, -15), Quaternion.identity) as Transform;
+                            }
+                            myInstance.GetComponent<movementScript>().customer = allCustomers[j];                                
+                                                                
                         }
                     }
-                }             
+                }
+                          
             }
 
 
@@ -213,7 +214,16 @@ public class Controller : MonoBehaviour {
             int index = filmShowings[i].getScreenNumber();
             int ticketsSold = getTicketsSoldValue(theScreens[index]);
             filmShowings[i].setTicketsSold(ticketsSold);
-            filmShowings[i].createCustomerList();
+
+            int currentCount = 0;
+
+            for (int j = 0; j < i; j++)
+            {
+                currentCount += filmShowings[j].getTicketsSold();
+            }
+
+            List<Customer> tmp = filmShowings[i].createCustomerList(currentCount);
+            allCustomers.AddRange(tmp);
         }
 
         //// update day output 
@@ -302,23 +312,40 @@ public class Controller : MonoBehaviour {
         }
     }
 
-    int queueCount = 0;
+    float queueCount = 0;
 
     void QueueController()
     {
-        
         if (ticketQueue.Count > 0)
         {
-            queueCount++;
+            queueCount += Time.deltaTime;
 
-            Debug.Log("QUEUE SIZE: " + ticketQueue.Count + " | TICKET STAFF: " + ticketStaff.Count);
+            Debug.Log("Queue Count: " + queueCount);
 
-            if (queueCount > 150)
+            if (queueCount > 2.5f)
             {
                 queueCount = 0;
-                
-                ticketQueue.Dequeue();
+
+
+                for (int i = 0; i < ticketStaff.Count; i++)
+                {
+                    int index = ticketQueue.Peek().getCharIndex();
+
+                    if (queueDone != null)
+                    {
+                        allCustomers[index].doneWithQueue();
+                        allCustomers[index].ticketsDone();
+                        allCustomers[index].nextPlace();
+                        queueDone(allCustomers[index]);
+                    }
+                    ticketQueue.Dequeue();
+
+                }
+
             }
+        }
+        else {
+            queueCount = 0;
         }
     }
 

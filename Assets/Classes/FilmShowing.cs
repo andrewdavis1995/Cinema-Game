@@ -11,8 +11,6 @@ public class FilmShowing
     int ticketsSold;
     public int timeH;
     public int timeM;
-    
-    List<Customer> customers = new List<Customer>();
 
     public FilmShowing(int id, int screenNumber, int tickets, int hours, int minutes)
     {
@@ -21,22 +19,24 @@ public class FilmShowing
         ticketsSold = tickets;
         timeH = hours;
         timeM = minutes;
-
-        createCustomerList();
     }
 
-    public void createCustomerList()
+    public List<Customer> createCustomerList(int currentCount)
     {
-        for (int i = 0; i < ticketsSold; i++)
+        List<Customer> customers = new List<Customer>();
+
+        for (int i = 0; i < ticketsSold; i++)     // ticketsSold
         {
-            customers.Add(new Customer(this));
+            customers.Add(new Customer(this, currentCount + i));
         }
+        
+
+        return customers;
     }
 
     int getTimeH() { return this.timeH; }
     int getTimeM() { return this.timeM; }
-
-    public List<Customer> getCustomers() { return this.customers; }
+    
 
     public int getScreenNumber() { return this.screenNum; }
     public int getTicketsSold() { return this.ticketsSold; }

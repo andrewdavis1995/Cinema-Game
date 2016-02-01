@@ -16,6 +16,9 @@ public class movementScript : MonoBehaviour {
     public delegate int getTicketQueueSize();
     public static event getTicketQueueSize getQueueTicketsSize;
 
+
+    public Transform greenGuy;
+
     public float moveSpeed;
 
     private Animator animator;
@@ -38,6 +41,7 @@ public class movementScript : MonoBehaviour {
     {
         animator = GetComponent<Animator>();
         imgs = GameObject.Find("Customer Status").GetComponentsInChildren<Image>();
+        Controller.queueDone += sortQueuePosition;
     }
 
     private void moveCustomer(int index)
@@ -104,7 +108,7 @@ public class movementScript : MonoBehaviour {
 
                         Vector3 temp = gameObject.transform.position;
                         temp.y = yPos;
-                        temp.x += 2.2f;
+                        temp.x -= 1.5f;
 
                         gameObject.transform.position = temp;
 
@@ -113,11 +117,10 @@ public class movementScript : MonoBehaviour {
                         {
                             addToQueueTickets(customer);
                             customer.inQueue = true;
+
                             animator.SetTrigger("queue");
                         }
 
-                        customer.ticketsDone();
-                        customer.nextPlace();
 
                     }
                     else
@@ -132,15 +135,15 @@ public class movementScript : MonoBehaviour {
 
                 if (timeInQueue % 1000 == 0)
                 {
-                    animator.SetTrigger("bored");
+                    animator.SetTrigger("queue");
                 }
                 else if (timeInQueue % 1000 == 500)
                 {
-                    animator.SetTrigger("queue");
+                    animator.SetTrigger("bored");
                 }
             }
 
-        if (customer.currentDirection != newDir)
+        if (customer.currentDirection != newDir && !customer.inQueue)
         {
             animator.SetTrigger(direction);
         }
@@ -184,19 +187,12 @@ public class movementScript : MonoBehaviour {
         StartCoroutine(showPatienceBar());       
     }
 
-    public Transform greenGuy;
-
 
     // Update is called once per frame
     void Update () {
 
         moveCustomer(0);
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Instantiate(greenGuy, new Vector3(15, -10, 0), Quaternion.identity);
-            greenGuy = null;
-        }
+        
     }
 
     public int getQueueTicketSize()
@@ -209,4 +205,25 @@ public class movementScript : MonoBehaviour {
         return 0;
 
     }
+
+    public void sortQueuePosition(Customer cust)
+    {
+        if (customer.inQueue && !cust.inQueue )
+        {
+            transform.position = transform.position + new Vector3(0, 0.8f, 0);            
+        }
+        else if(cust.inQueue)
+        {
+            customer = cust;
+
+            // finished with Queue
+            // set trigger
+            Vector3 tmp = transform.position;
+            tmp.y = customer.getTravellingToY();
+            transform.position = tmp;
+
+            animator.SetTrigger("left");
+        }
+    }
+
 }

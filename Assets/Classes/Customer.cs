@@ -4,15 +4,15 @@ using Random = UnityEngine.Random;
 public class Customer
 {
     #region Position Constants
-    const int doorX = -15;
-    const int doorY = -4;
-    const int centreX = 0;
-    const int centreY = 0;
-    const float ticketsX = 15;
+    const float doorX = -15;
+    const float doorY = -4.6f;
+    const float centreX = 0;
+    const float centreY = 0;
+    const float ticketsX = 17;
     const float ticketsY = -3.5f;
     #endregion
     
-    int characterNum;
+    int index;
     public int currentDirection = 0;     // 1 down, 2 up, 3 left, 4 right, 0 still
 
     int hourDue;
@@ -32,9 +32,11 @@ public class Customer
 
     FilmShowing filmShowing;
 
-    public Customer(FilmShowing fs)
+    public Customer(FilmShowing fs, int ID)
     {
         filmShowing = fs;
+
+        index = ID;
 
         needsFood = Random.Range(0, 10) >= 4;
         needsTickets = Random.Range(0, 10) >= 3;
@@ -85,12 +87,13 @@ public class Customer
             goingToSeats = true;
         }
     }
-
+    public void doneWithQueue() { this.inQueue = false; }
     
     public float getTravellingToX() { return travellingToX; }
     public float getTravellingToY() { return travellingToY; }
     public void ticketsDone() { this.needsTickets = false; }
     public bool isGoingToSeat() { return this.goingToSeats; }
+    public int getCharIndex() { return this.index; }
 
     public bool NeedsTickets()
     {

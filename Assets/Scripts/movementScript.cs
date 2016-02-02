@@ -16,6 +16,7 @@ public class movementScript : MonoBehaviour {
     public delegate int getTicketQueueSize();
     public static event getTicketQueueSize getQueueTicketsSize;
 
+    GameObject customerStatus;
 
     public Transform greenGuy;
 
@@ -27,7 +28,6 @@ public class movementScript : MonoBehaviour {
     
     public Animation anim;
 
-    Image[] imgs;
 
     int timeInQueue;
 
@@ -40,7 +40,8 @@ public class movementScript : MonoBehaviour {
     void Start ()
     {
         animator = GetComponent<Animator>();
-        imgs = GameObject.Find("Customer Status").GetComponentsInChildren<Image>();
+
+        Image[] imgs = GameObject.Find("Customer Status").GetComponentsInChildren<Image>();
         Controller.queueDone += sortQueuePosition;
     }
 
@@ -156,6 +157,8 @@ public class movementScript : MonoBehaviour {
 
     IEnumerator showPatienceBar()
     {
+        Image[] imgs = customerStatus.GetComponents<Image>();
+
         if (imgs != null)
         {
 
@@ -179,6 +182,8 @@ public class movementScript : MonoBehaviour {
 
     void OnMouseDown()
     {
+        Image[] imgs = customerStatus.GetComponents<Image>();
+
         for (int i = 0; i < imgs.Length; i++)
         {
             imgs[i].enabled = true;

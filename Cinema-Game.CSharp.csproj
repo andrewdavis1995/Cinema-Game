@@ -13,11 +13,13 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>iOS:9</UnityBuildTarget>
     <UnityVersion>5.3.1f1</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -70,6 +72,7 @@
   <ItemGroup>
     <Compile Include="Assets\Classes\Customer.cs" />
     <Compile Include="Assets\Classes\FilmShowing.cs" />
+    <Compile Include="Assets\Classes\Floor.cs" />
     <Compile Include="Assets\Classes\Screen.cs" />
     <Compile Include="Assets\Classes\StaffMember.cs" />
     <Compile Include="Assets\Classes\TimeTuple.cs" />
@@ -79,6 +82,8 @@
     <Compile Include="Assets\Scripts\Screen_Script.cs" />
     <Compile Include="Assets\Scripts\mouseDrag.cs" />
     <Compile Include="Assets\Scripts\movementScript.cs" />
+    <Compile Include="Assets\Scripts\TileManager.cs" />
+    <Compile Include="Assets\Classes\FloorTile.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>

@@ -6,9 +6,10 @@ using UnityEngine.UI;
 
 public class Controller : MonoBehaviour {
 
-    Image[] imgs;
     GameObject startDayButton;
     public float mouseSensitivity = 1.0f;
+
+    GameObject colourPicker;
 
     Queue<Customer> ticketQueue = new Queue<Customer>();
     List<Customer> allCustomers = new List<Customer>();
@@ -33,6 +34,12 @@ public class Controller : MonoBehaviour {
     public delegate void doneWithQueue(Customer c);
     public static event doneWithQueue queueDone;
 
+    public Sprite ColourBackground;
+    public Sprite colourCircle;
+    public Sprite marbleBackground;
+    public Sprite marbleSquare;
+
+    GameObject[] floorTiles;
 
     bool simulationRunning = false;
 
@@ -49,7 +56,7 @@ public class Controller : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
-        
+
         //inputs[0].gameObject.SetActive(false);
 
         for (int i = 0; i < 5; i++)
@@ -59,7 +66,7 @@ public class Controller : MonoBehaviour {
         theScreens[0].upgrade();
         theScreens[0].upgradeComplete();
 
-        
+
         mouseDrag.addStaff += addStaffMember;
         mouseDrag.getStaffListSize += getStaffSize;
         mouseDrag.getStaffJobById += getStaffJobById;
@@ -68,22 +75,138 @@ public class Controller : MonoBehaviour {
         movementScript.addToQueueTickets += addToQueueTickets;
         movementScript.getQueueTickets += getTicketQueue;
         movementScript.getQueueTicketsSize += getTicketQueueSize;
+        
 
-
-        imgs = GameObject.Find("Customer Status").GetComponentsInChildren<Image>();
+        Image[] imgs = GameObject.Find("Customer Status").GetComponentsInChildren<Image>();
 
         for (int i = 0; i < imgs.Length; i++)
         {
             imgs[i].enabled = false;
         }
 
+        colourPicker = GameObject.Find("Colour Panel");
+
+        colourPicker.SetActive(false);
+
+        //Text[] txt = colourPicker.GetComponentsInChildren<Text>();
+
+        //for (int i = 0; i < txt.Length; i++)
+        //{
+        //    txt[i].enabled = false;
+        //}
+
+        #region find commands
         startDayButton = GameObject.Find("Start Day Button");
         nextDay(false);
 
+        floorTiles = GameObject.FindGameObjectsWithTag("Floor Tile");
+
+        #endregion
+
+        createColourPicker();
+
+    }
+
+    void newColourButton(int row, int column, bool texture)
+    {
+        GameObject gO = new GameObject();
+        gO.name = "ColorCircle~" + row + "~" + column;
+        gO.tag = "Colour Button";
+        gO.AddComponent<Image>();
+
+        if (!texture)
+        {
+            gO.GetComponent<Image>().sprite = colourCircle;
+
+            int r, g, b;
+
+            int columnMultiple = (column * 50);
+
+            if (row == 0)
+            {
+                r = 255 - columnMultiple;
+                g = columnMultiple;
+                b = 0;
+            }
+            else if (row == 1)
+            {
+                r = 0;
+                g = 255 - columnMultiple;
+                b = columnMultiple;
+            }
+            else
+            {
+                r = columnMultiple;
+                g = 0;
+                b = 255 - columnMultiple;
+            }
+            gO.GetComponent<Image>().color = new Color(r, g, b, 100);
+        }
+        else
+        {
+            gO.GetComponent<Image>().sprite = marbleBackground;
+            //gO.tag = "untagged";
+        }
+
+
+        //// create an Image
+        //SpriteRenderer theRenderer = gO.AddComponent<SpriteRenderer>();
+        //theRenderer.sprite = ColourBackground;
+
+        gO.GetComponent<Image>().rectTransform.sizeDelta = new Vector3(15, 15);
+        gO.transform.SetParent(colourPicker.transform);
+
+        gO.transform.localPosition = new Vector3(column * 20 - 60, row * 30, 0);
+
+        gO.AddComponent<Button>();
+        Button btn = gO.GetComponent<Button>();
+        btn.onClick.AddListener(() => colourClicked(gO.GetComponent<Image>().color, gO.GetComponent<Image>().sprite));
+    }
+    
+    void createColourPicker()
+    {
+        Image[,] colours = new Image[3, 6];
+
+        for (int row = 0; row < 3; row++)
+        {
+            for (int column = 0; column < 2; column++)
+            {
+                newColourButton(row, column, false);
+            }
+        }
+
+        newColourButton(0, 2, true);
+
+    }
+
+    void colourClicked(Color c, Sprite s) {
+        for (int i = 0; i < floorTiles.Length; i++)
+        {
+            string name = floorTiles[i].name;
+
+            string[] tmp = name.Split('~');
+            int x = int.Parse(tmp[1]);
+            int y = int.Parse(tmp[2]);
+            
+            floorTiles[i].GetComponent<SpriteRenderer>().color = c;
+            if (!s.Equals(marbleBackground))
+            {
+                floorTiles[i].GetComponent<SpriteRenderer>().sprite = ColourBackground;
+            }
+            else
+            {
+                floorTiles[i].GetComponent<SpriteRenderer>().sprite = marbleSquare;
+
+                if ((x % 2 != y % 2))
+                {
+                    floorTiles[i].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0);
+                }
+            }
+        }
     }
 
     void UpdateJobList()
-    {        
+    {
         ticketStaff = staffMembers.FindAll(
             delegate (StaffMember sm)
             {
@@ -95,6 +218,13 @@ public class Controller : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            colourPicker.SetActive(true);
+        }
+
+
         if (simulationRunning)
         {
             count += Time.deltaTime;

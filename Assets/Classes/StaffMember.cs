@@ -5,6 +5,8 @@ using System.Text;
 
 namespace Assets.Scripts
 {
+
+    [System.Serializable]
     public class StaffMember
     {
         int index;

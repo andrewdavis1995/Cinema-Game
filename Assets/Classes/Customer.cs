@@ -1,6 +1,8 @@
 ﻿using System;
 using Random = UnityEngine.Random;
 
+
+[System.Serializable]
 public class Customer
 {
     #region Position Constants

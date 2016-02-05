@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 
 
-class Screen
+[System.Serializable]
+public class Screen
 {
     int screenNumber;
     int capacity;
@@ -12,14 +13,26 @@ class Screen
     bool constructionInProgress = false;
     int constructionTimeRemaining = 0;
 
+    int pointX = 0;
+    int pointY = 0;
+
+    public void setPosition(int x, int y)
+    {
+        pointX = x;
+        pointY = y;
+    }
+
+    public int getX() { return this.pointX; }
+    public int getY() { return this.pointY; }
 
     public Screen(int screenID, int numSeats)
     {
         screenNumber = screenID;
         capacity = numSeats;
     }
-        
 
+
+    public int getScreenNumber() { return screenNumber; }
     public int getNumSeats() { return capacity; }
 
         
@@ -73,8 +86,7 @@ class Screen
             constructionTimeRemaining = 6;
             return 20000;
         }
-    }
-        
+    }        
 
     private int getNewCapacity()
     {

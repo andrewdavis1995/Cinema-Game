@@ -208,8 +208,13 @@ public class movementScript : MonoBehaviour {
         }
 
         return 0;
+    }
+
+    public void ShowBuildingOptions()
+    {
 
     }
+
 
     public void sortQueuePosition(Customer cust)
     {

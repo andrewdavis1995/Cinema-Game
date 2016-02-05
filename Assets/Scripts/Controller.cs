@@ -3,19 +3,36 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts;
 using UnityEngine.UI;
+using Assets.Classes;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
+[System.Serializable]
 public class Controller : MonoBehaviour {
 
     GameObject startDayButton;
     public float mouseSensitivity = 1.0f;
-
+    
     GameObject colourPicker;
+    GameObject objectInfo;
+    GameObject confirmMovePanel;
+
+    public string objectSelected = "";
+
+    List<Transform> screenObjects = new List<Transform>();
+
+    List<Screen> theScreens = new List<Screen>();
 
     Queue<Customer> ticketQueue = new Queue<Customer>();
     List<Customer> allCustomers = new List<Customer>();
 
+    public int statusCode = 0;     // 0 = free, 1 = dragging staff, 2 = moving object, 3 = in menu, 4 = moving camera
+
+    public Color carpetColour;
+
     public Transform greenGuy;
     public Transform blueGuy;
+    public Transform screen;
 
     public Text timeLabel;
     public Text dayLabel;
@@ -25,21 +42,24 @@ public class Controller : MonoBehaviour {
     Transform myInstance = null;
 
     public List<StaffMember> staffMembers = new List<StaffMember>();
-
-    private Screen[] theScreens = new Screen[5];
+    
     private List<FilmShowing> filmShowings = new List<FilmShowing>();
 
     List<StaffMember> ticketStaff = new List<StaffMember>();
+    TileManager theTileManager;
 
     public delegate void doneWithQueue(Customer c);
     public static event doneWithQueue queueDone;
+
+    public delegate void setTileStates(int startX, int startY, bool newState, bool complete);
+    public static event setTileStates updateTileState;
 
     public Sprite ColourBackground;
     public Sprite colourCircle;
     public Sprite marbleBackground;
     public Sprite marbleSquare;
 
-    GameObject[] floorTiles;
+    public GameObject[,] floorTiles;
 
     bool simulationRunning = false;
 
@@ -57,11 +77,13 @@ public class Controller : MonoBehaviour {
     // Use this for initialization
     void Start() {
 
+        theTileManager = GameObject.Find("TileManagement").GetComponent<TileManager>();
+
         //inputs[0].gameObject.SetActive(false);
 
         for (int i = 0; i < 5; i++)
         {
-            theScreens[i] = new Screen(i, 0);
+            theScreens.Add(new Screen(i, 0));
         }
         theScreens[0].upgrade();
         theScreens[0].upgradeComplete();
@@ -75,7 +97,7 @@ public class Controller : MonoBehaviour {
         movementScript.addToQueueTickets += addToQueueTickets;
         movementScript.getQueueTickets += getTicketQueue;
         movementScript.getQueueTicketsSize += getTicketQueueSize;
-        
+        Screen_Script.showBuildingMenu += ShowBuildingOptions;
 
         Image[] imgs = GameObject.Find("Customer Status").GetComponentsInChildren<Image>();
 
@@ -86,6 +108,7 @@ public class Controller : MonoBehaviour {
 
         colourPicker = GameObject.Find("Colour Panel");
 
+        //colourPicker.GetComponent<Renderer>().enabled = false;
         colourPicker.SetActive(false);
 
         //Text[] txt = colourPicker.GetComponentsInChildren<Text>();
@@ -99,12 +122,84 @@ public class Controller : MonoBehaviour {
         startDayButton = GameObject.Find("Start Day Button");
         nextDay(false);
 
-        floorTiles = GameObject.FindGameObjectsWithTag("Floor Tile");
+        floorTiles = new GameObject[80, 40];
+        GameObject[] tmpArray = GameObject.FindGameObjectsWithTag("Floor Tile");
+        for (int i = 0; i < tmpArray.Length; i++)
+        {
+            string name = tmpArray[i].name;
+
+            string[] tmp = name.Split('~');
+            int x = int.Parse(tmp[1]);
+            int y = int.Parse(tmp[2]);
+
+            carpetColour = new Color(0, 0, 255, 100);
+
+            tmpArray[i].GetComponent<SpriteRenderer>().color = carpetColour;
+            
+            tmpArray[i].GetComponent<SpriteRenderer>().sprite = ColourBackground;
+            floorTiles[x, y] = tmpArray[i];
+        }
+
 
         #endregion
 
         createColourPicker();
 
+        // create some test screens
+        for (int i = 0; i < 3; i++)
+        {
+            Vector3 pos = floorTiles[i * 11, 0].transform.position;
+
+            // align to grid - +/- 1 to move by one tile horizontally, 0.8 for vertical movement
+            pos.x += 4.5f;
+            pos.y += 6f;
+
+            Transform instance = Instantiate(screen, pos, Quaternion.identity) as Transform;
+            instance.GetComponent<Screen_Script>().theScreen = theScreens[i];
+            instance.name = "screen#" + theScreens[i].getScreenNumber();
+            theScreens[i].setPosition((int)pos.x - 4, (int)pos.y - 6);
+            screenObjects.Add(instance);
+
+            //setTiles(true, floorTiles[i * 440]);
+        }
+
+        objectInfo = GameObject.Find("Object Info");
+        objectInfo.SetActive(false);
+
+        confirmMovePanel = GameObject.Find("MovementPanel");
+        confirmMovePanel.SetActive(false);
+
+    }
+
+    public void updateTiles(int x, int y, bool newState)
+    {
+        if (updateTileState != null)
+        {
+            updateTileState(x, y, newState, false);
+        }
+    }
+
+    void setTiles(bool newState, int x, int y)
+    {
+        Color newColour;
+
+        if (newState) { newColour = carpetColour; } else { newColour = Color.green; }
+        
+        for (int i = x; i < x + 10; i++)
+        {
+            for (int j = y; j < y + 15; j++)
+            {
+                floorTiles[i, j].GetComponent<SpriteRenderer>().color = newColour;
+            }
+        }
+
+        updateTiles(x, y, true);
+    }
+
+    public void hideObjectInfo()
+    {
+        objectInfo.SetActive(false);
+        statusCode = 0;
     }
 
     void newColourButton(int row, int column, bool texture)
@@ -180,26 +275,29 @@ public class Controller : MonoBehaviour {
     }
 
     void colourClicked(Color c, Sprite s) {
-        for (int i = 0; i < floorTiles.Length; i++)
+
+        carpetColour = c;
+
+        for (int i = 0; i < 80; i++)
         {
-            string name = floorTiles[i].name;
+            int width = 40;
 
-            string[] tmp = name.Split('~');
-            int x = int.Parse(tmp[1]);
-            int y = int.Parse(tmp[2]);
-            
-            floorTiles[i].GetComponent<SpriteRenderer>().color = c;
-            if (!s.Equals(marbleBackground))
+            for (int j = 0; j < width; j++)
             {
-                floorTiles[i].GetComponent<SpriteRenderer>().sprite = ColourBackground;
-            }
-            else
-            {
-                floorTiles[i].GetComponent<SpriteRenderer>().sprite = marbleSquare;
+                floorTiles[i, j].GetComponent<SpriteRenderer>().color = c;
 
-                if ((x % 2 != y % 2))
+                if (!s.Equals(marbleBackground))
                 {
-                    floorTiles[i].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0);
+                    floorTiles[i, j].GetComponent<SpriteRenderer>().sprite = ColourBackground;
+                }
+                else
+                {
+                    floorTiles[i, j].GetComponent<SpriteRenderer>().sprite = marbleSquare;
+
+                    if ((i % 2 != j % 2))
+                    {
+                        floorTiles[i, j].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0);
+                    }
                 }
             }
         }
@@ -218,10 +316,20 @@ public class Controller : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            Save();
+        }
+
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            Load();
+        }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             colourPicker.SetActive(true);
+            objectInfo.SetActive(true);
         }
 
 
@@ -329,7 +437,7 @@ public class Controller : MonoBehaviour {
 
         currDay++;
 
-        for (int i = 0; i < theScreens.Length; i++)
+        for (int i = 0; i < theScreens.Count; i++)
         {
             theScreens[i].progressOneDay();
         }
@@ -479,6 +587,114 @@ public class Controller : MonoBehaviour {
         }
     }
 
+    public void objectMoveComplete(bool confirmed)
+    {
+        confirmMovePanel.SetActive(false);
+        objectInfo.SetActive(true);
+
+        // re-place image
+        
+        string[] tmp = objectSelected.Split('#');
+        int id = int.Parse(tmp[1]);
+
+
+        int x; int y;
+
+        if (confirmed)
+        {
+            x = theTileManager.toMoveX;
+            y = theTileManager.toMoveY;
+        }
+        else
+        {
+            x = theTileManager.origX;
+            y = theTileManager.origY;
+        }
+
+        theTileManager.updateTileState(x, y, true, true);
+
+        Vector3 pos = new Vector3(x, y * 0.8f, 0);
+
+        theScreens[id].setPosition(x, y);
+
+        pos.x = pos.x += 4.5f;        
+        pos.y += 6f;
+
+        screenObjects[id] = Instantiate(screen, pos, Quaternion.identity) as Transform;
+        screenObjects[id].GetComponent<Screen_Script>().theScreen = theScreens[id];
+        screenObjects[id].name = "screen#" + theScreens[id].getScreenNumber();
+        screenObjects.Add(screenObjects[id]);
+
+        theTileManager.origX = -1;
+        theTileManager.origY = -1;
+        theTileManager.toMoveX = -1;
+        theTileManager.toMoveY = -1;
+        
+    }
+
+    public void moveObject()
+    {
+        confirmMovePanel.SetActive(true);
+        objectInfo.SetActive(false);
+
+        statusCode = 2;
+        Debug.Log("PRESSED");
+        for (int i = 0; i < screenObjects.Count; i++)
+        {
+            if (screenObjects[i].name.Equals(objectSelected))
+            {
+                screenObjects[i].GetComponent<Renderer>().enabled = false;
+                int x = theScreens[i].getX(); //-4
+                int y = theScreens[i].getY(); //-6
+
+                theTileManager.toMoveX = x;
+                theTileManager.toMoveY = y;
+
+                theTileManager.origX = x;
+                theTileManager.origY = y;
+
+                setTiles(false, x, y);
+                      
+                break;
+            }
+        }
+
+    }
+
+
+    void Save()
+    {
+        BinaryFormatter formatter = new BinaryFormatter();
+        FileStream file = File.Create(Application.persistentDataPath + "/saveState.gd");
+
+        PlayerData data = new PlayerData(theScreens, carpetColour, staffMembers, filmShowings, totalCoins, currDay, numScreens);
+        
+
+        formatter.Serialize(file, data);
+        file.Close();
+    }
+
+    void Load()
+    {
+        if (File.Exists(Application.persistentDataPath + "/saveState.gd"))
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+
+            FileStream file = File.Open(Application.persistentDataPath + "/saveState.gd", FileMode.Open);
+            file.Position = 0;
+
+            if (file == null)
+            {
+                Debug.Log("FUCK YOUR SHIT");
+                return;
+            }
+
+            PlayerData pd = (PlayerData)formatter.Deserialize(file);
+            //SaveLoadScript.savedGames = (List<Controller>)formatter.Deserialize(file);
+            file.Close();
+        }
+    }
+
     #region staff events
     public void addStaffMember(StaffMember staff)
     {
@@ -497,7 +713,15 @@ public class Controller : MonoBehaviour {
     }
 
     public int getStaffJobById(int index) { return staffMembers[index].getJobID(); }
-
+    
+    void ShowBuildingOptions(int screenNum, int upgradeLevel)
+    {
+        objectInfo.SetActive(true);
+        Text[] labels = objectInfo.gameObject.GetComponentsInChildren<Text>();
+        labels[0].text = "Screen " + screenNum;
+        labels[1].text = "Level " + upgradeLevel;
+    }
+    
     public List<StaffMember> getFullStaffList()
     {
         return staffMembers;
@@ -518,4 +742,30 @@ public class Controller : MonoBehaviour {
         return this.ticketQueue.Count;
     }
     #endregion
+}
+
+[Serializable]
+class PlayerData
+{
+    //Transform[] screenObjects;
+    Screen[] theScreens;
+    int[] carpetColour;
+    StaffMember[] staffMembers;
+    FilmShowing[] filmShowings;
+    int totalCoins;
+    int currentDay;
+    int numScreens;
+
+    public PlayerData(List<Screen> screens, Color col, List<StaffMember> staff, List<FilmShowing> films, int coins, int day, int noOfScreens)
+    {
+        //screenObjects = sO.ToArray();
+        theScreens = screens.ToArray();
+        carpetColour = new int[4] { (int)col.r, (int)col.g, (int)col.b, (int)col.a};
+        staffMembers = staff.ToArray();
+        filmShowings = films.ToArray();
+        totalCoins = coins;
+        currentDay = day;
+        numScreens = noOfScreens;
+    }
+
 }

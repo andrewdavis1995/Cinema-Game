@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Assets.Scripts
 {
+    [System.Serializable]
     class TimeTuple
     {
         public int hours;

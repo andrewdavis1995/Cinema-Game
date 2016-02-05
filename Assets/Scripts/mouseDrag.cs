@@ -48,10 +48,13 @@ public class mouseDrag : MonoBehaviour {
     bool dragging = false;
 
     bool triggerSet = false;
-    
+
+    Controller mainController;
 
     void Start()
     {
+        mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
+
         for (int i = 0; i < numSlots; i++)
         {
             staffSlot.Add((GameObject)GameObject.Find("Slot " + i));
@@ -99,9 +102,10 @@ public class mouseDrag : MonoBehaviour {
         //Debug.Log("StW: " + Camera.main.ScreenToWorldPoint(Input.mousePosition).x); // this one
         ////Debug.Log("StV: " + Camera.main.ScreenToViewportPoint(Input.mousePosition).x);
 
-        if (dragging)
+        if (dragging && (mainController.statusCode == 1 || mainController.statusCode == 0))
         {
             doDragging();
+            mainController.statusCode = 1;
         }
 
         //checkForOutOfBounds();
@@ -134,7 +138,6 @@ public class mouseDrag : MonoBehaviour {
         //if (theY < -12)
         //{
         //    Vector3 tmp = Camera.main.transform.position;
-        //    tmp.y = 0f;
         //    tmp.z = -10f;
         //    Camera.main.transform.position = tmp;
         //}
@@ -149,15 +152,18 @@ public class mouseDrag : MonoBehaviour {
 
     void OnMouseDown()
     {
-        dragging = true;
-        transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
-        changeStaffJob(staffIndex, 0);
-
-        for (int i = 0; i < numSlots; i++)
+        if (mainController.statusCode == 0)
         {
-            if (validDrop(i))
+            dragging = true;
+            transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+            changeStaffJob(staffIndex, 0);
+
+            for (int i = 0; i < numSlots; i++)
             {
-                staffSlot[i].GetComponent<Renderer>().enabled = true;
+                if (validDrop(i))
+                {
+                    staffSlot[i].GetComponent<Renderer>().enabled = true;
+                }
             }
         }
     }
@@ -197,7 +203,10 @@ public class mouseDrag : MonoBehaviour {
 
     void OnMouseUp()
     {
+        if(mainController.statusCode == 1)
+        { 
         dragging = false;
+        mainController.statusCode = 0;
 
         for (int i = 0; i < numSlots; i++)
         {
@@ -209,43 +218,44 @@ public class mouseDrag : MonoBehaviour {
         triggerSet = false;
         transform.position = new Vector3(transform.position.x, transform.position.y + 1f, 0);
 
-        for (int i = 0; i < numSlots; i++)
-        {
-            Bounds b1 = staffSlot[i].GetComponent<Renderer>().bounds;
-            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            mousePos = new Vector3(mousePos.x, mousePos.y, 0f);
-
-            if (b1.Contains(mousePos))
+            for (int i = 0; i < numSlots; i++)
             {
-                if (validDrop(i))
+                Bounds b1 = staffSlot[i].GetComponent<Renderer>().bounds;
+                Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                mousePos = new Vector3(mousePos.x, mousePos.y, 0f);
+
+                if (b1.Contains(mousePos))
                 {
-                    // add to list of staff at ticket booth
-                    if (changeStaffJob != null)
+                    if (validDrop(i))
                     {
-                        int target = 0;
-
-                        if (i < numTicketSlots)
+                        // add to list of staff at ticket booth
+                        if (changeStaffJob != null)
                         {
-                            // a ticket slot
-                            target = 1;
-                        }
-                        else
-                        {
-                            target = 2;
-                        }
+                            int target = 0;
 
-                        changeStaffJob(staffIndex, target);
+                            if (i < numTicketSlots)
+                            {
+                                // a ticket slot
+                                target = 1;
+                            }
+                            else
+                            {
+                                target = 2;
+                            }
+
+                            changeStaffJob(staffIndex, target);
+                        }
                     }
-                }
-                else
-                {
-                    Bounds b2 = new Bounds(mousePos, new Vector3(2, 2, 0));
-
-                    if (b1.Intersects(b2))
+                    else
                     {
-                        transform.position = new Vector3(transform.position.x + 3, transform.position.y, 0);
+                        Bounds b2 = new Bounds(mousePos, new Vector3(2, 2, 0));
+
+                        if (b1.Intersects(b2))
+                        {
+                            transform.position = new Vector3(transform.position.x + 3, transform.position.y, 0);
+                        }
+                        changeStaffJob(staffIndex, 0);
                     }
-                    changeStaffJob(staffIndex, 0);
                 }
             }
         }

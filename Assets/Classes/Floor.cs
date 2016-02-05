@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Assets.Classes
 {
+    [System.Serializable]
     class Floor
     {
         public FloorTile[,] floorTiles;

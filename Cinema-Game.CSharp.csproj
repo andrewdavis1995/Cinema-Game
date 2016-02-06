@@ -81,6 +81,7 @@
     <Compile Include="Assets\Scripts\MenuScript.cs" />
     <Compile Include="Assets\Scripts\SaveLoadScript.cs" />
     <Compile Include="Assets\Scripts\Screen_Script.cs" />
+    <Compile Include="Assets\Scripts\ShopScript.cs" />
     <Compile Include="Assets\Scripts\TileManager.cs" />
     <Compile Include="Assets\Scripts\mouseDrag.cs" />
     <Compile Include="Assets\Scripts\movementScript.cs" />

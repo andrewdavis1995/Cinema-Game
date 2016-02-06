@@ -16,6 +16,7 @@ public class Controller : MonoBehaviour {
     GameObject colourPicker;
     GameObject objectInfo;
     GameObject confirmMovePanel;
+    GameObject shopCanvas;
 
     public string objectSelected = "";
 
@@ -26,7 +27,7 @@ public class Controller : MonoBehaviour {
     Queue<Customer> ticketQueue = new Queue<Customer>();
     List<Customer> allCustomers = new List<Customer>();
 
-    public int statusCode = 0;     // 0 = free, 1 = dragging staff, 2 = moving object, 3 = in menu, 4 = moving camera
+    public int statusCode = 0;     // 0 = free, 1 = dragging staff, 2 = moving object, 3 = in menu, 4 = moving camera, 5 = shop
 
     public Color carpetColour;
 
@@ -47,6 +48,7 @@ public class Controller : MonoBehaviour {
 
     List<StaffMember> ticketStaff = new List<StaffMember>();
     TileManager theTileManager;
+    public GameObject confirmPanel;
 
     public delegate void doneWithQueue(Customer c);
     public static event doneWithQueue queueDone;
@@ -58,6 +60,9 @@ public class Controller : MonoBehaviour {
     public Sprite colourCircle;
     public Sprite marbleBackground;
     public Sprite marbleSquare;
+
+    const int width = 80;
+    const int height = 40;
 
     public GameObject[,] floorTiles;
 
@@ -78,12 +83,14 @@ public class Controller : MonoBehaviour {
     void Start() {
 
         theTileManager = GameObject.Find("TileManagement").GetComponent<TileManager>();
+        confirmPanel = GameObject.Find("pnlConfirm");
+        shopCanvas = GameObject.Find("Shop Canvas");
+        //shopCanvas.SetActive(false);
+        
 
-        //inputs[0].gameObject.SetActive(false);
-
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 3; i++)
         {
-            theScreens.Add(new Screen(i, 0));
+            theScreens.Add(new Screen((i+1), 0));
         }
         theScreens[0].upgrade();
         theScreens[0].upgradeComplete();
@@ -122,7 +129,7 @@ public class Controller : MonoBehaviour {
         startDayButton = GameObject.Find("Start Day Button");
         nextDay(false);
 
-        floorTiles = new GameObject[80, 40];
+        floorTiles = new GameObject[width, height];
         GameObject[] tmpArray = GameObject.FindGameObjectsWithTag("Floor Tile");
         for (int i = 0; i < tmpArray.Length; i++)
         {
@@ -160,7 +167,7 @@ public class Controller : MonoBehaviour {
             theScreens[i].setPosition((int)pos.x - 4, (int)pos.y - 6);
             screenObjects.Add(instance);
 
-            //setTiles(true, floorTiles[i * 440]);
+            setTiles(true, i * 11, 0);
         }
 
         objectInfo = GameObject.Find("Object Info");
@@ -193,7 +200,7 @@ public class Controller : MonoBehaviour {
             }
         }
 
-        updateTiles(x, y, true);
+        updateTiles(x, y, newState);
     }
 
     public void hideObjectInfo()
@@ -278,11 +285,9 @@ public class Controller : MonoBehaviour {
 
         carpetColour = c;
 
-        for (int i = 0; i < 80; i++)
+        for (int i = 0; i < width; i++)
         {
-            int width = 40;
-
-            for (int j = 0; j < width; j++)
+            for (int j = 0; j < height; j++)
             {
                 floorTiles[i, j].GetComponent<SpriteRenderer>().color = c;
 
@@ -471,6 +476,8 @@ public class Controller : MonoBehaviour {
         minutes = 0;
         hours = 9;
 
+        Save();
+
     }
 
     void nextWeek()
@@ -594,16 +601,19 @@ public class Controller : MonoBehaviour {
 
         // re-place image
         
-        string[] tmp = objectSelected.Split('#');
-        int id = int.Parse(tmp[1]);
+       
 
 
-        int x; int y;
+        int x = -1; int y = -1;
+        bool newScreen = !(theTileManager.origX > -1) ;
+
 
         if (confirmed)
         {
+
             x = theTileManager.toMoveX;
-            y = theTileManager.toMoveY;
+            y = theTileManager.toMoveY;         
+
         }
         else
         {
@@ -611,25 +621,60 @@ public class Controller : MonoBehaviour {
             y = theTileManager.origY;
         }
 
-        theTileManager.updateTileState(x, y, true, true);
+        if (!newScreen)
+        {
+            string[] tmp = objectSelected.Split('#');
+            int id = int.Parse(tmp[1]) - 1;
 
-        Vector3 pos = new Vector3(x, y * 0.8f, 0);
+            Vector3 pos = new Vector3(x, y * 0.8f, 0);
 
-        theScreens[id].setPosition(x, y);
+            theScreens[id].setPosition(x, y);
 
-        pos.x = pos.x += 4.5f;        
-        pos.y += 6f;
+            pos.x = pos.x += 4.5f;
+            pos.y += 6f;
 
-        screenObjects[id] = Instantiate(screen, pos, Quaternion.identity) as Transform;
-        screenObjects[id].GetComponent<Screen_Script>().theScreen = theScreens[id];
-        screenObjects[id].name = "screen#" + theScreens[id].getScreenNumber();
-        screenObjects.Add(screenObjects[id]);
+            //Destroy(screenObjects[id]);
+            try
+            {
+                Destroy(GameObject.Find("screen#" + theScreens[id].getScreenNumber()));
+            }
+            catch (Exception) { }
+
+            screenObjects.Add(Instantiate(screen, pos, Quaternion.identity) as Transform);
+            screenObjects[id].GetComponent<Screen_Script>().theScreen = theScreens[id];
+            screenObjects[id].name = "screen#" + theScreens[id].getScreenNumber();
+            screenObjects.Add(screenObjects[id]);
+
+        }
+        else if (confirmed)
+        {
+
+            int newID = theScreens.Count;
+
+            Screen aScreen = new Screen(newID + 1, 0);
+            aScreen.upgrade();
+            theScreens.Add(aScreen);
+
+            Vector3 pos = new Vector3(x, y * 0.8f, 0);
+
+            theScreens[newID].setPosition(x, y);
+
+            pos.x = pos.x += 4.5f;
+            pos.y += 6f;
+
+            screenObjects.Add(Instantiate(screen, pos, Quaternion.identity) as Transform);
+            screenObjects[newID].GetComponent<Screen_Script>().theScreen = theScreens[newID];
+            screenObjects[newID].name = "screen#" + theScreens[newID].getScreenNumber();
+            screenObjects.Add(screenObjects[newID]);
+        }
+
+        setTiles(true, theTileManager.toMoveX, theTileManager.toMoveY);
 
         theTileManager.origX = -1;
         theTileManager.origY = -1;
         theTileManager.toMoveX = -1;
         theTileManager.toMoveY = -1;
-        
+
     }
 
     public void moveObject()
@@ -659,6 +704,38 @@ public class Controller : MonoBehaviour {
             }
         }
 
+    }
+
+    public void placeObject(int x, int y)
+    {
+        shopCanvas.SetActive(false);
+        confirmMovePanel.SetActive(true);
+
+        bool valid = theTileManager.checkValidity(x, y, 10, 15);
+
+        Color newColour;
+
+        if (valid)
+        {
+            newColour = Color.green;
+        }
+        else
+        {
+            newColour = Color.red;
+        }
+
+        for (int i = x; i < x + 10; i++)
+        {
+            for (int j = y; j < y + 15; j++)
+            {
+                floorTiles[i, j].GetComponent<SpriteRenderer>().color = newColour;
+            }
+        }
+
+        statusCode = 2;
+
+        theTileManager.toMoveX = 10;
+        theTileManager.toMoveY = 10;
     }
 
 

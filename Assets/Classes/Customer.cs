@@ -7,7 +7,7 @@ public class Customer
 {
     #region Position Constants
     const float doorX = -15;
-    const float doorY = -4.6f;
+    const float doorY = -4.65f;
     const float centreX = 0;
     const float centreY = 0;
     const float ticketsX = 17;

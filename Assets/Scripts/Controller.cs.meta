@@ -1,10 +1,22 @@
 fileFormatVersion: 2
 guid: 9e2d7d5d42104d24eb1f5d405639def6
-timeCreated: 1454446072
+timeCreated: 1454875845
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - greenGuy: {fileID: 436262, guid: a442556c3b2a7bc449ba0b41cd995698, type: 2}
+  - blueGuy: {fileID: 425064, guid: d74c92d177b4f4847b0ccbc11bfe2f40, type: 2}
+  - screen: {fileID: 22482446, guid: 12dafb93ef98aeb4a980fa30e37fe40c, type: 2}
+  - timeLabel: {instanceID: 0}
+  - dayLabel: {instanceID: 0}
+  - coinLabel: {instanceID: 0}
+  - popcornLabel: {instanceID: 0}
+  - confirmPanel: {instanceID: 0}
+  - ColourBackground: {fileID: 21300000, guid: b9be1fd59791470439b9aa2fdb8137ee, type: 3}
+  - colourCircle: {fileID: 21300000, guid: 8ab1a2a4b8d2dab4aab3ccaab9d6e246, type: 3}
+  - marbleBackground: {fileID: 21300000, guid: 14ccf2dc02e9e0e4b8b7a254f467ba39, type: 3}
+  - marbleSquare: {fileID: 21300000, guid: 6692ff69002094a448c935c21e26e8a9, type: 3}
   executionOrder: 250
   icon: {instanceID: 0}
   userData: 

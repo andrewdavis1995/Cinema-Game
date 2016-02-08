@@ -54,8 +54,6 @@ public class TileManager : MonoBehaviour {
                 tilesRenderer.sprite = carpetSprite;
 
                 newTile.transform.SetParent(this.transform, true);
-                //currentTile.RegisterCallback((tile) => { OnTileTypeChanged(tile, newTile); });
-                //currentTile.tileObject = newTile;
             }
         }
     }
@@ -170,6 +168,16 @@ public class TileManager : MonoBehaviour {
         }
 
         return true;
+    }
+
+    public void NewItemAdded(int x, int y)
+    {
+        validMove = checkValidity(x, y, 10, 15);
+        Color col;
+        if (validMove) { col = Color.green; } else { col = Color.red; }
+        
+        colourAllTiles(x, y, col);
+
     }
 
     void colourAllTiles(int startX, int startY, Color col)

@@ -9,10 +9,13 @@ public class CameraControls : MonoBehaviour
 
     GameObject[] staff;
 
+    Controller mainController;
+
     // Use this for initialization
     void Start()
     {
         staff = GameObject.FindGameObjectsWithTag("Staff");
+        mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
     }
 
     // Update is called once per frame
@@ -43,33 +46,42 @@ public class CameraControls : MonoBehaviour
             lastPosition = Input.mousePosition;
         }
 
-        if (Input.GetMouseButton(0))
-        {
-            bool overlapping = false;
+        //if (mainController.statusCode == 0 || mainController.statusCode == 4 || mainController.statusCode == 5)
+        //{
+            //mainController.statusCode = 4;
 
-            for (int i = 0; i < staff.Length; i++)
+            if (Input.GetMouseButton(0))
             {
-                Bounds bounds1 = staff[i].GetComponent<Renderer>().bounds;
-                bounds1.extents = new Vector3(3, 4, 2);
+                bool overlapping = false;
 
-                Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                mousePos.z = 0;
-                
-                if (bounds1.Contains(mousePos))
+                for (int i = 0; i < staff.Length; i++)
                 {
-                    overlapping = true;
-                    break;
+                    Bounds bounds1 = staff[i].GetComponent<Renderer>().bounds;
+                    bounds1.extents = new Vector3(3, 4, 2);
+
+                    Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                    mousePos.z = 0;
+
+                    if (bounds1.Contains(mousePos))
+                    {
+                        overlapping = true;
+                        break;
+                    }
                 }
-            }
 
 
-            if (!overlapping)
-            {
+                if (!overlapping)
+                {
 
-                Vector3 delta = Input.mousePosition - lastPosition;
-                Camera.main.transform.Translate(-delta.x * mouseSensitivity, -delta.y * mouseSensitivity, 0);
-                lastPosition = Input.mousePosition;
-            }
+                    Vector3 delta = Input.mousePosition - lastPosition;
+                    Camera.main.transform.Translate(-delta.x * mouseSensitivity, -delta.y * mouseSensitivity, 0);
+                    lastPosition = Input.mousePosition;
+                }
+            //}
+            //else
+            //{
+            //    mainController.statusCode = 0;
+            //}
         }
     }
 }

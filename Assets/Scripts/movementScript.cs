@@ -105,7 +105,7 @@ public class movementScript : MonoBehaviour {
 
                         int queueLength = getQueueTicketsSize();
 
-                        float yPos = -4.5f - queueLength * 0.8f;
+                        float yPos = -4.65f - queueLength * 0.8f;
 
                         Vector3 temp = gameObject.transform.position;
                         temp.y = yPos;

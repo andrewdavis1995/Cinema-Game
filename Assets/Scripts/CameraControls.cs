@@ -46,8 +46,8 @@ public class CameraControls : MonoBehaviour
             lastPosition = Input.mousePosition;
         }
 
-        //if (mainController.statusCode == 0 || mainController.statusCode == 4 || mainController.statusCode == 5)
-        //{
+        if (mainController.statusCode != 5)
+        {
             //mainController.statusCode = 4;
 
             if (Input.GetMouseButton(0))
@@ -77,7 +77,7 @@ public class CameraControls : MonoBehaviour
                     Camera.main.transform.Translate(-delta.x * mouseSensitivity, -delta.y * mouseSensitivity, 0);
                     lastPosition = Input.mousePosition;
                 }
-            //}
+            }
             //else
             //{
             //    mainController.statusCode = 0;

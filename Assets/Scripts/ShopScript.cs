@@ -13,11 +13,30 @@ public class ShopScript : MonoBehaviour {
 
     public void Purchase(int id)
     {
+        mainController.itemToAddID = id;
+
         switch (id)
         {
-            case 0: //screen
+            case 0: // Screen
                 mainController.objectSelected = "NEW SCREEN";
-                mainController.placeObject(10, 10);
+                mainController.placeObject(10, 10, 10, 15);
+                break;
+            case 1: // Staff
+                break;
+            case 2: // Plant
+                mainController.objectSelected = "NEW PLANT";
+                mainController.placeObject(10, 10, 1, 1);
+                break;
+            case 3: // Bust
+                mainController.objectSelected = "NEW BUST";
+                mainController.placeObject(10, 10, 2, 3);
+                break;
+            case 4: // 5 Popcorns
+                // micro-transactions - MONEY!
+                break;
+            case 5: // Vending Machine
+                mainController.objectSelected = "NEW VENDING MACHINE";
+                mainController.placeObject(10, 10, 3, 5);
                 break;
         }
     }

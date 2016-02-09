@@ -13,11 +13,13 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>iOS:9</UnityBuildTarget>
     <UnityVersion>5.3.1f1</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -79,7 +81,6 @@
     <Compile Include="Assets\Scripts\Camera Drag.cs" />
     <Compile Include="Assets\Scripts\CameraControls.cs" />
     <Compile Include="Assets\Scripts\Controller.cs" />
-    <Compile Include="Assets\Scripts\SaveLoadScript.cs" />
     <Compile Include="Assets\Scripts\Screen_Script.cs" />
     <Compile Include="Assets\Scripts\ShopScript.cs" />
     <Compile Include="Assets\Scripts\TileManager.cs" />

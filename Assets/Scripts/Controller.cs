@@ -10,6 +10,9 @@ using System.IO;
 [System.Serializable]
 public class Controller : MonoBehaviour {
 
+
+    public int itemToAddID = -1;
+
     GameObject startDayButton;
     public float mouseSensitivity = 1.0f;
     
@@ -22,9 +25,11 @@ public class Controller : MonoBehaviour {
 
     public string objectSelected = "";
 
-    List<GameObject> screenObjects = new List<GameObject>();
+    List<GameObject> gameObjectList = new List<GameObject>();
+    List<GameObject> screenObjectList = new List<GameObject>();
 
     List<Screen> theScreens = new List<Screen>();
+    List<OtherObject> otherObjects = new List<OtherObject>();
 
     Queue<Customer> ticketQueue = new Queue<Customer>();
     List<Customer> allCustomers = new List<Customer>();
@@ -36,6 +41,9 @@ public class Controller : MonoBehaviour {
     public Transform greenGuy;
     public Transform blueGuy;
     public Transform screen;
+    public Transform plant;
+    public Transform bust;
+    public Transform vendingMachine;
 
     public Text timeLabel;
     public Text dayLabel;
@@ -181,6 +189,7 @@ public class Controller : MonoBehaviour {
             currDay = data.currentDay;
             numScreens = theScreens.Count;
             numPopcorn = data.numPopcorn;
+            otherObjects = new List<OtherObject>(data.otherObjects);
 
             #region Floor Tiles
             // initialise the floor tiles
@@ -208,9 +217,7 @@ public class Controller : MonoBehaviour {
 
             coinLabel.text = totalCoins.ToString();
             dayLabel.text = "DAY: " + currDay.ToString();
-            popcornLabel.text = numPopcorn.ToString();
-
-           
+            popcornLabel.text = numPopcorn.ToString();           
 
 
         }
@@ -225,13 +232,64 @@ public class Controller : MonoBehaviour {
             pos.x += 4.6f;
             pos.y += 6.05f;
             
+            // change pos and element here
             GameObject instance = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity);
             instance.GetComponent<Screen_Script>().theScreen = theScreens[i];
-            instance.name = "screen#" + theScreens[i].getScreenNumber();
+            instance.name = "Screen#" + theScreens[i].getScreenNumber();
 
-            screenObjects.Add(instance);
+            screenObjectList.Add(instance);
 
-            setTiles(true, (int)(theScreens[i].getX()), (int)(theScreens[i].getY()));
+            setTiles(true, (int)(theScreens[i].getX()), (int)(theScreens[i].getY()), 10, 15);
+        }
+
+        // do same for other objects
+        for(int i = 0; i < otherObjects.Count; i++)
+        {
+            Vector3 pos = new Vector3(otherObjects[i].xPos + 0.05f, otherObjects[i].yPos * 0.8f, 0);
+
+            float xCorrection = 0;
+            float yCorrection = 0;
+
+            Transform newItem = null;
+
+            int w = 0;
+            int h = 0;
+
+            itemToAddID = otherObjects[i].type;
+
+            if (itemToAddID == 2)
+            {
+                newItem = plant;
+                xCorrection = 0.1f;
+                yCorrection = 0.35f;
+                w = 1; h = 1;
+            }
+            else if (itemToAddID == 3)
+            {
+                newItem = bust;
+                xCorrection = 0.65f;
+                yCorrection = 1.5f;
+                w = 2; h = 2;
+            }
+            else if (itemToAddID == 5)
+            {
+                newItem = vendingMachine;
+                xCorrection = 1.07f;
+                yCorrection = 1.62f;
+                w = 3; h = 5;
+            }
+
+            // align to grid - +/- 1 to move by one tile horizontally, 0.8 for vertical movement
+            pos.x += xCorrection;
+            pos.y += yCorrection;
+            
+            // change pos and element here
+            GameObject instance = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity);
+            instance.name = "Element#" + (i + otherObjects.Count);
+
+            gameObjectList.Add(instance);
+
+            setTiles(true, (int)(otherObjects[i].xPos), (int)(otherObjects[i].yPos), w, h);
         }
 
         createColourPicker();
@@ -246,15 +304,15 @@ public class Controller : MonoBehaviour {
         }
     }
 
-    void setTiles(bool newState, int x, int y)
+    void setTiles(bool newState, int x, int y, int width, int height)
     {
         Color newColour;
 
         if (newState) { newColour = carpetColour; } else { newColour = Color.green; }
         
-        for (int i = x; i < x + 10; i++)
+        for (int i = x; i < x + width; i++)
         {
-            for (int j = y; j < y + 15; j++)
+            for (int j = y; j < y + height; j++)
             {
                 floorTiles[i, j].GetComponent<SpriteRenderer>().color = newColour;
             }
@@ -660,13 +718,9 @@ public class Controller : MonoBehaviour {
 
         // re-place image
         
-       
-
-
         int x = -1; int y = -1;
-        bool newScreen = !(theTileManager.origX > -1) ;
-
-
+        bool newObject = !(theTileManager.origX > -1) ;
+        
         if (confirmed)
         {
 
@@ -680,78 +734,203 @@ public class Controller : MonoBehaviour {
             y = theTileManager.origY;
         }
 
-        if (!newScreen)
+        if (!newObject)
         {
+            
+            Transform newItem = null;
+
             string[] tmp = objectSelected.Split('#');
             int id = int.Parse(tmp[1]) - 1;
 
-            Vector3 pos = new Vector3(x + 0.05f, y * 0.8f, 0);
-
-            theScreens[id].setPosition(x, y);
-
-            pos.x = pos.x += 4.6f;
-            pos.y += 6.05f;
-
-            //Destroy(screenObjects[id]);
-            try
+            if (itemToAddID == 0)
             {
-                Destroy(GameObject.Find("screen#" + theScreens[id].getScreenNumber()));
-            }
-            catch (Exception) { }
+                
+                Vector3 pos = new Vector3(x + 0.05f, y * 0.8f, 0);
 
-            GameObject theScreen = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity);
-            theScreen.GetComponent<Screen_Script>().theScreen = theScreens[id];
-            theScreen.name = "screen#" + theScreens[id].getScreenNumber();
-            screenObjects.Add(theScreen);
+                theScreens[id].setPosition(x, y);
+
+                pos.x = pos.x += 4.6f;
+                pos.y += 6.05f;
+
+                Screen temp = null;
+
+                try
+                {
+                    for (int i = 0; i < screenObjectList.Count; i++)
+                    {
+                        if (screenObjectList[i].name == "Screen#" + (id + 1))
+                        {
+                            temp = screenObjectList[i].GetComponent<Screen_Script>().theScreen;
+                            screenObjectList.RemoveAt(i);
+                        }
+                    }
+                    Destroy(GameObject.Find("Screen#" + theScreens[id].getScreenNumber()));
+                }
+                catch (Exception) { }
+                
+
+                GameObject theScreen = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity);
+                theScreen.GetComponent<Screen_Script>().theScreen = temp;
+                theScreen.name = "Screen#" + temp.getScreenNumber();
+                theScreen.tag = "Screen";
+                screenObjectList.Add(theScreen);
+            }
+            else {
+                try
+                {
+                    for (int i = 0; i < otherObjects.Count; i++)
+                    {
+                        if (gameObjectList[i].name == "Element#" + id)
+                        {
+                            gameObjectList.RemoveAt(i);
+                        }
+                    }
+                    Destroy(GameObject.Find("Element#" + id));
+                    
+                }
+                catch (Exception) { }
+
+                Vector3 pos = new Vector3(x + 0.05f, y * 0.8f, 0);
+
+                theScreens[id].setPosition(x, y);
+
+                pos.x += 4.6f;
+                pos.y += 6.05f;
+
+                string theTag = "";
+
+                if (itemToAddID == 2)
+                {
+                    newItem = plant;
+                    theTag = "Plant";
+                }
+                else if (itemToAddID == 3)
+                {
+                    newItem = bust;
+                    theTag = "Bust";
+                }
+                else if (itemToAddID == 5)
+                {
+                    newItem = vendingMachine;
+                    theTag = "Vending Machine";
+                }
+                
+
+                GameObject theObject = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity);
+                theObject.name = "Element#" + otherObjects.Count;
+                theObject.tag = theTag;
+                gameObjectList.Add(theObject);
+            }
+            itemToAddID = -1;
 
         }
         else if (confirmed)
         {
-
-            int newID = theScreens.Count;
-
-            Screen aScreen = new Screen(newID + 1, 0);
-            aScreen.upgrade();
-            theScreens.Add(aScreen);
+            // this will change too -----------------------------
 
             Vector3 pos = new Vector3(x + 0.05f, y * 0.8f, 0);
 
-            theScreens[newID].setPosition(x, y);
 
-            pos.x = pos.x += 4.6f;
-            pos.y += 6.05f;
+            Transform newItem = null;
+            float xCorrection = 0;
+            float yCorrection = 0;
+
+            if (itemToAddID == 0)
+            {
+                newItem = screen;
+                xCorrection = 4.6f;
+                yCorrection = 6.05f;
+
+                int newID = theScreens.Count;
+                Screen aScreen = new Screen(newID + 1, 0);
+                aScreen.setPosition(x, y);
+                aScreen.upgrade();
+                theScreens.Add(aScreen);
+
+                pos.x += xCorrection;
+                pos.y += yCorrection;
+
+                GameObject screenThing = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity) as GameObject;
+                screenThing.GetComponent<Screen_Script>().theScreen = theScreens[newID];
+                screenThing.name = "Screen#" + theScreens[newID].getScreenNumber();
+                screenThing.tag = "Screen";
+                screenObjectList.Add(screenThing);
+            }
+            else {
+
+                string theTag = "";
+
+                if (itemToAddID == 2)
+                {
+                    newItem = plant;
+                    xCorrection = 0.1f;
+                    yCorrection = 0.35f;
+                    otherObjects.Add(new OtherObject(x, y, 2, otherObjects.Count));
+                    theTag = "Plant";
+                }
+                else if (itemToAddID == 3)
+                {
+                    newItem = bust;
+                    xCorrection = 0.65f;
+                    yCorrection = 1.5f;
+                    otherObjects.Add(new OtherObject(x, y, 3, otherObjects.Count));
+                    theTag = "Bust";
+                }
+                else if (itemToAddID == 5)
+                {
+                    newItem = vendingMachine;
+                    xCorrection = 1.07f;
+                    yCorrection = 1.62f;
+                    otherObjects.Add(new OtherObject(x, y, 5, otherObjects.Count));
+                    theTag = "Vending Machine";
+                }
+
+               
+                pos.x += xCorrection;
+                pos.y += yCorrection;
 
 
-            GameObject theScreen = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity) as GameObject;
+                GameObject theObject = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity) as GameObject;
+                theObject.name = "Element#" + otherObjects.Count;
+                theObject.tag = theTag;
 
-            theScreen.GetComponent<Screen_Script>().theScreen = theScreens[newID];
-            theScreen.name = "screen#" + theScreens[newID].getScreenNumber();
-            screenObjects.Add(theScreen);
+                gameObjectList.Add(theObject);
+              
+            }
+            itemToAddID = -1;
+
+
         }
 
-        setTiles(true, theTileManager.toMoveX, theTileManager.toMoveY);
+        setTiles(true, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
 
         theTileManager.origX = -1;
         theTileManager.origY = -1;
         theTileManager.toMoveX = -1;
         theTileManager.toMoveY = -1;
+        theTileManager.fullWidth = -1;
+        theTileManager.fullHeight = -1;
 
     }
 
-    public void moveObject()
+    public void moveScreen()
     {
         confirmMovePanel.SetActive(true);
         objectInfo.SetActive(false);
 
         statusCode = 2;
         Debug.Log("PRESSED");
-        for (int i = 0; i < screenObjects.Count; i++)
+
+        for (int i = 0; i < screenObjectList.Count; i++)
         {
-            if (screenObjects[i].name.Equals(objectSelected))
+            if (screenObjectList[i].name.Equals(objectSelected))
             {
-                screenObjects[i].GetComponent<Renderer>().enabled = false;
+                screenObjectList[i].GetComponent<Renderer>().enabled = false;
                 int x = theScreens[i].getX(); //-4
                 int y = theScreens[i].getY(); //-6
+
+
+                itemToAddID = 0;
 
                 theTileManager.toMoveX = x;
                 theTileManager.toMoveY = y;
@@ -759,7 +938,54 @@ public class Controller : MonoBehaviour {
                 theTileManager.origX = x;
                 theTileManager.origY = y;
 
-                setTiles(false, x, y);
+                theTileManager.fullWidth = 10;
+                theTileManager.fullHeight = 15;
+
+                setTiles(false, x, y, 10, 15);
+
+                break;
+            }
+        }
+        for (int i = 0; i < gameObjectList.Count; i++)
+        {
+            if (gameObjectList[i].name.Equals(objectSelected))
+            {
+                gameObjectList[i].GetComponent<Renderer>().enabled = false;
+                int x = otherObjects[i].xPos; //-4
+                int y = otherObjects[i].yPos; //-6
+
+
+                int w = 0;
+                int h = 0;
+
+                if (gameObjectList[i].tag.Equals("Plant"))
+                {
+                    itemToAddID = 2;
+                    w = 1; h = 1;
+                }
+                else if (gameObjectList[i].tag.Equals("Bust"))
+                {
+                    itemToAddID = 3;
+                    w = 2; h = 3;
+                }
+                else if (gameObjectList[i].tag.Equals("Vending Machine"))
+                {
+                    itemToAddID = 5;
+                    w = 3; h = 5;
+                }
+
+                theTileManager.toMoveX = x;
+                theTileManager.toMoveY = y;
+
+                theTileManager.origX = x;
+                theTileManager.origY = y;
+
+
+
+                theTileManager.fullWidth = w;
+                theTileManager.fullHeight = h;
+
+                setTiles(false, x, y, w, h);
                       
                 break;
             }
@@ -767,15 +993,14 @@ public class Controller : MonoBehaviour {
 
     }
 
-    public void placeObject(int x, int y)
+    public void placeObject(int x, int y, int width, int height)
     {
-
         statusCode = 2;
 
         shopCanvas.SetActive(false);
         confirmMovePanel.SetActive(true);
 
-        bool valid = theTileManager.checkValidity(x, y, 10, 15);
+        bool valid = theTileManager.checkValidity(x, y, width, height);
 
         Color newColour;
 
@@ -788,17 +1013,19 @@ public class Controller : MonoBehaviour {
             newColour = Color.red;
         }
 
-        for (int i = x; i < x + 10; i++)
+        for (int i = x; i < x + width; i++)
         {
-            for (int j = y; j < y + 15; j++)
+            for (int j = y; j < y + height; j++)
             {
                 floorTiles[i, j].GetComponent<SpriteRenderer>().color = newColour;
             }
         }
 
-
+        
         theTileManager.toMoveX = 10;
         theTileManager.toMoveY = 10;
+        theTileManager.fullWidth = width;
+        theTileManager.fullHeight = height;
         theTileManager.NewItemAdded(10, 10);
     }
 
@@ -808,7 +1035,7 @@ public class Controller : MonoBehaviour {
         BinaryFormatter formatter = new BinaryFormatter();
         FileStream file = File.Create(Application.persistentDataPath + "/saveState.gd");
 
-        PlayerData data = new PlayerData(theScreens, carpetColour, staffMembers, filmShowings, totalCoins, currDay, numPopcorn);
+        PlayerData data = new PlayerData(theScreens, carpetColour, staffMembers, filmShowings, totalCoins, currDay, numPopcorn, otherObjects);
         
 
         formatter.Serialize(file, data);
@@ -868,7 +1095,7 @@ public class Controller : MonoBehaviour {
 [Serializable]
 public class PlayerData
 {
-    //Transform[] screenObjects;
+    //Transform[] gameObjectList;
     public Screen[] theScreens;
     public int[] carpetColour;
     public StaffMember[] staffMembers;
@@ -876,10 +1103,11 @@ public class PlayerData
     public int totalCoins;
     public int numPopcorn;
     public int currentDay;
+    public OtherObject[] otherObjects;
 
-    public PlayerData(List<Screen> screens, Color col, List<StaffMember> staff, List<FilmShowing> films, int coins, int day, int popcorn)
+    public PlayerData(List<Screen> screens, Color col, List<StaffMember> staff, List<FilmShowing> films, int coins, int day, int popcorn, List<OtherObject> others)
     {
-        //screenObjects = sO.ToArray();
+        //gameObjectList = sO.ToArray();
         theScreens = screens.ToArray();
         carpetColour = new int[4] { (int)col.r, (int)col.g, (int)col.b, (int)col.a};
         staffMembers = staff.ToArray();
@@ -887,6 +1115,24 @@ public class PlayerData
         totalCoins = coins;
         currentDay = day;
         numPopcorn = popcorn;
+        otherObjects = others.ToArray();
     }
 
+}
+
+[Serializable]
+public class OtherObject
+{
+    public int xPos;
+    public int yPos;
+    public int type;
+    public int id;
+
+    public OtherObject(int x, int y, int t, int i)
+    {
+        xPos = x;
+        yPos = y;
+        type = t;
+        id = i;
+    }
 }

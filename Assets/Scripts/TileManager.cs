@@ -20,6 +20,9 @@ public class TileManager : MonoBehaviour {
     const int width = 80;
     const int height = 40;
 
+    public int fullWidth = -1;
+    public int fullHeight = -1;
+
     Controller mainController;
 
     // Use this for initialization
@@ -70,14 +73,14 @@ public class TileManager : MonoBehaviour {
                     if (validMove)
                     {
                         showOutput();
-                        validMove = checkValidity(toMoveX - 1, toMoveY, 1, 15);
+                        validMove = checkValidity(toMoveX - 1, toMoveY, 1, fullHeight);
                     }
                     else
                     {
-                        validMove = checkValidity(toMoveX - 1, toMoveY, 10, 15);
+                        validMove = checkValidity(toMoveX - 1, toMoveY, fullWidth, fullHeight);
                     }
                 
-                    updateColumn(toMoveX + 9, toMoveY, false, -1);
+                    updateColumn(toMoveX + fullWidth - 1, toMoveY, false, -1);
                     updateColumn(toMoveX - 1, toMoveY, true, -1);
                     toMoveX--;
                 }
@@ -91,55 +94,55 @@ public class TileManager : MonoBehaviour {
                     if (validMove)
                     {
                         showOutput();
-                        validMove = checkValidity(toMoveX, toMoveY - 1, 10, 1);
+                        validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, 1);
                     }
                     else
                     {
-                        validMove = checkValidity(toMoveX, toMoveY - 1, 10, 15);
+                        validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, fullHeight);
                     }
 
                     // check validity
-                    updateRow(toMoveX, toMoveY + 14, false, -1);
+                    updateRow(toMoveX, toMoveY + fullHeight - 1, false, -1);
                     updateRow(toMoveX, toMoveY - 1, true, -1);
                     toMoveY--;
                 }
             }
             if (Input.GetKeyDown(KeyCode.D))
             {
-                if (toMoveX < width - 10)
+                if (toMoveX < width - fullWidth)
                 {
                     if (validMove)
                     {
-                        validMove = checkValidity(toMoveX + 10, toMoveY, 1, 15);
+                        validMove = checkValidity(toMoveX + fullWidth, toMoveY, 1, fullHeight);
                     }
                     else
                     {
-                        validMove = checkValidity(toMoveX + 1, toMoveY, 10, 15);
+                        validMove = checkValidity(toMoveX + 1, toMoveY, fullWidth, fullHeight);
                     }
 
                     // check validity
                     updateColumn(toMoveX, toMoveY, false, 1);
-                    updateColumn(toMoveX + 10, toMoveY, true, 1);
+                    updateColumn(toMoveX + fullWidth, toMoveY, true, 1);
                     toMoveX++;
                 }
             }
             if (Input.GetKeyDown(KeyCode.W))
             {
-                if (toMoveY < height - 15)
+                if (toMoveY < height - fullHeight)
                 {
                     if (validMove)
                     {
                         showOutput();
-                        validMove = checkValidity(toMoveX, toMoveY + 15, 10, 1);
+                        validMove = checkValidity(toMoveX, toMoveY + fullHeight, fullWidth, 1);
                     }
                     else
                     {
-                        validMove = checkValidity(toMoveX, toMoveY + 1, 10, 15);
+                        validMove = checkValidity(toMoveX, toMoveY + 1, fullWidth, fullHeight);
                     }
 
                     // check validity
                     updateRow(toMoveX, toMoveY, false, 1);
-                    updateRow(toMoveX, toMoveY + 15, true, 1);
+                    updateRow(toMoveX, toMoveY + fullHeight, true, 1);
                     toMoveY++;
                 }
             }
@@ -172,7 +175,7 @@ public class TileManager : MonoBehaviour {
 
     public void NewItemAdded(int x, int y)
     {
-        validMove = checkValidity(x, y, 10, 15);
+        validMove = checkValidity(x, y, fullWidth, fullHeight);
         Color col;
         if (validMove) { col = Color.green; } else { col = Color.red; }
         
@@ -183,9 +186,9 @@ public class TileManager : MonoBehaviour {
     void colourAllTiles(int startX, int startY, Color col)
     {
         
-        for (int i = startX; i < startX + 10; i++)
+        for (int i = startX; i < startX + fullWidth; i++)
         {
-            for (int j = startY; j < startY + 15; j++)
+            for (int j = startY; j < startY + fullHeight; j++)
             {
                 try
                 {
@@ -203,7 +206,7 @@ public class TileManager : MonoBehaviour {
     {    
 
         if (!newState) {
-            for (int j = y; j < y + 15; j++)
+            for (int j = y; j < y + fullHeight; j++)
             {
                 //if (!floor.floorTiles[x, j].inUse)
                 //{
@@ -236,7 +239,7 @@ public class TileManager : MonoBehaviour {
             }
             else
             {
-                for (int j = y; j < y + 15; j++)
+                for (int j = y; j < y + fullHeight; j++)
                 {
                     //if (!floor.floorTiles[x, j].inUse)
                     //{
@@ -256,7 +259,7 @@ public class TileManager : MonoBehaviour {
     {
         if (!newState)
         {
-            for (int i = x; i < x + 10; i++)
+            for (int i = x; i < x + fullWidth; i++)
             {
                 //    for (int j = y; j < y + 15; j++)
                 //{
@@ -284,7 +287,7 @@ public class TileManager : MonoBehaviour {
             }
             else
             {
-                for (int j = x; j < x + 10; j++)
+                for (int j = x; j < x + fullWidth; j++)
                 {
                     //if (!floor.floorTiles[x, j].inUse)
                     //{
@@ -301,17 +304,12 @@ public class TileManager : MonoBehaviour {
 
     public void updateTileState(int x, int y, bool newState, bool complete)
     {
-        for (int i = x; i < x + 10; i++)
+        for (int i = x; i < x + fullWidth; i++)
         {
-            for (int j = y; j < y + 15; j++)
+            for (int j = y; j < y + fullHeight; j++)
             {
                 floor.floorTiles[i, j].inUse = newState;
-
-                if (i == 21)
-                {
-                    Debug.Log("fgfgfg");
-                }
-
+                
                 if (complete)
                 {
                     mainController.floorTiles[i, j].GetComponent<SpriteRenderer>().color = mainController.carpetColour;

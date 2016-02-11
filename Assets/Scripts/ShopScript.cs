@@ -4,9 +4,11 @@ using System.Collections;
 public class ShopScript : MonoBehaviour {
 
     Controller mainController;
+    GameObject closeBtn;
 
     void Start()
     {
+        closeBtn = GameObject.Find("Close Shop");
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
     }
 
@@ -39,6 +41,11 @@ public class ShopScript : MonoBehaviour {
                 mainController.placeObject(10, 10, 3, 5);
                 break;
         }
+    }
+
+    public void PutCloseToTop()
+    {
+        closeBtn.GetComponent<RectTransform>().SetAsLastSibling();
     }
 
 }

@@ -3,10 +3,28 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using UnityEngine.UI;
 
 public class ButtonScript : MonoBehaviour {
 
     public static PlayerData loadGame;
+    Button loadButton;
+
+    void Start()
+    {
+        loadButton = (Button)GameObject.Find("LoadButton").GetComponent<Button>();
+        CheckIfLoadExists();
+    }
+
+    void CheckIfLoadExists()
+    {
+        if (!File.Exists(Application.persistentDataPath + "/saveState.gd"))
+        {
+            loadButton.enabled = false;
+            loadButton.image.color = Color.grey;
+        }
+    }
+
 
     public void newGame()
     {

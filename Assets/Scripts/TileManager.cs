@@ -66,6 +66,100 @@ public class TileManager : MonoBehaviour {
        
         if (mainController.statusCode == 2 && toMoveX > -1 && toMoveY > -1)
         {
+            if (Input.touchCount == 1)
+            {
+
+                Vector3 newTouch = Input.GetTouch(0).position;
+                Vector3 prevTouch = Input.GetTouch(1).deltaPosition;
+
+
+                float xDiff = newTouch.x - prevTouch.x;
+                float yDiff = newTouch.y - prevTouch.y;
+
+
+                if (xDiff > 5)
+                {
+                    if (toMoveX >= 1)
+                    {
+                        if (validMove)
+                        {
+                            showOutput();
+                            validMove = checkValidity(toMoveX - 1, toMoveY, 1, fullHeight);
+                        }
+                        else
+                        {
+                            validMove = checkValidity(toMoveX - 1, toMoveY, fullWidth, fullHeight);
+                        }
+
+                        updateColumn(toMoveX + fullWidth - 1, toMoveY, false, -1);
+                        updateColumn(toMoveX - 1, toMoveY, true, -1);
+                        toMoveX--;
+                    }
+
+                }
+                if (yDiff < 5)
+                {
+                    if (toMoveY > 0)
+                    {
+
+                        if (validMove)
+                        {
+                            showOutput();
+                            validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, 1);
+                        }
+                        else
+                        {
+                            validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, fullHeight);
+                        }
+
+                        // check validity
+                        updateRow(toMoveX, toMoveY + fullHeight - 1, false, -1);
+                        updateRow(toMoveX, toMoveY - 1, true, -1);
+                        toMoveY--;
+                    }
+                }
+                if (xDiff < 5)
+                {
+                    if (toMoveX < width - fullWidth)
+                    {
+                        if (validMove)
+                        {
+                            validMove = checkValidity(toMoveX + fullWidth, toMoveY, 1, fullHeight);
+                        }
+                        else
+                        {
+                            validMove = checkValidity(toMoveX + 1, toMoveY, fullWidth, fullHeight);
+                        }
+
+                        // check validity
+                        updateColumn(toMoveX, toMoveY, false, 1);
+                        updateColumn(toMoveX + fullWidth, toMoveY, true, 1);
+                        toMoveX++;
+                    }
+                }
+                if (yDiff > 5)
+                {
+                    if (toMoveY < height - fullHeight)
+                    {
+                        if (validMove)
+                        {
+                            showOutput();
+                            validMove = checkValidity(toMoveX, toMoveY + fullHeight, fullWidth, 1);
+                        }
+                        else
+                        {
+                            validMove = checkValidity(toMoveX, toMoveY + 1, fullWidth, fullHeight);
+                        }
+
+                        // check validity
+                        updateRow(toMoveX, toMoveY, false, 1);
+                        updateRow(toMoveX, toMoveY + fullHeight, true, 1);
+                        toMoveY++;
+                    }
+                }
+            }
+
+            #region PC movement
             if (Input.GetKeyDown(KeyCode.A))
             {               
                 if (toMoveX >= 1)
@@ -146,12 +240,8 @@ public class TileManager : MonoBehaviour {
                     toMoveY++;
                 }
             }
+            #endregion
 
-            if (!validMove)
-            {
-                // hide the confirm button
-            }
-        
             previousValidMove = validMove;
 
         }
@@ -302,11 +392,11 @@ public class TileManager : MonoBehaviour {
         //}
     }
 
-    public void updateTileState(int x, int y, bool newState, bool complete)
+    public void updateTileState(int x, int y, int w, int h, bool newState, bool complete)
     {
-        for (int i = x; i < x + fullWidth; i++)
+        for (int i = x; i < x + w; i++)
         {
-            for (int j = y; j < y + fullHeight; j++)
+            for (int j = y; j < y + h; j++)
             {
                 floor.floorTiles[i, j].inUse = newState;
                 

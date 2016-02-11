@@ -65,7 +65,7 @@ public class Controller : MonoBehaviour {
     public delegate void doneWithQueue(Customer c);
     public static event doneWithQueue queueDone;
 
-    public delegate void setTileStates(int startX, int startY, bool newState, bool complete);
+    public delegate void setTileStates(int startX, int startY, int w, int h, bool newState, bool complete);
     public static event setTileStates updateTileState;
 
     public Sprite ColourBackground;
@@ -141,6 +141,7 @@ public class Controller : MonoBehaviour {
         movementScript.getQueueTickets += getTicketQueue;
         movementScript.getQueueTicketsSize += getTicketQueueSize;
         Screen_Script.showBuildingMenu += ShowBuildingOptions;
+        OtherObjectScript.showBuildingMenu += ShowBuildingOptions;
         #endregion
 
         
@@ -236,6 +237,7 @@ public class Controller : MonoBehaviour {
             GameObject instance = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity);
             instance.GetComponent<Screen_Script>().theScreen = theScreens[i];
             instance.name = "Screen#" + theScreens[i].getScreenNumber();
+            instance.GetComponent<SpriteRenderer>().sortingOrder = height - theScreens[i].getY();
 
             screenObjectList.Add(instance);
 
@@ -286,6 +288,7 @@ public class Controller : MonoBehaviour {
             // change pos and element here
             GameObject instance = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity);
             instance.name = "Element#" + (i + otherObjects.Count);
+            instance.GetComponent<SpriteRenderer>().sortingOrder = height - otherObjects[i].yPos;
 
             gameObjectList.Add(instance);
 
@@ -296,11 +299,11 @@ public class Controller : MonoBehaviour {
         
     }
 
-    public void updateTiles(int x, int y, bool newState)
+    public void updateTiles(int x, int y, int w, int h, bool newState)
     {
         if (updateTileState != null)
         {
-            updateTileState(x, y, newState, false);
+            updateTileState(x, y, w, h, newState, false);
         }
     }
 
@@ -318,7 +321,7 @@ public class Controller : MonoBehaviour {
             }
         }
 
-        updateTiles(x, y, newState);
+        updateTiles(x, y, width, height, newState);
     }
 
     public void hideObjectInfo()
@@ -448,8 +451,8 @@ public class Controller : MonoBehaviour {
         
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            colourPicker.SetActive(true);
-            objectInfo.SetActive(true);
+            colourPicker.SetActive(!colourPicker.active);
+            //objectInfo.SetActive(true);
         }
 
 
@@ -714,7 +717,7 @@ public class Controller : MonoBehaviour {
     public void objectMoveComplete(bool confirmed)
     {
         confirmMovePanel.SetActive(false);
-        objectInfo.SetActive(true);
+        //objectInfo.SetActive(true);
 
         // re-place image
         
@@ -740,11 +743,12 @@ public class Controller : MonoBehaviour {
             Transform newItem = null;
 
             string[] tmp = objectSelected.Split('#');
-            int id = int.Parse(tmp[1]) - 1;
+            int id = int.Parse(tmp[1]);
 
             if (itemToAddID == 0)
             {
-                
+                id -= 1;
+
                 Vector3 pos = new Vector3(x + 0.05f, y * 0.8f, 0);
 
                 theScreens[id].setPosition(x, y);
@@ -773,12 +777,13 @@ public class Controller : MonoBehaviour {
                 theScreen.GetComponent<Screen_Script>().theScreen = temp;
                 theScreen.name = "Screen#" + temp.getScreenNumber();
                 theScreen.tag = "Screen";
+                theScreen.GetComponent<SpriteRenderer>().sortingOrder = height - y;
                 screenObjectList.Add(theScreen);
             }
             else {
                 try
                 {
-                    for (int i = 0; i < otherObjects.Count; i++)
+                    for (int i = 0; i < gameObjectList.Count; i++)
                     {
                         if (gameObjectList[i].name == "Element#" + id)
                         {
@@ -794,8 +799,27 @@ public class Controller : MonoBehaviour {
 
                 theScreens[id].setPosition(x, y);
 
-                pos.x += 4.6f;
-                pos.y += 6.05f;
+                float xCorrection = 0;
+                float yCorrection = 0;
+
+                if (itemToAddID == 2)
+                {  
+                    xCorrection = 0.1f;
+                    yCorrection = 0.35f;
+                }
+                else if (itemToAddID == 3)
+                {
+                    xCorrection = 0.65f;
+                    yCorrection = 1.5f;
+                }
+                else if (itemToAddID == 5)
+                {
+                    xCorrection = 1.07f;
+                    yCorrection = 1.62f;
+                }
+
+                pos.x += xCorrection;
+                pos.y += yCorrection;
 
                 string theTag = "";
 
@@ -817,7 +841,8 @@ public class Controller : MonoBehaviour {
                 
 
                 GameObject theObject = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity);
-                theObject.name = "Element#" + otherObjects.Count;
+                theObject.name = "Element#" + (otherObjects.Count);
+                theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y;
                 theObject.tag = theTag;
                 gameObjectList.Add(theObject);
             }
@@ -853,6 +878,7 @@ public class Controller : MonoBehaviour {
                 GameObject screenThing = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity) as GameObject;
                 screenThing.GetComponent<Screen_Script>().theScreen = theScreens[newID];
                 screenThing.name = "Screen#" + theScreens[newID].getScreenNumber();
+                screenThing.GetComponent<SpriteRenderer>().sortingOrder = height - y;
                 screenThing.tag = "Screen";
                 screenObjectList.Add(screenThing);
             }
@@ -891,8 +917,9 @@ public class Controller : MonoBehaviour {
 
 
                 GameObject theObject = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity) as GameObject;
-                theObject.name = "Element#" + otherObjects.Count;
+                theObject.name = "Element#" + (otherObjects.Count - 1);
                 theObject.tag = theTag;
+                theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y;
 
                 gameObjectList.Add(theObject);
               
@@ -902,6 +929,7 @@ public class Controller : MonoBehaviour {
 
         }
 
+
         setTiles(true, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
 
         theTileManager.origX = -1;
@@ -910,6 +938,8 @@ public class Controller : MonoBehaviour {
         theTileManager.toMoveY = -1;
         theTileManager.fullWidth = -1;
         theTileManager.fullHeight = -1;
+
+        statusCode = 0;
 
     }
 
@@ -940,7 +970,7 @@ public class Controller : MonoBehaviour {
 
                 theTileManager.fullWidth = 10;
                 theTileManager.fullHeight = 15;
-
+                
                 setTiles(false, x, y, 10, 15);
 
                 break;
@@ -1062,12 +1092,12 @@ public class Controller : MonoBehaviour {
 
     public int getStaffJobById(int index) { return staffMembers[index].getJobID(); }
     
-    void ShowBuildingOptions(int screenNum, int upgradeLevel)
+    void ShowBuildingOptions(string line1, string line2)
     {
         objectInfo.SetActive(true);
         Text[] labels = objectInfo.gameObject.GetComponentsInChildren<Text>();
-        labels[0].text = "Screen " + screenNum;
-        labels[1].text = "Level " + upgradeLevel;
+        labels[0].text = line1;
+        labels[1].text = line2;
     }
     
     public List<StaffMember> getFullStaffList()

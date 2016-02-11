@@ -5,7 +5,9 @@ public class CameraControls : MonoBehaviour
 {
 
     private Vector3 lastPosition;
-    float mouseSensitivity = 0.1f;
+    float mouseSensitivity = 0.05f;
+    
+    public float orthographicZoomSpeed = .5f;
 
     GameObject[] staff;
 
@@ -35,9 +37,9 @@ public class CameraControls : MonoBehaviour
             Camera.main.orthographicSize = 4f;
         }
 
-        if (Camera.main.orthographicSize > 23f)
+        if (Camera.main.orthographicSize > 18f)
         {
-            Camera.main.orthographicSize = 23f;
+            Camera.main.orthographicSize = 18f;
         }
 
 
@@ -69,10 +71,8 @@ public class CameraControls : MonoBehaviour
                     }
                 }
 
-
                 if (!overlapping)
                 {
-
                     Vector3 delta = Input.mousePosition - lastPosition;
                     Camera.main.transform.Translate(-delta.x * mouseSensitivity, -delta.y * mouseSensitivity, 0);
                     lastPosition = Input.mousePosition;
@@ -83,5 +83,34 @@ public class CameraControls : MonoBehaviour
             //    mainController.statusCode = 0;
             //}
         }
+
+        // pinch zoom controls
+        if (Input.touchCount == 2)
+        {
+            Touch touch1 = Input.GetTouch(0);
+            Touch touch2 = Input.GetTouch(1);
+
+            Vector3 prevTouch1 = touch1.position - touch1.deltaPosition;
+            Vector3 prevTouch2 = touch2.position - touch2.deltaPosition;
+
+            float prevTouchDeltaMagnitude = (prevTouch1 - prevTouch2).magnitude;
+            float touchDeltaMagnitude = (prevTouch1 - prevTouch2).magnitude;
+
+            // check if fingers are getting further apart (zoom in), or close together (zoom out)
+            float deltaDiff = prevTouchDeltaMagnitude - touchDeltaMagnitude;
+            Camera.main.orthographicSize = deltaDiff * orthographicZoomSpeed;
+
+            if (Camera.main.orthographicSize > 18)
+            {
+                Camera.main.orthographicSize = 18;
+            }
+            if (Camera.main.orthographicSize < 4)
+            {
+                Camera.main.orthographicSize = 4;
+            }
+
+
+        }
+
     }
 }

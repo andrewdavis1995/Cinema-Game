@@ -9,7 +9,7 @@ public class Screen_Script : MonoBehaviour {
 
     public Screen theScreen;
     
-    public delegate void showBuildingOptions(int screen, int upgrade);
+    public delegate void showBuildingOptions(string screen, string upgrade);
     public static event showBuildingOptions showBuildingMenu;
 
     Controller theController;
@@ -33,7 +33,7 @@ public class Screen_Script : MonoBehaviour {
     {
         if (showBuildingMenu != null)
         {
-            showBuildingMenu(theScreen.getScreenNumber(), theScreen.getUpgradeLevel());
+            showBuildingMenu("Screen " + theScreen.getScreenNumber(), "Level " + theScreen.getUpgradeLevel());
             theController.statusCode = 3;
             theController.objectSelected = name;
         }

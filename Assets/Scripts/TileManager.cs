@@ -25,6 +25,9 @@ public class TileManager : MonoBehaviour {
 
     Controller mainController;
 
+    Vector3 currentPosition = new Vector3(0, 0, 0);
+    Vector3 previousPosition = new Vector3(0, 0, 0);
+
     // Use this for initialization
     void Start() {
 
@@ -242,6 +245,105 @@ public class TileManager : MonoBehaviour {
             }
             #endregion
 
+            #region PC movement MOUSE
+            if (Input.GetMouseButtonDown(0))
+            {
+
+                currentPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                Vector3 deltaPos = currentPosition - previousPosition;
+                previousPosition = currentPosition; 
+
+
+                float xDiff = deltaPos.x;
+                float yDiff = deltaPos.y;
+
+                Debug.Log("X: " + xDiff + ", Y: " + yDiff);
+
+
+                if (xDiff > 5)
+                {
+                    if (toMoveX >= 1)
+                    {
+                        if (validMove)
+                        {
+                            showOutput();
+                            validMove = checkValidity(toMoveX - 1, toMoveY, 1, fullHeight);
+                        }
+                        else
+                        {
+                            validMove = checkValidity(toMoveX - 1, toMoveY, fullWidth, fullHeight);
+                        }
+
+                        updateColumn(toMoveX + fullWidth - 1, toMoveY, false, -1);
+                        updateColumn(toMoveX - 1, toMoveY, true, -1);
+                        toMoveX--;
+                    }
+
+                }
+                if (yDiff < 5)
+                {
+                    if (toMoveY > 0)
+                    {
+
+                        if (validMove)
+                        {
+                            showOutput();
+                            validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, 1);
+                        }
+                        else
+                        {
+                            validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, fullHeight);
+                        }
+
+                        // check validity
+                        updateRow(toMoveX, toMoveY + fullHeight - 1, false, -1);
+                        updateRow(toMoveX, toMoveY - 1, true, -1);
+                        toMoveY--;
+                    }
+                }
+                if (xDiff < 5)
+                {
+                    if (toMoveX < width - fullWidth)
+                    {
+                        if (validMove)
+                        {
+                            validMove = checkValidity(toMoveX + fullWidth, toMoveY, 1, fullHeight);
+                        }
+                        else
+                        {
+                            validMove = checkValidity(toMoveX + 1, toMoveY, fullWidth, fullHeight);
+                        }
+
+                        // check validity
+                        updateColumn(toMoveX, toMoveY, false, 1);
+                        updateColumn(toMoveX + fullWidth, toMoveY, true, 1);
+                        toMoveX++;
+                    }
+                }
+                if (yDiff > 5)
+                {
+                    if (toMoveY < height - fullHeight)
+                    {
+                        if (validMove)
+                        {
+                            showOutput();
+                            validMove = checkValidity(toMoveX, toMoveY + fullHeight, fullWidth, 1);
+                        }
+                        else
+                        {
+                            validMove = checkValidity(toMoveX, toMoveY + 1, fullWidth, fullHeight);
+                        }
+
+                        // check validity
+                        updateRow(toMoveX, toMoveY, false, 1);
+                        updateRow(toMoveX, toMoveY + fullHeight, true, 1);
+                        toMoveY++;
+                    }
+                }
+
+            }
+            #endregion
+
             previousValidMove = validMove;
 
         }
@@ -293,7 +395,9 @@ public class TileManager : MonoBehaviour {
     }
 
     void updateColumn(int x, int y, bool newState, int direction)
-    {    
+    {
+
+        mainController.confirmPanel.SetActive(validMove);
 
         if (!newState) {
             for (int j = y; j < y + fullHeight; j++)
@@ -324,7 +428,6 @@ public class TileManager : MonoBehaviour {
             if (validMove != previousValidMove)
             {  
                 colourAllTiles(toMoveX + direction, toMoveY, newColour);
-                mainController.confirmPanel.SetActive(validMove);
                 // hide / show confirm button
             }
             else
@@ -347,6 +450,8 @@ public class TileManager : MonoBehaviour {
 
     void updateRow(int x, int y, bool newState, int direction)
     {
+        mainController.confirmPanel.SetActive(validMove);
+
         if (!newState)
         {
             for (int i = x; i < x + fullWidth; i++)
@@ -427,7 +532,7 @@ public class TileManager : MonoBehaviour {
                     lineOutput += '@';
                 }
             }
-            Debug.Log(lineOutput);
+            //Debug.Log(lineOutput);
         }
     }
 

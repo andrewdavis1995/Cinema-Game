@@ -20,6 +20,8 @@ public class Controller : MonoBehaviour {
     GameObject objectInfo;
     GameObject confirmMovePanel;
     GameObject shopCanvas;
+    GameObject steps;
+    GameObject closeInfo;
 
     Sprite[] screenSprites = new Sprite[4];
 
@@ -111,12 +113,14 @@ public class Controller : MonoBehaviour {
         shopButton = GameObject.Find("cmdShop").GetComponent<Button>();
         shopCanvas = GameObject.Find("Shop Canvas");
         colourPicker = GameObject.Find("Colour Panel");
-        Image[] imgs = GameObject.Find("Customer Status").GetComponentsInChildren<Image>();
+        GameObject custStatus = GameObject.Find("Customer Status");
         startDayButton = GameObject.Find("Start Day Button");
         objectInfo = GameObject.Find("Object Info");
         confirmMovePanel = GameObject.Find("MovementPanel");
         floorTiles = new GameObject[width, height];
         GameObject[] tmpArray = GameObject.FindGameObjectsWithTag("Floor Tile");
+        closeInfo = GameObject.Find("Close Info");
+        steps = GameObject.Find("Steps");
         #endregion
 
         #region Hide Objects on Start
@@ -124,11 +128,8 @@ public class Controller : MonoBehaviour {
         objectInfo.SetActive(false);
         shopCanvas.SetActive(false);
         colourPicker.SetActive(false);
-
-        for (int i = 0; i < imgs.Length; i++)
-        {
-            imgs[i].enabled = false;
-        }
+        closeInfo.SetActive(false);
+        custStatus.SetActive(false);
         #endregion
         
         #region Add Delegate references
@@ -328,6 +329,7 @@ public class Controller : MonoBehaviour {
     {
         shopCanvas.SetActive(false);
         objectInfo.SetActive(false);
+        closeInfo.SetActive(false);
         statusCode = 0;
     }
 
@@ -428,6 +430,11 @@ public class Controller : MonoBehaviour {
                 }
             }
         }
+
+
+        // change step colours
+        steps.GetComponent<SpriteRenderer>().color = carpetColour;
+
     }
 
     void UpdateJobList()
@@ -831,7 +838,7 @@ public class Controller : MonoBehaviour {
                 else if (itemToAddID == 3)
                 {
                     newItem = bust;
-                    theTag = "Bust";
+                    theTag = "Bust of Game Creator";
                 }
                 else if (itemToAddID == 5)
                 {
@@ -900,7 +907,7 @@ public class Controller : MonoBehaviour {
                     xCorrection = 0.65f;
                     yCorrection = 1.5f;
                     otherObjects.Add(new OtherObject(x, y, 3, otherObjects.Count));
-                    theTag = "Bust";
+                    theTag = "Bust of Game Creator";
                 }
                 else if (itemToAddID == 5)
                 {
@@ -947,6 +954,7 @@ public class Controller : MonoBehaviour {
     {
         confirmMovePanel.SetActive(true);
         objectInfo.SetActive(false);
+        closeInfo.SetActive(false);
 
         statusCode = 2;
         Debug.Log("PRESSED");
@@ -993,7 +1001,7 @@ public class Controller : MonoBehaviour {
                     itemToAddID = 2;
                     w = 1; h = 1;
                 }
-                else if (gameObjectList[i].tag.Equals("Bust"))
+                else if (gameObjectList[i].tag.Equals("Bust of Game Creator"))
                 {
                     itemToAddID = 3;
                     w = 2; h = 3;
@@ -1095,6 +1103,7 @@ public class Controller : MonoBehaviour {
     void ShowBuildingOptions(string line1, string line2)
     {
         objectInfo.SetActive(true);
+        closeInfo.SetActive(true);
         Text[] labels = objectInfo.gameObject.GetComponentsInChildren<Text>();
         labels[0].text = line1;
         labels[1].text = line2;

@@ -9,7 +9,7 @@ public class ButtonScript : MonoBehaviour {
 
     public static PlayerData loadGame;
     Button loadButton;
-
+     
     void Start()
     {
         loadButton = (Button)GameObject.Find("LoadButton").GetComponent<Button>();

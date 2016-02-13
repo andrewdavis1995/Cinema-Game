@@ -28,8 +28,10 @@ public class movementScript : MonoBehaviour {
     
     public Animation anim;
 
+    Image[] imgs;
 
     int timeInQueue;
+
 
     public void setCustomer(Customer cust)
     {
@@ -41,7 +43,7 @@ public class movementScript : MonoBehaviour {
     {
         animator = GetComponent<Animator>();
 
-        Image[] imgs = GameObject.Find("Customer Status").GetComponentsInChildren<Image>();
+        imgs = GameObject.Find("Customer Status").GetComponentsInChildren<Image>();
         Controller.queueDone += sortQueuePosition;
     }
 
@@ -157,8 +159,6 @@ public class movementScript : MonoBehaviour {
 
     IEnumerator showPatienceBar()
     {
-        Image[] imgs = customerStatus.GetComponents<Image>();
-
         if (imgs != null)
         {
 
@@ -182,8 +182,6 @@ public class movementScript : MonoBehaviour {
 
     void OnMouseDown()
     {
-        Image[] imgs = customerStatus.GetComponents<Image>();
-
         for (int i = 0; i < imgs.Length; i++)
         {
             imgs[i].enabled = true;

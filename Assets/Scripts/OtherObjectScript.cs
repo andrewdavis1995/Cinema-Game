@@ -27,9 +27,15 @@ public class OtherObjectScript : MonoBehaviour {
 
     void ShowMenu()
     {
+        string message = "No purpose";
+        if (tag.Equals("Bust of Game Creator"))
+        {
+            message = "Thanks for playing!";
+        }
+
         if (showBuildingMenu != null)
         {
-            showBuildingMenu(tag, "Useless");
+            showBuildingMenu(tag, message);
             theController.statusCode = 3;
             theController.objectSelected = name;
         }

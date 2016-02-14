@@ -50,7 +50,7 @@ public class CameraControls : MonoBehaviour
 
         if (mainController.statusCode != 5 && mainController.statusCode != 1 && mainController.statusCode != 2)
         {
-            // pinch zoom controls
+            /// pinch zoom controls
             if (Input.touchCount == 2)
             {
                 Touch touch1 = Input.GetTouch(0);
@@ -60,10 +60,11 @@ public class CameraControls : MonoBehaviour
                 Vector3 prevTouch2 = touch2.position - touch2.deltaPosition;
 
                 float prevTouchDeltaMagnitude = (prevTouch1 - prevTouch2).magnitude;
-                float touchDeltaMagnitude = (prevTouch1 - prevTouch2).magnitude;
+                float touchDeltaMagnitude = (touch1.position - touch2.position).magnitude;
 
                 // check if fingers are getting further apart (zoom in), or close together (zoom out)
                 float deltaDiff = prevTouchDeltaMagnitude - touchDeltaMagnitude;
+
                 Camera.main.orthographicSize += deltaDiff * orthographicZoomSpeed;
 
                 if (Camera.main.orthographicSize > 18f)

@@ -62,7 +62,6 @@ public class movementScript : MonoBehaviour {
                 float theX = transform.position.x;
                 float theY = transform.position.y;
 
-
                 if (theY > customer.getTravellingToY() + 0.11f)
                 {
                     // move up
@@ -162,9 +161,13 @@ public class movementScript : MonoBehaviour {
     {
         if (imgs != null)
         {
+            int patienceVal = customer.GetPatience();
+
+            float val = (float)patienceVal / 1000;
 
             // this will be affected by the patience level
-            imgs[0].color = new Color(152, 100, 0);
+            imgs[1].fillAmount = val;
+            imgs[1].color = new Color((255 * val), 255 - (255 - val), 0);
 
             yield return new WaitForSeconds(1.25f);
         

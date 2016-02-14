@@ -16,6 +16,20 @@ public class Customer
     
     int index;
     public int currentDirection = 0;     // 1 down, 2 up, 3 left, 4 right, 0 still
+    int patience = 1000;
+
+    public int GetPatience()
+    {
+        return patience;
+    }
+
+    public void DecreasePatience(int val)
+    {
+        patience -= val;
+
+        if (patience < 0) { patience = 0; }
+
+    }
 
     int hourDue;
 

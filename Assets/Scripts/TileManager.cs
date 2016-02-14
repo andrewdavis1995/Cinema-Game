@@ -337,7 +337,7 @@ public class TileManager : MonoBehaviour {
     {
         validMove = checkValidity(x, y, fullWidth, fullHeight);
         Color col;
-        if (validMove) { col = Color.green; } else { col = Color.red; }
+        if (validMove) { col = Color.green; mainController.confirmPanel.SetActive(true); } else { col = Color.red; mainController.confirmPanel.SetActive(false); }
         
         colourAllTiles(x, y, col);
 

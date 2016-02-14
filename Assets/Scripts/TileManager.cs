@@ -8,6 +8,8 @@ public class TileManager : MonoBehaviour {
     private Floor floor;
     public Sprite carpetSprite;
 
+    GameObject movementPanel;
+
     bool validMove = true;
     bool previousValidMove = true;
 
@@ -33,7 +35,9 @@ public class TileManager : MonoBehaviour {
 
         Controller.updateTileState += updateTileState;
 
+
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
+        
 
         floor = new Floor(width, height);
 
@@ -69,99 +73,6 @@ public class TileManager : MonoBehaviour {
        
         if (mainController.statusCode == 2 && toMoveX > -1 && toMoveY > -1)
         {
-            if (Input.touchCount == 1)
-            {
-
-                Vector3 newTouch = Input.GetTouch(0).position;
-                Vector3 prevTouch = Input.GetTouch(1).deltaPosition;
-
-
-                float xDiff = newTouch.x - prevTouch.x;
-                float yDiff = newTouch.y - prevTouch.y;
-
-
-                if (xDiff > 5)
-                {
-                    if (toMoveX >= 1)
-                    {
-                        if (validMove)
-                        {
-                            showOutput();
-                            validMove = checkValidity(toMoveX - 1, toMoveY, 1, fullHeight);
-                        }
-                        else
-                        {
-                            validMove = checkValidity(toMoveX - 1, toMoveY, fullWidth, fullHeight);
-                        }
-
-                        updateColumn(toMoveX + fullWidth - 1, toMoveY, false, -1);
-                        updateColumn(toMoveX - 1, toMoveY, true, -1);
-                        toMoveX--;
-                    }
-
-                }
-                if (yDiff < 5)
-                {
-                    if (toMoveY > 0)
-                    {
-
-                        if (validMove)
-                        {
-                            showOutput();
-                            validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, 1);
-                        }
-                        else
-                        {
-                            validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, fullHeight);
-                        }
-
-                        // check validity
-                        updateRow(toMoveX, toMoveY + fullHeight - 1, false, -1);
-                        updateRow(toMoveX, toMoveY - 1, true, -1);
-                        toMoveY--;
-                    }
-                }
-                if (xDiff < 5)
-                {
-                    if (toMoveX < width - fullWidth)
-                    {
-                        if (validMove)
-                        {
-                            validMove = checkValidity(toMoveX + fullWidth, toMoveY, 1, fullHeight);
-                        }
-                        else
-                        {
-                            validMove = checkValidity(toMoveX + 1, toMoveY, fullWidth, fullHeight);
-                        }
-
-                        // check validity
-                        updateColumn(toMoveX, toMoveY, false, 1);
-                        updateColumn(toMoveX + fullWidth, toMoveY, true, 1);
-                        toMoveX++;
-                    }
-                }
-                if (yDiff > 5)
-                {
-                    if (toMoveY < height - fullHeight)
-                    {
-                        if (validMove)
-                        {
-                            showOutput();
-                            validMove = checkValidity(toMoveX, toMoveY + fullHeight, fullWidth, 1);
-                        }
-                        else
-                        {
-                            validMove = checkValidity(toMoveX, toMoveY + 1, fullWidth, fullHeight);
-                        }
-
-                        // check validity
-                        updateRow(toMoveX, toMoveY, false, 1);
-                        updateRow(toMoveX, toMoveY + fullHeight, true, 1);
-                        toMoveY++;
-                    }
-                }
-            }
-
             #region PC movement
             if (Input.GetKeyDown(KeyCode.A))
             {               
@@ -244,110 +155,167 @@ public class TileManager : MonoBehaviour {
                 }
             }
             #endregion
-
-            #region PC movement MOUSE
-            if (Input.GetMouseButtonDown(0))
-            {
-
-                currentPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                Vector3 deltaPos = currentPosition - previousPosition;
-                previousPosition = currentPosition; 
-
-
-                float xDiff = deltaPos.x;
-                float yDiff = deltaPos.y;
-
-                Debug.Log("X: " + xDiff + ", Y: " + yDiff);
-
-
-                if (xDiff > 5)
-                {
-                    if (toMoveX >= 1)
-                    {
-                        if (validMove)
-                        {
-                            showOutput();
-                            validMove = checkValidity(toMoveX - 1, toMoveY, 1, fullHeight);
-                        }
-                        else
-                        {
-                            validMove = checkValidity(toMoveX - 1, toMoveY, fullWidth, fullHeight);
-                        }
-
-                        updateColumn(toMoveX + fullWidth - 1, toMoveY, false, -1);
-                        updateColumn(toMoveX - 1, toMoveY, true, -1);
-                        toMoveX--;
-                    }
-
-                }
-                if (yDiff < 5)
-                {
-                    if (toMoveY > 0)
-                    {
-
-                        if (validMove)
-                        {
-                            showOutput();
-                            validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, 1);
-                        }
-                        else
-                        {
-                            validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, fullHeight);
-                        }
-
-                        // check validity
-                        updateRow(toMoveX, toMoveY + fullHeight - 1, false, -1);
-                        updateRow(toMoveX, toMoveY - 1, true, -1);
-                        toMoveY--;
-                    }
-                }
-                if (xDiff < 5)
-                {
-                    if (toMoveX < width - fullWidth)
-                    {
-                        if (validMove)
-                        {
-                            validMove = checkValidity(toMoveX + fullWidth, toMoveY, 1, fullHeight);
-                        }
-                        else
-                        {
-                            validMove = checkValidity(toMoveX + 1, toMoveY, fullWidth, fullHeight);
-                        }
-
-                        // check validity
-                        updateColumn(toMoveX, toMoveY, false, 1);
-                        updateColumn(toMoveX + fullWidth, toMoveY, true, 1);
-                        toMoveX++;
-                    }
-                }
-                if (yDiff > 5)
-                {
-                    if (toMoveY < height - fullHeight)
-                    {
-                        if (validMove)
-                        {
-                            showOutput();
-                            validMove = checkValidity(toMoveX, toMoveY + fullHeight, fullWidth, 1);
-                        }
-                        else
-                        {
-                            validMove = checkValidity(toMoveX, toMoveY + 1, fullWidth, fullHeight);
-                        }
-
-                        // check validity
-                        updateRow(toMoveX, toMoveY, false, 1);
-                        updateRow(toMoveX, toMoveY + fullHeight, true, 1);
-                        toMoveY++;
-                    }
-                }
-
-            }
-            #endregion
-
+         
             previousValidMove = validMove;
-
         }
     }
+
+    public void doMove(int code)
+    {
+        if (code == 3)
+        {
+            if (toMoveX >= 1)
+            {
+                if (validMove)
+                {
+                    showOutput();
+                    validMove = checkValidity(toMoveX - 1, toMoveY, 1, fullHeight);
+                }
+                else
+                {
+                    validMove = checkValidity(toMoveX - 1, toMoveY, fullWidth, fullHeight);
+                }
+
+                updateColumn(toMoveX + fullWidth - 1, toMoveY, false, -1);
+                updateColumn(toMoveX - 1, toMoveY, true, -1);
+                toMoveX--;
+            }
+
+        }
+        if (code == 1)
+        {
+            if (toMoveY > 0)
+            {
+
+                if (validMove)
+                {
+                    showOutput();
+                    validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, 1);
+                }
+                else
+                {
+                    validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, fullHeight);
+                }
+
+                // check validity
+                updateRow(toMoveX, toMoveY + fullHeight - 1, false, -1);
+                updateRow(toMoveX, toMoveY - 1, true, -1);
+                toMoveY--;
+            }
+        }
+        if (code == 2)
+        {
+            if (toMoveX < width - fullWidth)
+            {
+                if (validMove)
+                {
+                    validMove = checkValidity(toMoveX + fullWidth, toMoveY, 1, fullHeight);
+                }
+                else
+                {
+                    validMove = checkValidity(toMoveX + 1, toMoveY, fullWidth, fullHeight);
+                }
+
+                // check validity
+                updateColumn(toMoveX, toMoveY, false, 1);
+                updateColumn(toMoveX + fullWidth, toMoveY, true, 1);
+                toMoveX++;
+            }
+        }
+        if (code == 0)
+        {
+            if (toMoveY < height - fullHeight)
+            {
+                if (validMove)
+                {
+                    showOutput();
+                    validMove = checkValidity(toMoveX, toMoveY + fullHeight, fullWidth, 1);
+                }
+                else
+                {
+                    validMove = checkValidity(toMoveX, toMoveY + 1, fullWidth, fullHeight);
+                }
+
+                // check validity
+                updateRow(toMoveX, toMoveY, false, 1);
+                updateRow(toMoveX, toMoveY + fullHeight, true, 1);
+                toMoveY++;
+            }
+        }
+
+        previousValidMove = validMove;
+        
+    }
+
+    /*public void doMove(int code)
+    {
+        int xMove = 0, yMove = 0;
+        int trueHeight = 0;
+        int trueWidth = 0;
+        int validWidth = 0;
+        int validHeight = 0;
+        int width2 = 0;
+        int height2 = 0;
+
+        #region calculate Direction
+        switch (code)
+        {
+            case 0:
+                xMove = 0;
+                yMove = 1;
+                trueWidth = 0;
+                trueHeight = 1;
+                validWidth = fullWidth;
+                validHeight = 1;
+                break;
+            case 1:
+                xMove = 0;
+                yMove = -1;
+                trueWidth = 0;
+                trueHeight = fullHeight;
+                validWidth = fullWidth;
+                validHeight = 1;
+                break;
+            case 2:
+                xMove = 1;
+                yMove = 0;
+                trueWidth = 1;
+                trueHeight = 0;
+                trueWidth = toMoveX + trueWidth - 1;
+                validHeight = fullHeight;
+                break;
+            case 3:
+                xMove = -1;
+                yMove = 0;
+                trueWidth = fullWidth;
+                trueHeight = 0;
+                validWidth = 1;
+                validHeight = fullHeight;
+                break;
+        }
+        int direction = xMove + yMove; 
+        #endregion
+
+        if ((toMoveX >= 1 && xMove == -1) || (toMoveY > 0 && yMove == -1) || ((toMoveY < height - fullHeight) && yMove == 1) || ((toMoveX < width - fullWidth) && xMove == 1))
+        {
+            if (validMove)
+            {
+                showOutput();
+                validMove = checkValidity(toMoveX + xMove, toMoveY + yMove, validWidth, validHeight);
+            }
+            else
+            {
+                validMove = checkValidity(toMoveX + xMove, toMoveY + yMove, fullWidth, fullHeight);
+            }
+
+            updateColumn(, toMoveY + trueHeight, false, direction);
+            updateColumn(toMoveX + (fullWidth), toMoveY + yMove + trueHeight, true, direction);
+            toMoveX += xMove;
+            toMoveY += yMove;
+        }
+        previousValidMove = validMove;
+
+    }*/
 
     public bool checkValidity(int startX, int startY, int width, int height)
     {

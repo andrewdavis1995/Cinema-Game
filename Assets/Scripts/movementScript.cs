@@ -16,7 +16,7 @@ public class movementScript : MonoBehaviour {
     public delegate int getTicketQueueSize();
     public static event getTicketQueueSize getQueueTicketsSize;
 
-    GameObject customerStatus;
+    public static GameObject customerStatus;
 
     public Transform greenGuy;
 
@@ -43,7 +43,8 @@ public class movementScript : MonoBehaviour {
     {
         animator = GetComponent<Animator>();
 
-        imgs = GameObject.Find("Customer Status").GetComponentsInChildren<Image>();
+		imgs = customerStatus.GetComponentsInChildren<Image>();
+
         Controller.queueDone += sortQueuePosition;
     }
 
@@ -163,29 +164,18 @@ public class movementScript : MonoBehaviour {
         {
 
             // this will be affected by the patience level
-            imgs[1].color = new Color(152, 100, 0);
+            imgs[0].color = new Color(152, 100, 0);
 
             yield return new WaitForSeconds(1.25f);
-
         
-
-            for (int i = 0; i < imgs.Length; i++)
-            {
-                imgs[i].enabled = false;
-            }
-
-
-            imgs = null;
+			customerStatus.SetActive (false);
         }
     }
 
 
     void OnMouseDown()
     {
-        for (int i = 0; i < imgs.Length; i++)
-        {
-            imgs[i].enabled = true;
-        }
+		customerStatus.SetActive (true);
 
         StartCoroutine(showPatienceBar());       
     }

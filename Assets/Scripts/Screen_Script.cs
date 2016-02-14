@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System.Threading;
 
 public class Screen_Script : MonoBehaviour {
 
@@ -19,7 +20,7 @@ public class Screen_Script : MonoBehaviour {
     {
         theController = GameObject.Find("Central Controller").GetComponent<Controller>();
     }
-
+    
 
     void OnMouseDown()
     {

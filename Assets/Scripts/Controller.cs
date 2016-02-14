@@ -21,9 +21,10 @@ public class Controller : MonoBehaviour {
     GameObject confirmMovePanel;
     GameObject shopCanvas;
     GameObject steps;
-    GameObject closeInfo;
+	GameObject closeInfo;
+    GameObject moveButtons;
 
-    Sprite[] screenSprites = new Sprite[4];
+	Sprite[] screenSprites = new Sprite[4];
 
     public string objectSelected = "";
 
@@ -114,9 +115,11 @@ public class Controller : MonoBehaviour {
         shopCanvas = GameObject.Find("Shop Canvas");
         colourPicker = GameObject.Find("Colour Panel");
         GameObject custStatus = GameObject.Find("Customer Status");
+		movementScript.customerStatus = custStatus;
         startDayButton = GameObject.Find("Start Day Button");
         objectInfo = GameObject.Find("Object Info");
         confirmMovePanel = GameObject.Find("MovementPanel");
+        moveButtons = GameObject.Find("buttonPanel");
         floorTiles = new GameObject[width, height];
         GameObject[] tmpArray = GameObject.FindGameObjectsWithTag("Floor Tile");
         closeInfo = GameObject.Find("Close Info");
@@ -128,6 +131,7 @@ public class Controller : MonoBehaviour {
         objectInfo.SetActive(false);
         shopCanvas.SetActive(false);
         colourPicker.SetActive(false);
+        moveButtons.SetActive(false);
         closeInfo.SetActive(false);
         custStatus.SetActive(false);
         #endregion
@@ -144,8 +148,7 @@ public class Controller : MonoBehaviour {
         Screen_Script.showBuildingMenu += ShowBuildingOptions;
         OtherObjectScript.showBuildingMenu += ShowBuildingOptions;
         #endregion
-
-        
+                
         #region Load / New Game
         // get Player data. If not null, load game
         if (ButtonScript.loadGame == null)
@@ -692,7 +695,8 @@ public class Controller : MonoBehaviour {
         {
             queueCount += Time.deltaTime;
 
-            Debug.Log("Queue Count: " + queueCount);
+			Debug.Log("Queue Count: " + queueCount);
+			Debug.Log("Staff: " + ticketStaff.Count);
 
             if (queueCount > 2.5f)
             {
@@ -724,10 +728,11 @@ public class Controller : MonoBehaviour {
     public void objectMoveComplete(bool confirmed)
     {
         confirmMovePanel.SetActive(false);
+        moveButtons.SetActive(false);
         //objectInfo.SetActive(true);
 
         // re-place image
-        
+
         int x = -1; int y = -1;
         bool newObject = !(theTileManager.origX > -1) ;
         
@@ -953,6 +958,7 @@ public class Controller : MonoBehaviour {
     public void moveScreen()
     {
         confirmMovePanel.SetActive(true);
+        moveButtons.SetActive(true);
         objectInfo.SetActive(false);
         closeInfo.SetActive(false);
 
@@ -1037,6 +1043,7 @@ public class Controller : MonoBehaviour {
 
         shopCanvas.SetActive(false);
         confirmMovePanel.SetActive(true);
+        moveButtons.SetActive(true);
 
         bool valid = theTileManager.checkValidity(x, y, width, height);
 

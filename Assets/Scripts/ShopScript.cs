@@ -21,7 +21,7 @@ public class ShopScript : MonoBehaviour {
         {
             case 0: // Screen
                 mainController.objectSelected = "NEW SCREEN";
-                mainController.placeObject(10, 10, 10, 15);
+                mainController.placeObject(10, 10, 11, 15);
                 break;
             case 1: // Staff
                 break;

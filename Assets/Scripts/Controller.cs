@@ -246,11 +246,12 @@ public class Controller : MonoBehaviour
             GameObject instance = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity);
             instance.GetComponent<Screen_Script>().theScreen = theScreens[i];
             instance.name = "Screen#" + theScreens[i].getScreenNumber();
+            instance.tag = "Screen";
             instance.GetComponent<SpriteRenderer>().sortingOrder = height - theScreens[i].getY();
 
             screenObjectList.Add(instance);
 
-            setTiles(true, (int)(theScreens[i].getX()), (int)(theScreens[i].getY()), 10, 15);
+            setTiles(true, (int)(theScreens[i].getX()), (int)(theScreens[i].getY()), 11, 15);
         }
 
         // do same for other objects
@@ -265,6 +266,7 @@ public class Controller : MonoBehaviour
 
             int w = 0;
             int h = 0;
+            String tag = null;
 
             itemToAddID = otherObjects[i].type;
 
@@ -274,6 +276,7 @@ public class Controller : MonoBehaviour
                 xCorrection = 0.1f;
                 yCorrection = 0.35f;
                 w = 1; h = 1;
+                tag = "Plant";
             }
             else if (itemToAddID == 3)
             {
@@ -281,6 +284,7 @@ public class Controller : MonoBehaviour
                 xCorrection = 0.65f;
                 yCorrection = 1.5f;
                 w = 2; h = 2;
+                tag = "Bust of Game Creator";
             }
             else if (itemToAddID == 5)
             {
@@ -288,6 +292,7 @@ public class Controller : MonoBehaviour
                 xCorrection = 1.07f;
                 yCorrection = 1.62f;
                 w = 3; h = 5;
+                tag = "Vending Machine";
             }
 
             // align to grid - +/- 1 to move by one tile horizontally, 0.8 for vertical movement
@@ -298,6 +303,7 @@ public class Controller : MonoBehaviour
             GameObject instance = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity);
             instance.name = "Element#" + (i + otherObjects.Count);
             instance.GetComponent<SpriteRenderer>().sortingOrder = height - otherObjects[i].yPos;
+            instance.tag = tag;
 
             gameObjectList.Add(instance);
 
@@ -420,7 +426,6 @@ public class Controller : MonoBehaviour
 
     void colourClicked(Color c, Sprite s)
     {
-
         carpetColour = c;
 
         for (int i = 0; i < width; i++)
@@ -754,6 +759,12 @@ public class Controller : MonoBehaviour
 
     public void objectMoveComplete(bool confirmed)
     {
+        GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
+        for (int i = 0; i < staff.Length; i++)
+        {
+            staff[i].GetComponent<SpriteRenderer>().enabled = true;
+        }
+
         confirmMovePanel.SetActive(false);
         moveButtons.SetActive(false);
         //objectInfo.SetActive(true);
@@ -839,7 +850,8 @@ public class Controller : MonoBehaviour
 
                 Vector3 pos = new Vector3(x + 0.05f, y * 0.8f, 0);
 
-                theScreens[id].setPosition(x, y);
+                otherObjects[id].xPos = x;
+                otherObjects[id].yPos = y;
 
                 float xCorrection = 0;
                 float yCorrection = 0;
@@ -883,7 +895,7 @@ public class Controller : MonoBehaviour
 
 
                 GameObject theObject = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity);
-                theObject.name = "Element#" + (otherObjects.Count);
+                theObject.name = "Element#" + (otherObjects.Count - 1);
                 theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y;
                 theObject.tag = theTag;
                 gameObjectList.Add(theObject);
@@ -900,7 +912,6 @@ public class Controller : MonoBehaviour
         }
         else if (confirmed)
         {
-            // this will change too -----------------------------
 
             Vector3 pos = new Vector3(x + 0.05f, y * 0.8f, 0);
 
@@ -995,6 +1006,13 @@ public class Controller : MonoBehaviour
 
     public void moveScreen()
     {
+        GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
+
+        for (int i = 0; i < staff.Length; i++)
+        {
+            staff[i].GetComponent<SpriteRenderer>().enabled = false;
+        }
+
         confirmMovePanel.SetActive(true);
         moveButtons.SetActive(true);
         objectInfo.SetActive(false);
@@ -1020,10 +1038,10 @@ public class Controller : MonoBehaviour
                 theTileManager.origX = x;
                 theTileManager.origY = y;
 
-                theTileManager.fullWidth = 10;
+                theTileManager.fullWidth = 11;
                 theTileManager.fullHeight = 15;
 
-                setTiles(false, x, y, 10, 15);
+                setTiles(false, x, y, 11, 15);
 
                 break;
             }
@@ -1077,6 +1095,12 @@ public class Controller : MonoBehaviour
 
     public void placeObject(int x, int y, int width, int height)
     {
+        GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
+
+        for (int i = 0; i < staff.Length; i++)
+        {
+            staff[i].GetComponent<SpriteRenderer>().enabled = false;
+        }
         statusCode = 2;
 
         shopCanvas.SetActive(false);

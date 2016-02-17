@@ -155,8 +155,7 @@ public class movementScript : MonoBehaviour {
         }
 
     }
-
-
+    
     IEnumerator showPatienceBar()
     {
         if (imgs != null)

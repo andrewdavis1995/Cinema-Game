@@ -10,7 +10,7 @@ namespace Assets.Classes
     {
         public int xCoord;
         public int yCoord;
-        public bool inUse;
+        public int inUse;       // 0 = empty, 1 = buffer, 2 = full
 
         public FloorTile(int x, int y)
         {

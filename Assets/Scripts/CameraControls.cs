@@ -48,8 +48,12 @@ public class CameraControls : MonoBehaviour
             lastPosition = Input.mousePosition;
         }
 
-        if (mainController.statusCode != 5 && mainController.statusCode != 1 && mainController.statusCode != 2)
+        if (mainController.statusCode != 5 && mainController.statusCode != 1 && mainController.statusCode != 3)
         {
+
+            mainController.objectInfo.SetActive(false);
+            mainController.closeInfo.SetActive(false);
+
             /// pinch zoom controls
             if (Input.touchCount == 2)
             {

@@ -70,10 +70,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Classes\Coordinate.cs" />
     <Compile Include="Assets\Classes\Customer.cs" />
     <Compile Include="Assets\Classes\FilmShowing.cs" />
     <Compile Include="Assets\Classes\Floor.cs" />
     <Compile Include="Assets\Classes\FloorTile.cs" />
+    <Compile Include="Assets\Classes\Node.cs" />
     <Compile Include="Assets\Classes\Screen.cs" />
     <Compile Include="Assets\Classes\StaffMember.cs" />
     <Compile Include="Assets\Classes\TimeTuple.cs" />

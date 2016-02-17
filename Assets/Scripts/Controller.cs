@@ -18,11 +18,11 @@ public class Controller : MonoBehaviour
     public float mouseSensitivity = 1.0f;
 
     GameObject colourPicker;
-    GameObject objectInfo;
+    public GameObject objectInfo;
     GameObject confirmMovePanel;
     GameObject shopCanvas;
     GameObject steps;
-    GameObject closeInfo;
+    public GameObject closeInfo;
     GameObject moveButtons;
 
     Sprite[] screenSprites = new Sprite[4];
@@ -69,7 +69,7 @@ public class Controller : MonoBehaviour
     public delegate void doneWithQueue(Customer c);
     public static event doneWithQueue queueDone;
 
-    public delegate void setTileStates(int startX, int startY, int w, int h, bool newState, bool complete);
+    public delegate void setTileStates(int startX, int startY, int w, int h, int newState, bool complete);
     public static event setTileStates updateTileState;
 
     public Sprite ColourBackground;
@@ -251,7 +251,7 @@ public class Controller : MonoBehaviour
 
             screenObjectList.Add(instance);
 
-            setTiles(true, (int)(theScreens[i].getX()), (int)(theScreens[i].getY()), 11, 15);
+            setTiles(2, (int)(theScreens[i].getX()), (int)(theScreens[i].getY()), 11, 15);
         }
 
         // do same for other objects
@@ -307,7 +307,7 @@ public class Controller : MonoBehaviour
 
             gameObjectList.Add(instance);
 
-            setTiles(true, (int)(otherObjects[i].xPos), (int)(otherObjects[i].yPos), w, h);
+            setTiles(2, (int)(otherObjects[i].xPos), (int)(otherObjects[i].yPos), w, h);
         }
 
         createColourPicker();
@@ -325,7 +325,7 @@ public class Controller : MonoBehaviour
         }
     }
 
-    public void updateTiles(int x, int y, int w, int h, bool newState)
+    public void updateTiles(int x, int y, int w, int h, int newState)
     {
         if (updateTileState != null)
         {
@@ -333,11 +333,11 @@ public class Controller : MonoBehaviour
         }
     }
 
-    void setTiles(bool newState, int x, int y, int width, int height)
+    void setTiles(int newState, int x, int y, int width, int height)
     {
         Color newColour;
 
-        if (newState) { newColour = carpetColour; } else { newColour = Color.green; }
+        if (newState != 0) { newColour = carpetColour; } else { newColour = Color.green; }
 
         changeColour(newColour, x, y, width, height);
 
@@ -486,7 +486,7 @@ public class Controller : MonoBehaviour
 
             QueueController();
 
-            if (count > 0.2)
+            if (count > 0.12)
             {
 
                 count = 0;
@@ -902,7 +902,7 @@ public class Controller : MonoBehaviour
             }
             itemToAddID = -1;
 
-            setTiles(true, x, y, theTileManager.fullWidth, theTileManager.fullHeight);
+            setTiles(2, x, y, theTileManager.fullWidth, theTileManager.fullHeight);
 
             if (!confirmed)
             {
@@ -986,7 +986,7 @@ public class Controller : MonoBehaviour
             }
             itemToAddID = -1;
 
-            setTiles(true, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
+            setTiles(2, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
 
         }
         else {
@@ -1041,7 +1041,7 @@ public class Controller : MonoBehaviour
                 theTileManager.fullWidth = 11;
                 theTileManager.fullHeight = 15;
 
-                setTiles(false, x, y, 11, 15);
+                setTiles(0, x, y, 11, 15);
 
                 break;
             }
@@ -1085,7 +1085,7 @@ public class Controller : MonoBehaviour
                 theTileManager.fullWidth = w;
                 theTileManager.fullHeight = h;
 
-                setTiles(false, x, y, w, h);
+                setTiles(0, x, y, w, h);
 
                 break;
             }

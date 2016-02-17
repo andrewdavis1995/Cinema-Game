@@ -323,7 +323,7 @@ public class TileManager : MonoBehaviour {
         {
             for (int j = startY; j < startY + height; j++)
             {
-                if (floor.floorTiles[i, j].inUse) {
+                if (floor.floorTiles[i, j].inUse != 0) {
                     return false;
                 }
 
@@ -344,8 +344,7 @@ public class TileManager : MonoBehaviour {
     }
 
     void colourAllTiles(int startX, int startY, Color col)
-    {
-        
+    {        
         for (int i = startX; i < startX + fullWidth; i++)
         {
             for (int j = startY; j < startY + fullHeight; j++)
@@ -465,7 +464,7 @@ public class TileManager : MonoBehaviour {
         //}
     }
 
-    public void updateTileState(int x, int y, int w, int h, bool newState, bool complete)
+    public void updateTileState(int x, int y, int w, int h, int newState, bool complete)
     {
         for (int i = x; i < x + w; i++)
         {
@@ -480,6 +479,18 @@ public class TileManager : MonoBehaviour {
             }
         }
 
+        if (width == 11 && height == 15)
+        {
+            for (int i = y; i < y + 15; i++)
+            {
+                floor.floorTiles[x + 11, i].inUse = newState;
+            }
+            for (int i = x; i < x + 10; i++)
+            {
+                floor.floorTiles[i, y + 15].inUse = newState;
+            }
+        }
+
         showOutput();
 
     }
@@ -491,7 +502,7 @@ public class TileManager : MonoBehaviour {
             string lineOutput = i.ToString();
             for (int j = 0; j < height; j++)
             {
-                if (!floor.floorTiles[i, j].inUse)
+                if (floor.floorTiles[i, j].inUse == 0)
                 {
                     lineOutput += '-';
                 }

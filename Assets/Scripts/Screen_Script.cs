@@ -24,10 +24,17 @@ public class Screen_Script : MonoBehaviour {
 
     void OnMouseDown()
     {
-        if (GetComponent<Renderer>().enabled && theController.statusCode == 0)
+        if (GetComponent<Renderer>().enabled && theController.statusCode == 0 && !theController.simulationRunning)
         {
             ShowMenu();
         }
+    }
+
+    void OnMouseDrag()
+    {
+        theController.statusCode = 0;
+        theController.objectInfo.SetActive(false);
+        theController.closeInfo.SetActive(false);
     }
 
     void ShowMenu()

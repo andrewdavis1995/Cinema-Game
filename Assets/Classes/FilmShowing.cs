@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Assets.Classes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using UnityEngine;
 
 [System.Serializable]
 public class FilmShowing
@@ -13,22 +14,25 @@ public class FilmShowing
     public int timeH;
     public int timeM;
 
-    public FilmShowing(int id, int screenNumber, int tickets, int hours, int minutes)
+    Floor theFloor;
+
+    public FilmShowing(int id, int screenNumber, int tickets, int hours, int minutes, Floor f)
     {
         screeningID = id;
         screenNum = screenNumber;
         ticketsSold = tickets;
         timeH = hours;
         timeM = minutes;
+        theFloor = f;
     }
 
     public List<Customer> createCustomerList(int currentCount)
     {
         List<Customer> customers = new List<Customer>();
 
-        for (int i = 0; i < ticketsSold; i++)     // ticketsSold
+        for (int i = 0; i < 1; i++)     // ticketsSold
         {
-            customers.Add(new Customer(this, currentCount + i));
+            customers.Add(new Customer(this, (currentCount + i), theFloor));
         }
         
 

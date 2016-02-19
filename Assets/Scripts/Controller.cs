@@ -32,7 +32,7 @@ public class Controller : MonoBehaviour
     List<GameObject> gameObjectList = new List<GameObject>();
     List<GameObject> screenObjectList = new List<GameObject>();
 
-    List<Screen> theScreens = new List<Screen>();
+    public static List<Screen> theScreens = new List<Screen>();
     List<OtherObject> otherObjects = new List<OtherObject>();
 
     Queue<Customer> ticketQueue = new Queue<Customer>();
@@ -82,7 +82,7 @@ public class Controller : MonoBehaviour
 
     public GameObject[,] floorTiles;
 
-    bool simulationRunning = false;
+    public bool simulationRunning = false;
 
     int totalCoins = 0;
     int numPopcorn = 0;
@@ -122,11 +122,13 @@ public class Controller : MonoBehaviour
         objectInfo = GameObject.Find("Object Info");
         confirmMovePanel = GameObject.Find("MovementPanel");
         moveButtons = GameObject.Find("buttonPanel");
-        floorTiles = new GameObject[width, height];
+        floorTiles = new GameObject[height, width];
         GameObject[] tmpArray = GameObject.FindGameObjectsWithTag("Floor Tile");
         closeInfo = GameObject.Find("Close Info");
         steps = GameObject.Find("Steps");
         #endregion
+
+        Customer.tiles = floorTiles;
 
         #region Hide Objects on Start
         confirmMovePanel.SetActive(false);
@@ -316,9 +318,9 @@ public class Controller : MonoBehaviour
 
     public void changeColour(Color c, int x, int y, int width, int height)
     {
-        for (int i = x; i < x + width; i++)
+        for (int i = y; i < y + height; i++)
         {
-            for (int j = y; j < y + height; j++)
+            for (int j = x; j < x + width; j++)
             {
                 floorTiles[i, j].GetComponent<SpriteRenderer>().color = c;
             }
@@ -466,6 +468,12 @@ public class Controller : MonoBehaviour
             );
     }
 
+    public void ShowColourPicker()
+    {
+        colourPicker.SetActive(!colourPicker.active);
+        shopCanvas.SetActive(false);
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -476,7 +484,7 @@ public class Controller : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            colourPicker.SetActive(!colourPicker.active);
+            ShowColourPicker();
             //objectInfo.SetActive(true);
         }
 
@@ -512,13 +520,10 @@ public class Controller : MonoBehaviour
                     {
                         if (allCustomers[j].hasArrived(hours, minutes))
                         {
-                            float left = 12;
 
-                            if (allCustomers[j].NeedsTickets())
-                            {
-                                left = 17;
-                            }
-
+                            allCustomers[j].nextPoint(true);
+                            float left = allCustomers[j].getTravellingToX();
+                            float top = allCustomers[j].getTravellingToY();
 
                             int sprite = UnityEngine.Random.Range(0, 2);
 
@@ -530,6 +535,7 @@ public class Controller : MonoBehaviour
                             {
                                 myInstance = Instantiate(blueGuy, new Vector3(left, -15), Quaternion.identity) as Transform;
                             }
+
                             myInstance.GetComponent<movementScript>().customer = allCustomers[j];
 
                         }
@@ -561,6 +567,8 @@ public class Controller : MonoBehaviour
         // hide the button
         startDayButton.SetActive(false);
         shopButton.gameObject.SetActive(false);
+
+        Customer.tiles = floorTiles;
 
         if (!simulationRunning)
         {
@@ -608,10 +616,10 @@ public class Controller : MonoBehaviour
             nextWeek();
         }
 
-        for (int i = 0; i < filmShowings.Count; i++)
+        for (int i = 0; i < 1; i++)       // filmShowings.Count
         {
             int index = filmShowings[i].getScreenNumber();
-            int ticketsSold = getTicketsSoldValue(theScreens[index]);
+            int ticketsSold = getTicketsSoldValue(theScreens[index - 1]);
             filmShowings[i].setTicketsSold(ticketsSold);
 
             int currentCount = 0;
@@ -704,11 +712,11 @@ public class Controller : MonoBehaviour
         {
             int screeningsThisDay = UnityEngine.Random.Range(2, 4); // number of films per screen per day
 
-            for (int j = 0; j < screeningsThisDay; j++)
+            for (int j = 0; j < 1; j++)     // screeningsThisDay
             {
                 TimeTuple showTime = getShowTime(j);
 
-                FilmShowing newFilm = new FilmShowing(filmShowings.Count, i, 0, showTime.hours, showTime.minutes);
+                FilmShowing newFilm = new FilmShowing(filmShowings.Count, i + 1, 0, showTime.hours, showTime.minutes, theTileManager.floor);
                 filmShowings.Add(newFilm);
             }
 
@@ -738,7 +746,7 @@ public class Controller : MonoBehaviour
                     {
                         allCustomers[index].doneWithQueue();
                         allCustomers[index].ticketsDone();
-                        allCustomers[index].nextPlace();
+                        allCustomers[index].nextPoint(true);
                         queueDone(allCustomers[index]);
                     }
                     ticketQueue.Dequeue();
@@ -906,7 +914,7 @@ public class Controller : MonoBehaviour
 
             if (!confirmed)
             {
-                //setTiles(false, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
+                setTiles(0, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
                 changeColour(carpetColour, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
             }
         }
@@ -1006,6 +1014,7 @@ public class Controller : MonoBehaviour
 
     public void moveScreen()
     {
+        // hide staff
         GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
 
         for (int i = 0; i < staff.Length; i++)
@@ -1013,6 +1022,7 @@ public class Controller : MonoBehaviour
             staff[i].GetComponent<SpriteRenderer>().enabled = false;
         }
 
+        // hide / show necessary buttons
         confirmMovePanel.SetActive(true);
         moveButtons.SetActive(true);
         objectInfo.SetActive(false);
@@ -1026,8 +1036,21 @@ public class Controller : MonoBehaviour
             if (screenObjectList[i].name.Equals(objectSelected))
             {
                 screenObjectList[i].GetComponent<Renderer>().enabled = false;
-                int x = theScreens[i].getX(); //-4
-                int y = theScreens[i].getY(); //-6
+
+                String[] tmp = screenObjectList[i].name.Split('#');
+                int index = -1;
+
+                for (int j = 0; j < theScreens.Count; j++)
+                {
+                    if (theScreens[j].getScreenNumber() == int.Parse(tmp[1]))
+                    {
+                        index = j;
+                        break;
+                    }
+                }
+
+                int x = theScreens[index].getX(); //-4
+                int y = theScreens[index].getY(); //-6
 
 
                 itemToAddID = 0;
@@ -1120,9 +1143,9 @@ public class Controller : MonoBehaviour
             newColour = Color.red;
         }
 
-        for (int i = x; i < x + width; i++)
+        for (int i = y; i < y + height; i++)
         {
-            for (int j = y; j < y + height; j++)
+            for (int j = x; j < x + width; j++)
             {
                 floorTiles[i, j].GetComponent<SpriteRenderer>().color = newColour;
             }

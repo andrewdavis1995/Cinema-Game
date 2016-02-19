@@ -52,15 +52,18 @@ public class movementScript : MonoBehaviour {
     {
         //get direction
         int newDir = 0;
-        string direction = "idle";
+        string direction = "queue";
 
         if (customer != null)
         {
-            if (!customer.inQueue)
+            if (!customer.inQueue && customer.pointsToVisit.Count > 0)
             {
 
                 float theX = transform.position.x;
                 float theY = transform.position.y;
+
+                //Debug.Log("I am at: " + theX + ", " + theY);
+                //Debug.Log("I am travelling to: " + customer.getTravellingToX() + ", " + customer.getTravellingToY());
 
                 if (theY > customer.getTravellingToY() + 0.11f)
                 {
@@ -101,13 +104,16 @@ public class movementScript : MonoBehaviour {
                 else
                 {
                     newDir = 0;
+                    customer.nextPoint(false);
 
-                    if (!customer.isGoingToSeat())
+                    if (!customer.isGoingToSeat() && !customer.NeedsTickets())
                     {
 
                         int queueLength = getQueueTicketsSize();
 
                         float yPos = -4.65f - queueLength * 0.8f;
+
+                        // this will have to change - TODO
 
                         Vector3 temp = gameObject.transform.position;
                         temp.y = yPos;
@@ -120,11 +126,9 @@ public class movementScript : MonoBehaviour {
                         {
                             addToQueueTickets(customer);
                             customer.inQueue = true;
-
-                            animator.SetTrigger("queue");
+                            customer.pointsToVisit.Clear();
+                            direction = "queue";
                         }
-
-
                     }
                     else
                     {
@@ -138,20 +142,22 @@ public class movementScript : MonoBehaviour {
 
                 if (timeInQueue % 1000 == 0)
                 {
-                    animator.SetTrigger("queue");
+                    direction = "queue";
                 }
                 else if (timeInQueue % 1000 == 500)
                 {
-                    animator.SetTrigger("bored");
+                    direction = "bored";
                 }
             }
 
-        if (customer.currentDirection != newDir && !customer.inQueue)
-        {
-            animator.SetTrigger(direction);
-        }
+            //Debug.Log(direction);
 
-        customer.currentDirection = newDir;
+            if (customer.currentDirection != newDir && !customer.inQueue && !direction.Equals("poo poo"))
+            {
+                animator.SetTrigger(direction);
+            }
+
+            customer.currentDirection = newDir;
         }
 
     }

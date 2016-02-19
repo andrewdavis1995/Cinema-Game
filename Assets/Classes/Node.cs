@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Assets.Classes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
-class Node
+public class Node
 {
     public Coordinate location;
     public List<Node> path = new List<Node>();
@@ -18,7 +20,7 @@ class Node
         return this.path;
     }
 
-    public List<Node> FindChildren(List<Node> explored, List<Node> tmp, char[,] states)
+    public List<Node> FindChildren(List<Node> explored, List<Node> tmp, FloorTile[,] states)
     {
         List<Node> temp = new List<Node>();
 
@@ -26,34 +28,34 @@ class Node
         {
             Node toAdd = new Node(new Coordinate(location.x - 1, location.y));
 
-            if (!IsSameLocation(toAdd, explored) && !IsSameLocation(toAdd, tmp) && states[location.x - 1, location.y] != '0')
+            if (!IsSameLocation(toAdd, explored) && !IsSameLocation(toAdd, tmp) && states[location.y, location.x-1].inUse != 2)
             {
                 temp.Add(toAdd);
             }
         }
-        if (location.x < 19)
+        if (location.x < 79)
         {
             Node toAdd = new Node(new Coordinate(location.x + 1, location.y));
 
-            if (!IsSameLocation(toAdd, explored) && !IsSameLocation(toAdd, tmp) && states[location.x + 1, location.y] != '0')
+            if (!IsSameLocation(toAdd, explored) && !IsSameLocation(toAdd, tmp) && states[location.y, location.x + 1].inUse != 2)
             {
                 temp.Add(toAdd);
             }
         }
         if (location.y > 0)
         {
-            Node toAdd = new Node(new Coordinate(location.x, location.y - 1));
+            Node toAdd = new Node(new Coordinate(location.x, location.y-1));
 
-            if (!IsSameLocation(toAdd, explored) && !IsSameLocation(toAdd, tmp) && states[location.x, location.y - 1] != '0')
+            if (!IsSameLocation(toAdd, explored) && !IsSameLocation(toAdd, tmp) && states[location.y-1, location.x].inUse != 2)
             {
                 temp.Add(toAdd);
             }
         }
-        if (location.y < 24)
+        if (location.y < 39)
         {
-            Node toAdd = new Node(new Coordinate(location.x, location.y + 1));
+            Node toAdd = new Node(new Coordinate(location.x, location.y+1));
 
-            if (!IsSameLocation(toAdd, explored) && !IsSameLocation(toAdd, tmp) && states[location.x, location.y + 1] != '0')
+            if (!IsSameLocation(toAdd, explored) && !IsSameLocation(toAdd, tmp) && states[location.y+1, location.x].inUse != 2)
             {
                 temp.Add(toAdd);
             }

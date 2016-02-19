@@ -2,10 +2,11 @@
 using System.Collections;
 using Assets.Classes;
 using System;
+using System.IO;
 
 public class TileManager : MonoBehaviour {
 
-    private Floor floor;
+    public Floor floor;
     public Sprite carpetSprite;
 
     GameObject movementPanel;
@@ -39,12 +40,12 @@ public class TileManager : MonoBehaviour {
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
         
 
-        floor = new Floor(width, height);
+        floor = new Floor(height, width);
 
         // part of this code was ooperated on with Flatmate
-        for (int x = 0; x < floor.width; x++)
+        for (int x = 0; x < floor.height; x++)
         {
-            for (int y = 0; y < floor.height; y++)
+            for (int y = 0; y < floor.width; y++)
             {
                 GameObject newTile = new GameObject();
                 SpriteRenderer tilesRenderer = newTile.AddComponent<SpriteRenderer>();
@@ -56,7 +57,7 @@ public class TileManager : MonoBehaviour {
                 newTile.name = "FloorPanel~" + x + "~" + y;
                 newTile.tag = "Floor Tile";
 
-                newTile.transform.position = new Vector3(currentTile.xCoord, currentTile.yCoord - (0.2f * y), 0);
+                newTile.transform.position = new Vector3(currentTile.yCoord, currentTile.xCoord - (0.2f * x), 0);
 
                 //tilesRenderer.color = new Color(255, 0, 0, 100);
 
@@ -319,9 +320,9 @@ public class TileManager : MonoBehaviour {
 
     public bool checkValidity(int startX, int startY, int width, int height)
     {
-        for (int i = startX; i < startX + width; i++)
+        for (int i = startY; i < startY + height; i++)
         {
-            for (int j = startY; j < startY + height; j++)
+            for (int j = startX; j < startX + width; j++)
             {
                 if (floor.floorTiles[i, j].inUse != 0) {
                     return false;
@@ -345,9 +346,9 @@ public class TileManager : MonoBehaviour {
 
     void colourAllTiles(int startX, int startY, Color col)
     {        
-        for (int i = startX; i < startX + fullWidth; i++)
+        for (int i = startY; i < startY + fullHeight; i++)
         {
-            for (int j = startY; j < startY + fullHeight; j++)
+            for (int j = startX; j < startX + fullWidth; j++)
             {
                 try
                 {
@@ -374,7 +375,7 @@ public class TileManager : MonoBehaviour {
                     //floor.floorTiles[x, j].inUse = newState;
                 //}
 
-                mainController.floorTiles[x, j].GetComponent<SpriteRenderer>().color = mainController.carpetColour;
+                mainController.floorTiles[j, x].GetComponent<SpriteRenderer>().color = mainController.carpetColour;
                 //floor.floorTiles[x, j].inUse = false;            
 
             }
@@ -406,7 +407,7 @@ public class TileManager : MonoBehaviour {
                         //floor.floorTiles[x, j].inUse = newState;
                     //}
 
-                    mainController.floorTiles[x, j].GetComponent<SpriteRenderer>().color = newColour;
+                    mainController.floorTiles[j, x].GetComponent<SpriteRenderer>().color = newColour;
 
                 }
             }
@@ -425,7 +426,7 @@ public class TileManager : MonoBehaviour {
             {
                 //    for (int j = y; j < y + 15; j++)
                 //{
-                mainController.floorTiles[i, y].GetComponent<SpriteRenderer>().color = mainController.carpetColour;
+                mainController.floorTiles[y, i].GetComponent<SpriteRenderer>().color = mainController.carpetColour;
                 //}
             }
         }
@@ -456,7 +457,7 @@ public class TileManager : MonoBehaviour {
                     //floor.floorTiles[x, j].inUse = newState;
                     //}
 
-                    mainController.floorTiles[j, y].GetComponent<SpriteRenderer>().color = newColour;
+                    mainController.floorTiles[y, j].GetComponent<SpriteRenderer>().color = newColour;
 
                 }
             }
@@ -466,9 +467,9 @@ public class TileManager : MonoBehaviour {
 
     public void updateTileState(int x, int y, int w, int h, int newState, bool complete)
     {
-        for (int i = x; i < x + w; i++)
+        for (int i = y; i < y + h; i++)
         {
-            for (int j = y; j < y + h; j++)
+            for (int j = x; j < x + w; j++)
             {
                 floor.floorTiles[i, j].inUse = newState;
                 
@@ -479,15 +480,17 @@ public class TileManager : MonoBehaviour {
             }
         }
 
-        if (width == 11 && height == 15)
+        
+
+        if (w == 11 && h == 15 && newState == 2)
         {
+            for (int i = x; i < x + 11; i++)
+            {
+                floor.floorTiles[y, i].inUse = 1;
+            }
             for (int i = y; i < y + 15; i++)
             {
-                floor.floorTiles[x + 11, i].inUse = newState;
-            }
-            for (int i = x; i < x + 10; i++)
-            {
-                floor.floorTiles[i, y + 15].inUse = newState;
+                floor.floorTiles[i, x + 10].inUse = 1;
             }
         }
 
@@ -497,22 +500,22 @@ public class TileManager : MonoBehaviour {
 
     void showOutput()
     {
-        for (int i = 0; i < width; i++)
+
+
+        System.IO.StreamWriter file = new System.IO.StreamWriter("C:/Users/asuth/Documents/banana.txt", true);
+
+        for (int i = height - 1; i >= 0; i--)
         {
-            string lineOutput = i.ToString();
-            for (int j = 0; j < height; j++)
+            for (int j = 0; j < width; j++)
             {
-                if (floor.floorTiles[i, j].inUse == 0)
-                {
-                    lineOutput += '-';
-                }
-                else
-                {
-                    lineOutput += '@';
-                }
+                file.Write(floor.floorTiles[i, j].inUse + " ");
             }
             //Debug.Log(lineOutput);
+            file.WriteLine();
         }
+
+        file.Close();
+
     }
 
     

@@ -19,7 +19,7 @@ public class OtherObjectScript : MonoBehaviour {
 
     void OnMouseDown()
     {
-        if (GetComponent<Renderer>().enabled && theController.statusCode == 0)
+        if (GetComponent<Renderer>().enabled && theController.statusCode == 0 && !theController.simulationRunning)
         {
             ShowMenu();
         }

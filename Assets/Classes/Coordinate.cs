@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-class Coordinate
+public class Coordinate
 {
     public int x;
     public int y;

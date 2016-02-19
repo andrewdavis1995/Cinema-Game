@@ -1,5 +1,7 @@
-﻿using Boo.Lang;
+﻿using Assets.Classes;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 
@@ -11,14 +13,14 @@ public class Customer
     const float doorY = -4.65f;
     const float centreX = 0;
     const float centreY = 0;
-    const float ticketsX = 17;
-    const float ticketsY = -3.5f;
+    //const float ticketsX = 17;
+    //const float ticketsY = -3.5f;
     #endregion
     
     int index;
     public int currentDirection = 0;     // 1 down, 2 up, 3 left, 4 right, 0 still
     int patience = 1000;
-
+    
     public int GetPatience()
     {
         return patience;
@@ -42,21 +44,29 @@ public class Customer
     bool needsFood;
     bool needsTickets;
     bool needsToilet;
+
     bool goingToSeats = false;
+
+    Floor theFloor;
+
+    public List<Coordinate> pointsToVisit = new List<Coordinate>();
 
     float travellingToX = 0;
     float travellingToY = 0;
 
     FilmShowing filmShowing;
+    public static GameObject[,] tiles;
 
-    public Customer(FilmShowing fs, int ID)
+    public Customer(FilmShowing fs, int ID, Floor f)
     {
+        theFloor = f;
+
         filmShowing = fs;
 
         index = ID;
 
         needsFood = Random.Range(0, 10) >= 4;
-        needsTickets = Random.Range(0, 10) >= 3;
+        needsTickets = Random.Range(0, 10) >= 0;      // 3 - changed because it was being a cuntbucketshitebagprickknobadamjohnson
         needsToilet = Random.Range(0, 10) >= 6;
 
         int minutesEarly = Random.Range(20, 80);
@@ -72,8 +82,7 @@ public class Customer
             minuteDue += 60;
             hourDue--;
         }
-
-        this.nextPlace();
+        
     }
 
     public bool hasArrived(int hours, int minutes)
@@ -87,28 +96,92 @@ public class Customer
         return false;
     }
 
-    public void nextPoint()
+    public void nextPoint(bool first)
     {
-        // if (pointsToVisit.Count > 0){ travellingToX = pointsToVisit[0].x; travellingToY = pointsToVisit[0].y; }else { nextPlace(); }
+
+        try
+        {
+            pointsToVisit.RemoveAt(0);
+        }
+        catch (Exception) { }
+
+        if (pointsToVisit.Count > 0)
+        {
+            travellingToX = tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.x;
+            travellingToY = tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.y * 0.8f;
+        } else
+        {
+            nextPlace(first);
+        }
     }
 
-    public void nextPlace()
+    public void nextPlace(bool first)
     {
+        pointsToVisit.Clear();
+
         if (needsTickets)
         {
             // find a path and set up the point list
-            travellingToX = ticketsX;
-            travellingToY = ticketsY;
+            //travellingToX = ticketsX;
+            //travellingToY = ticketsY;
+
+            // 11, 40
+            // 0, 40
+            Node endPoint = theFloor.FindPath(40, 0, 40, 11);
+
+            for (int i = 0; i < endPoint.path.Count; i++)
+            {
+                pointsToVisit.Add(endPoint.path[i].location);
+            }
+
 
             //call next point();
+            if (!first)
+            {
+                needsTickets = false;
+            }
+
+            nextPoint(false);
         }
 
         // food, toilets go here
 
         else
         {
-            travellingToX = doorX;
-            travellingToY = doorY;
+            // get which screen the customer is going to
+            int targetScreen = filmShowing.getScreenNumber();
+            List<Screen> screenList = Controller.theScreens;
+
+            int x = 0;
+            int y = 0;
+            
+            for (int i = 0; i < screenList.Count; i++)
+            {
+                // find the location of the screen
+                if (screenList[i].getScreenNumber() == targetScreen)
+                {
+                    x = screenList[i].getX() + 5;
+                    y = screenList[i].getY();
+                }
+            }
+
+            Debug.Log("MY SCREEN IS AT: " + y + ", " + x);
+
+            int currX = (int)Math.Round(travellingToX, 0) - 2;
+            int currY = (int)Math.Round((travellingToY / 0.8), 0);
+
+            // get a path to it's location            
+            Node endPoint = theFloor.FindPath(currX, currY, x, y);     // (2, 40) will have to change - TODO
+
+            for (int i = 0; i < endPoint.path.Count; i++)
+            {
+                pointsToVisit.Add(endPoint.path[i].location);
+            }
+
+
+            //call next point();
+            nextPoint(true);
+
             goingToSeats = true;
         }
     }
@@ -127,82 +200,5 @@ public class Customer
     {
         return this.needsTickets;
     }
-
-
-
-    void FindPath(int startX, int startY, int goalX, int goalY)
-    {
-
-        // OutputStates();
-
-        Node head = new Node(new Coordinate(startX, startY));
-
-        bool found = false;
-
-        List<Node> openNodes = new List<Node>();
-        List<Node> exploredNodes = new List<Node>();
-
-        openNodes.Add(head);
-
-        while (!found && openNodes.Count > 0)
-        {
-            List<Node> tmp = new List<Node>();
-            while (openNodes.Count > 0)
-            {
-
-                if (openNodes[0].matchesGoal(new Coordinate(goalX, goalY)))
-                {
-                    found = true;
-                    head = openNodes[0];
-                    break;
-                }
-                else
-                {
-                    List<Node> tmpList = (openNodes[0].FindChildren(exploredNodes, tmp, states));
-
-                    for (int i = 0; i < tmpList.Count; i++)
-                    {
-                        // add path
-                        List<Node> localPath = new List<Node>();
-
-                        for (int j = 0; j < openNodes[0].GetPath().Count; j++)
-                        {
-                            localPath.Add(openNodes[0].GetPath()[j]);
-                        }
-                        Node localNode = openNodes[0];
-
-                        if (!localPath.Contains(openNodes[0]))
-                        {
-                            localPath.Add(localNode);
-                        }
-
-                        //openNodes[0].path = new List<Node>();
-                        tmpList[i].path = localPath;
-                    }
-
-                    exploredNodes.Add(openNodes[0]);
-                    openNodes.RemoveAt(0);
-
-                    tmp.AddRange(tmpList);
-
-                }
-            }
-
-            openNodes = tmp;
-        }
-
-        if (found)
-        {
-            head.path.Add(new Node(new Coordinate(goalX, goalY)));
-
-            // Customer.path = head.path;
-
-        }
-        else
-        {
-            Console.WriteLine("NO PATH AVAILABLE");
-        }
-
-    }
-
+    
 }

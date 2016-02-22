@@ -30,7 +30,8 @@ public class mouseDrag : MonoBehaviour {
 
     public delegate List<StaffMember> getFullStaffList();
     public static event getFullStaffList getStaffList;
-    
+
+    float prevCameraZoom = 10f;
 
     int numSlots = 2;
     int numTicketSlots = 1;
@@ -40,14 +41,14 @@ public class mouseDrag : MonoBehaviour {
 
     public float offset;
     private Animator animator;
-
-    int staffIndex = -1;
-
+    
     int maxTicketStaff = 1;
 
     bool dragging = false;
 
     bool triggerSet = false;
+
+    public StaffMember staffMember;
 
     Controller mainController;
 
@@ -64,15 +65,11 @@ public class mouseDrag : MonoBehaviour {
         animator = GetComponent<Animator>();
 
         // calculate staffIndex
-                
-        if (getStaffListSize != null)
-        {
-            staffIndex = getStaffListSize();
-        }
+        
 
-        StaffMember staff = new StaffMember(staffIndex);
+        //StaffMember staff = new StaffMember(staffIndex);
 
-        addToStaffList(staff);
+        //addToStaffList(staff);
 
 
     }
@@ -88,6 +85,7 @@ public class mouseDrag : MonoBehaviour {
 
     void Update()
     {
+        //Debug.Log(Input.mousePosition);
         //Debug.Log("WtS: " + Camera.main.WorldToScreenPoint(Camera.main.transform.transform.position).x);
         //Debug.Log("WtV: " + Camera.main.WorldToViewportPoint(Camera.main.transform.transform.position).x);
         ////Debug.Log("VtS: " + Camera.main.ViewportToScreenPoint(Camera.main.transform.transform.position).x);
@@ -152,11 +150,14 @@ public class mouseDrag : MonoBehaviour {
 
     void OnMouseDown()
     {
+
         if (mainController.statusCode == 0)
         {
             dragging = true;
+            prevCameraZoom = Camera.main.orthographicSize;
+            Camera.main.orthographicSize = 9;
             transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
-            changeStaffJob(staffIndex, 0);
+            changeStaffJob(staffMember.getIndex(), 0);
 
             for (int i = 0; i < numSlots; i++)
             {
@@ -203,6 +204,7 @@ public class mouseDrag : MonoBehaviour {
 
     void OnMouseUp()
     {
+
         if(mainController.statusCode == 1)
         { 
         dragging = false;
@@ -243,7 +245,7 @@ public class mouseDrag : MonoBehaviour {
                                 target = 2;
                             }
 
-                            changeStaffJob(staffIndex, target);
+                            changeStaffJob(staffMember.getIndex(), target);
                         }
                     }
                     else
@@ -254,11 +256,13 @@ public class mouseDrag : MonoBehaviour {
                         {
                             transform.position = new Vector3(transform.position.x + 3, transform.position.y, 0);
                         }
-                        changeStaffJob(staffIndex, 0);
+                        changeStaffJob(staffMember.getIndex(), 0);
                     }
                 }
             }
         }
+
+        Camera.main.orthographicSize = prevCameraZoom;
 
     }
 
@@ -284,6 +288,11 @@ public class mouseDrag : MonoBehaviour {
             if (b1.Contains(mousePos))
             {
                 staffSlot[i].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("empty slot 2");
+                // lock to pos
+                Vector3 position = staffSlot[i].transform.position;
+                position.y -= 1.8f;
+                transform.position = position;
+                // change image / animation ?
             }
             else
             {

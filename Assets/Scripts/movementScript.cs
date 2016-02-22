@@ -52,7 +52,7 @@ public class movementScript : MonoBehaviour {
     {
         //get direction
         int newDir = 0;
-        string direction = "queue";
+        string direction = "idle";
 
         if (customer != null)
         {
@@ -65,7 +65,7 @@ public class movementScript : MonoBehaviour {
                 //Debug.Log("I am at: " + theX + ", " + theY);
                 //Debug.Log("I am travelling to: " + customer.getTravellingToX() + ", " + customer.getTravellingToY());
 
-                if (theY > customer.getTravellingToY() + 0.11f)
+                if (theY > customer.getTravellingToY() + 0.3f)
                 {
                     // move up
                     transform.Translate(new Vector3(0, -moveSpeed * Time.deltaTime, 0));
@@ -74,7 +74,7 @@ public class movementScript : MonoBehaviour {
                     //customers[index].updatePosition(theX, theY - moveSpeed);
                     direction = "down";
                 }
-                else if (theY < customer.getTravellingToY() - 0.11f)
+                else if (theY < customer.getTravellingToY() - 0.3f)
                 {
                     // move down
                     transform.Translate(new Vector3(0, moveSpeed * Time.deltaTime, 0));
@@ -83,7 +83,7 @@ public class movementScript : MonoBehaviour {
                     //customers[index].updatePosition(theX, theY + moveSpeed);
                     direction = "up";
                 }
-                else if (theX < customer.getTravellingToX() - 0.11f)
+                else if (theX < customer.getTravellingToX() - 0.3f)
                 {
                     // move left
                     transform.Translate(new Vector3(+moveSpeed * Time.deltaTime, 0, 0));
@@ -92,7 +92,7 @@ public class movementScript : MonoBehaviour {
                     //customers[index].updatePosition(theX + moveSpeed, theY);
                     direction = "right";
                 }
-                else if (theX > customer.getTravellingToX() + 0.11f)
+                else if (theX > customer.getTravellingToX() + 0.3f)
                 {
                     // move right
                     transform.Translate(new Vector3(-moveSpeed * Time.deltaTime, 0, 0));
@@ -103,7 +103,8 @@ public class movementScript : MonoBehaviour {
                 }
                 else
                 {
-                    newDir = 0;
+                    //newDir = 0;
+                    newDir = customer.currentDirection;
                     customer.nextPoint(false);
 
                     if (!customer.isGoingToSeat() && !customer.NeedsTickets())
@@ -127,6 +128,7 @@ public class movementScript : MonoBehaviour {
                             addToQueueTickets(customer);
                             customer.inQueue = true;
                             customer.pointsToVisit.Clear();
+                            newDir = 0;
                             direction = "queue";
                         }
                     }
@@ -150,9 +152,9 @@ public class movementScript : MonoBehaviour {
                 }
             }
 
-            //Debug.Log(direction);
+            Debug.Log(newDir);
 
-            if (customer.currentDirection != newDir && !customer.inQueue && !direction.Equals("poo poo"))
+            if (customer.currentDirection != newDir)
             {
                 animator.SetTrigger(direction);
             }
@@ -170,9 +172,11 @@ public class movementScript : MonoBehaviour {
 
             float val = (float)patienceVal / 1000;
 
+            if (val > 1) { val = 1; }
+
             // this will be affected by the patience level
             imgs[1].fillAmount = val;
-            imgs[1].color = new Color((255 * val), 255 - (255 - val), 0);
+            imgs[1].color = new Color(255 - (float)(255 * val), (float)(255 * val), 0);
 
             yield return new WaitForSeconds(1.25f);
         

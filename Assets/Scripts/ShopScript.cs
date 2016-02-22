@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Assets.Scripts;
 
 public class ShopScript : MonoBehaviour {
 
@@ -23,7 +24,9 @@ public class ShopScript : MonoBehaviour {
                 mainController.objectSelected = "NEW SCREEN";
                 mainController.placeObject(10, 10, 11, 15);
                 break;
-            case 1: // Staff
+            case 1:
+                StaffMember sm = new StaffMember(mainController.staffMembers.Count);
+                mainController.addStaffMember(sm);
                 break;
             case 2: // Plant
                 mainController.objectSelected = "NEW PLANT";

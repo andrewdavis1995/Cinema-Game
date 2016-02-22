@@ -11,7 +11,7 @@ using System.IO;
 public class Controller : MonoBehaviour
 {
 
-
+    public Sprite[] screenImages;
     public int itemToAddID = -1;
 
     GameObject startDayButton;
@@ -24,8 +24,7 @@ public class Controller : MonoBehaviour
     GameObject steps;
     public GameObject closeInfo;
     GameObject moveButtons;
-
-    Sprite[] screenSprites = new Sprite[4];
+    
 
     public string objectSelected = "";
 
@@ -48,6 +47,7 @@ public class Controller : MonoBehaviour
     public Transform plant;
     public Transform bust;
     public Transform vendingMachine;
+    public Transform[] staffPrefabs;
 
     public Text timeLabel;
     public Text dayLabel;
@@ -185,6 +185,12 @@ public class Controller : MonoBehaviour
             theScreens[0].upgradeComplete();
 
             nextDay(false);
+
+            for (int i = 0; i < 2; i++)
+            {
+                addStaffMember(new StaffMember(i));
+            }
+
         }
         else
         {
@@ -313,7 +319,24 @@ public class Controller : MonoBehaviour
         }
 
         createColourPicker();
+        
+        if (updateTileState != null)
+        {
+            updateTileState(38, 0, 15, 16, 1, true);
+            updateTileState(38, 16, 15, 4, 2, true);
+        }
+    }
 
+    void createStaff(StaffMember staff)
+    {
+        int index = UnityEngine.Random.Range(0, 2);
+
+        Vector3 pos = new Vector3(floorTiles[0, 44 + (staff.getIndex() * 2)].transform.position.x, floorTiles[0, 44 + (staff.getIndex() * 2)].transform.position.y, 0);
+
+        GameObject goStaff = (GameObject)Instantiate(staffPrefabs[index].gameObject, pos, Quaternion.identity);
+        goStaff.name = "Staff#" + staff.getIndex();
+        goStaff.tag = "Staff";
+        goStaff.GetComponent<mouseDrag>().staffMember = staff;
     }
 
     public void changeColour(Color c, int x, int y, int width, int height)
@@ -326,6 +349,33 @@ public class Controller : MonoBehaviour
             }
         }
     }
+
+    public void Upgrade()
+    {
+        for (int i = 0; i < screenObjectList.Count; i++)
+        {
+            if (screenObjectList[i].name.Equals(objectSelected))
+            {
+                screenObjectList[i].GetComponent<Screen_Script>().theScreen.upgrade();
+                screenObjectList[i].GetComponent<SpriteRenderer>().sprite = screenImages[0];
+                
+                String[] tmp = screenObjectList[i].name.Split('#');
+                int index = -1;
+
+                for (int j = 0; j < theScreens.Count; j++)
+                {
+                    if (theScreens[j].getScreenNumber() == int.Parse(tmp[1]))
+                    {
+                        index = j;
+                        break;
+                    }
+                }
+                
+                break;
+            }
+        }
+    }
+
 
     public void updateTiles(int x, int y, int w, int h, int newState)
     {
@@ -616,7 +666,7 @@ public class Controller : MonoBehaviour
             nextWeek();
         }
 
-        for (int i = 0; i < 1; i++)       // filmShowings.Count
+        for (int i = 0; i < filmShowings.Count; i++)       // filmShowings.Count
         {
             int index = filmShowings[i].getScreenNumber();
             int ticketsSold = getTicketsSoldValue(theScreens[index - 1]);
@@ -710,16 +760,19 @@ public class Controller : MonoBehaviour
 
         for (int i = 0; i < numScreens; i++)
         {
-            int screeningsThisDay = UnityEngine.Random.Range(2, 4); // number of films per screen per day
-
-            for (int j = 0; j < 1; j++)     // screeningsThisDay
+            if (!theScreens[i].ConstructionInProgress())
             {
-                TimeTuple showTime = getShowTime(j);
 
-                FilmShowing newFilm = new FilmShowing(filmShowings.Count, i + 1, 0, showTime.hours, showTime.minutes, theTileManager.floor);
-                filmShowings.Add(newFilm);
+                int screeningsThisDay = UnityEngine.Random.Range(2, 4); // number of films per screen per day
+
+                for (int j = 0; j < screeningsThisDay; j++)     // screeningsThisDay
+                {
+                    TimeTuple showTime = getShowTime(j);
+
+                    FilmShowing newFilm = new FilmShowing(filmShowings.Count, i + 1, 0, showTime.hours, showTime.minutes, theTileManager.floor);
+                    filmShowings.Add(newFilm);
+                }
             }
-
         }
     }
 
@@ -1175,6 +1228,7 @@ public class Controller : MonoBehaviour
     public void addStaffMember(StaffMember staff)
     {
         staffMembers.Add(staff);
+        createStaff(staff);
     }
 
     public int getStaffSize()

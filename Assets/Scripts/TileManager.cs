@@ -58,9 +58,7 @@ public class TileManager : MonoBehaviour {
                 newTile.tag = "Floor Tile";
 
                 newTile.transform.position = new Vector3(currentTile.yCoord, currentTile.xCoord - (0.2f * x), 0);
-
-                //tilesRenderer.color = new Color(255, 0, 0, 100);
-
+                
 
                 tilesRenderer.sprite = carpetSprite;
 
@@ -81,7 +79,6 @@ public class TileManager : MonoBehaviour {
                 {
                     if (validMove)
                     {
-                        showOutput();
                         validMove = checkValidity(toMoveX - 1, toMoveY, 1, fullHeight);
                     }
                     else
@@ -102,7 +99,6 @@ public class TileManager : MonoBehaviour {
 
                     if (validMove)
                     {
-                        showOutput();
                         validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, 1);
                     }
                     else
@@ -141,7 +137,6 @@ public class TileManager : MonoBehaviour {
                 {
                     if (validMove)
                     {
-                        showOutput();
                         validMove = checkValidity(toMoveX, toMoveY + fullHeight, fullWidth, 1);
                     }
                     else
@@ -169,7 +164,6 @@ public class TileManager : MonoBehaviour {
             {
                 if (validMove)
                 {
-                    showOutput();
                     validMove = checkValidity(toMoveX - 1, toMoveY, 1, fullHeight);
                 }
                 else
@@ -190,7 +184,6 @@ public class TileManager : MonoBehaviour {
 
                 if (validMove)
                 {
-                    showOutput();
                     validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, 1);
                 }
                 else
@@ -229,7 +222,6 @@ public class TileManager : MonoBehaviour {
             {
                 if (validMove)
                 {
-                    showOutput();
                     validMove = checkValidity(toMoveX, toMoveY + fullHeight, fullWidth, 1);
                 }
                 else
@@ -471,6 +463,9 @@ public class TileManager : MonoBehaviour {
         {
             for (int j = x; j < x + w; j++)
             {
+
+                Debug.Log(i + ", " + j);
+
                 floor.floorTiles[i, j].inUse = newState;
                 
                 if (complete)
@@ -500,8 +495,6 @@ public class TileManager : MonoBehaviour {
 
     void showOutput()
     {
-
-
         System.IO.StreamWriter file = new System.IO.StreamWriter("C:/Users/asuth/Documents/banana.txt", true);
 
         for (int i = height - 1; i >= 0; i--)

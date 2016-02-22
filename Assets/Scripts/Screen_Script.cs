@@ -30,13 +30,7 @@ public class Screen_Script : MonoBehaviour {
         }
     }
 
-    void OnMouseDrag()
-    {
-        theController.statusCode = 0;
-        theController.objectInfo.SetActive(false);
-        theController.closeInfo.SetActive(false);
-    }
-
+    
     void ShowMenu()
     {
         if (showBuildingMenu != null)

@@ -17,6 +17,8 @@ namespace Assets.Scripts
             index = i;
         }
 
+        public int getIndex() { return this.index; }
+
         public void setJob(int jobID)
         {
             currentJob = jobID;

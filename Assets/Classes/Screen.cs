@@ -115,5 +115,10 @@ public class Screen
         this.constructionInProgress = false;
         this.constructionTimeRemaining = 0;
     }
+
+    public bool ConstructionInProgress()
+    {
+        return constructionInProgress;
+    }
 }
 

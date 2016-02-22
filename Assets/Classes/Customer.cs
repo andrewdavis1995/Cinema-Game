@@ -19,7 +19,7 @@ public class Customer
     
     int index;
     public int currentDirection = 0;     // 1 down, 2 up, 3 left, 4 right, 0 still
-    int patience = 1000;
+    int patience = 1250;
     
     public int GetPatience()
     {
@@ -108,7 +108,7 @@ public class Customer
         if (pointsToVisit.Count > 0)
         {
             travellingToX = tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.x;
-            travellingToY = tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.y * 0.8f;
+            travellingToY = tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.y;
         } else
         {
             nextPlace(first);

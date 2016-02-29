@@ -11,6 +11,10 @@ using System.IO;
 public class Controller : MonoBehaviour
 {
 
+    public Transform staffMenu;
+    public Transform staffInfoObject;
+    public Transform staffList;
+
     public Sprite[] screenImages;
     public int itemToAddID = -1;
 
@@ -26,6 +30,9 @@ public class Controller : MonoBehaviour
     GameObject moveButtons;
     
 
+    const string warning1 = "WARNING! \n\nThe Following Screen(s) are inaccessible to Customers:\n\n";
+    const string warning2 = "\nYou have built objects which block the path to these Screens. If you do not move them, the customers for these screens will leave and you will not get money from them! Plus, your reputation will be ruined!";
+
     public string objectSelected = "";
 
     List<GameObject> gameObjectList = new List<GameObject>();
@@ -37,12 +44,14 @@ public class Controller : MonoBehaviour
     Queue<Customer> ticketQueue = new Queue<Customer>();
     List<Customer> allCustomers = new List<Customer>();
 
-    public int statusCode = 0;     // 0 = free, 1 = dragging staff, 2 = moving object, 3 = in menu, 4 = moving camera, 5 = shop
+    public int statusCode = 0;     // 0 = free, 1 = dragging staff, 2 = moving object, 3 = in menu, 4 = moving camera, 5 = shop, 6 = staff menu
 
     public Color carpetColour;
 
     public Transform greenGuy;
     public Transform blueGuy;
+    public Transform orangeGuy;
+
     public Transform screen;
     public Transform plant;
     public Transform bust;
@@ -55,6 +64,7 @@ public class Controller : MonoBehaviour
     public Text popcornLabel;
 
     Button shopButton;
+    Button staffMenuButton;
 
     Transform myInstance = null;
 
@@ -82,7 +92,13 @@ public class Controller : MonoBehaviour
 
     public GameObject[,] floorTiles;
 
+    List<GameObject> customerObjects = new List<GameObject>();
+
     public bool simulationRunning = false;
+
+    public GameObject warningPanel;
+    public Image warningIcon;
+    public Text warningLabel;
 
     int totalCoins = 0;
     int numPopcorn = 0;
@@ -105,6 +121,15 @@ public class Controller : MonoBehaviour
         }
     }
 
+    public void OpenStaffMenu()
+    {
+        //if (staffMenu.gameObject.active)
+        //{
+            statusCode = 6;
+            staffMenu.gameObject.SetActive(true);
+        //}
+    }
+
 
     // Use this for initialization
     void Start()
@@ -114,6 +139,7 @@ public class Controller : MonoBehaviour
         theTileManager = GameObject.Find("TileManagement").GetComponent<TileManager>();
         confirmPanel = GameObject.Find("pnlConfirm");
         shopButton = GameObject.Find("cmdShop").GetComponent<Button>();
+        shopButton = GameObject.Find("cmdStaffMenu").GetComponent<Button>();
         shopCanvas = GameObject.Find("Shop Canvas");
         colourPicker = GameObject.Find("Colour Panel");
         GameObject custStatus = GameObject.Find("Customer Status");
@@ -138,6 +164,9 @@ public class Controller : MonoBehaviour
         moveButtons.SetActive(false);
         closeInfo.SetActive(false);
         custStatus.SetActive(false);
+        warningPanel.SetActive(false);
+        warningIcon.enabled = false;
+        staffMenu.gameObject.SetActive(false);
         #endregion
 
         #region Add Delegate references
@@ -188,7 +217,8 @@ public class Controller : MonoBehaviour
 
             for (int i = 0; i < 2; i++)
             {
-                addStaffMember(new StaffMember(i));
+                int index = UnityEngine.Random.Range(0, 2);
+                addStaffMember(new StaffMember(i, "Andrew", staffPrefabs[index]));
             }
 
         }
@@ -251,6 +281,9 @@ public class Controller : MonoBehaviour
             pos.y += 6.05f;
 
             // change pos and element here
+
+
+
             GameObject instance = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity);
             instance.GetComponent<Screen_Script>().theScreen = theScreens[i];
             instance.name = "Screen#" + theScreens[i].getScreenNumber();
@@ -319,24 +352,55 @@ public class Controller : MonoBehaviour
         }
 
         createColourPicker();
-        
+
         if (updateTileState != null)
         {
-            updateTileState(38, 0, 15, 16, 1, true);
-            updateTileState(38, 16, 15, 4, 2, true);
+            updateTileState(38, 0, 12, 16, 1, true);
+            updateTileState(38, 16, 12, 4, 2, true);
         }
     }
 
     void createStaff(StaffMember staff)
     {
-        int index = UnityEngine.Random.Range(0, 2);
-
         Vector3 pos = new Vector3(floorTiles[0, 44 + (staff.getIndex() * 2)].transform.position.x, floorTiles[0, 44 + (staff.getIndex() * 2)].transform.position.y, 0);
 
-        GameObject goStaff = (GameObject)Instantiate(staffPrefabs[index].gameObject, pos, Quaternion.identity);
+        Transform t = staff.getTransform();
+
+        GameObject goStaff = (GameObject)Instantiate(t.gameObject, pos, Quaternion.identity);
         goStaff.name = "Staff#" + staff.getIndex();
         goStaff.tag = "Staff";
         goStaff.GetComponent<mouseDrag>().staffMember = staff;
+
+        float x = pos.x;
+        float y = pos.y;
+
+        goStaff.GetComponent<mouseDrag>().staffMember.SetVector(x, y);
+
+        GameObject go = (GameObject)Instantiate(staffInfoObject.gameObject, new Vector3(0, 0, 0), Quaternion.identity);
+        go.transform.SetParent(staffList, false);
+        
+        go.transform.localPosition = new Vector3(0, 280 - (32 * staffMembers.Count), 0);
+
+        Image[] imgs = go.GetComponentsInChildren<Image>();
+        Text[] txts = go.GetComponentsInChildren<Text>();
+
+        imgs[1].sprite = staff.getTransform().GetComponent<SpriteRenderer>().sprite;
+        txts[0].text = staff.GetStaffname();
+        txts[1].text = "Level " + staff.GetUpgradeLevel();
+
+        Button b = imgs[2].GetComponent<Button>();
+        b.onClick.AddListener(() => MoveToStaffLocation(staff.getIndex()));
+        
+    }
+
+    public void MoveToStaffLocation(int staffID)
+    {
+        Camera.main.orthographicSize = 5f;
+        Vector3 pos = staffMembers[staffID].GetVector();
+        pos.z = -10;
+
+        //Camera.main.transform.position = (pos);
+        Camera.main.GetComponent<CameraControls>().endPos = pos;
     }
 
     public void changeColour(Color c, int x, int y, int width, int height)
@@ -356,26 +420,19 @@ public class Controller : MonoBehaviour
         {
             if (screenObjectList[i].name.Equals(objectSelected))
             {
-                screenObjectList[i].GetComponent<Screen_Script>().theScreen.upgrade();
-                screenObjectList[i].GetComponent<SpriteRenderer>().sprite = screenImages[0];
-                
-                String[] tmp = screenObjectList[i].name.Split('#');
-                int index = -1;
+                Screen theScreen = screenObjectList[i].GetComponent<Screen_Script>().theScreen;
 
-                for (int j = 0; j < theScreens.Count; j++)
+                if (theScreen.getUpgradeLevel() < 4 && !theScreen.ConstructionInProgress())
                 {
-                    if (theScreens[j].getScreenNumber() == int.Parse(tmp[1]))
-                    {
-                        index = j;
-                        break;
-                    }
+                    theScreen.upgrade();
+                    screenObjectList[i].GetComponent<SpriteRenderer>().sprite = screenImages[0];
+
+                    newShowTimes();
+                    break;
                 }
-                
-                break;
             }
         }
     }
-
 
     public void updateTiles(int x, int y, int w, int h, int newState)
     {
@@ -401,6 +458,8 @@ public class Controller : MonoBehaviour
         shopCanvas.SetActive(false);
         objectInfo.SetActive(false);
         closeInfo.SetActive(false);
+        staffMenu.gameObject.SetActive(false);
+        
         statusCode = 0;
     }
 
@@ -527,6 +586,7 @@ public class Controller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         if (Input.GetKeyDown(KeyCode.P))
         {
             Save();
@@ -573,20 +633,10 @@ public class Controller : MonoBehaviour
 
                             allCustomers[j].nextPoint(true);
                             float left = allCustomers[j].getTravellingToX();
-                            float top = allCustomers[j].getTravellingToY();
 
-                            int sprite = UnityEngine.Random.Range(0, 2);
+                            customerObjects[j].transform.position = new Vector3(left, -11, 0);
 
-                            if (sprite == 0)
-                            {
-                                myInstance = Instantiate(greenGuy, new Vector3(left, -15), Quaternion.identity) as Transform;
-                            }
-                            else
-                            {
-                                myInstance = Instantiate(blueGuy, new Vector3(left, -15), Quaternion.identity) as Transform;
-                            }
-
-                            myInstance.GetComponent<movementScript>().customer = allCustomers[j];
+                            customerObjects[j].GetComponent<movementScript>().customer = allCustomers[j];
 
                         }
                     }
@@ -626,6 +676,32 @@ public class Controller : MonoBehaviour
             simulationRunning = true;
         }
 
+        InstantiateCustomers();
+
+    }
+
+    void InstantiateCustomers()
+    {
+        for (int i = 0; i < allCustomers.Count; i++)
+        {
+            int sprite = UnityEngine.Random.Range(0, 3);
+
+            if (sprite == 0)
+            {
+                // change to repositioning
+                customerObjects.Add(Instantiate(greenGuy.gameObject, new Vector3(0, 0, 0), Quaternion.identity) as GameObject);
+            }
+            else if (sprite == 1)
+            {
+                // change to repositioning
+                customerObjects.Add(Instantiate(blueGuy.gameObject, new Vector3(0, 0, 0), Quaternion.identity) as GameObject);
+            }
+            else if (sprite == 2)
+            {
+                // change to repositioning
+                customerObjects.Add(Instantiate(orangeGuy.gameObject, new Vector3(0, 0, 0), Quaternion.identity) as GameObject);
+            }
+        }
     }
 
     public void nextDay(bool shouldCollect)
@@ -635,12 +711,10 @@ public class Controller : MonoBehaviour
 
         queueCount = 0;
         ticketQueue.Clear();
-
-        GameObject[] customers = GameObject.FindGameObjectsWithTag("Customer");
-
-        for (int i = 0; i < customers.Length; i++)
+        
+        for (int i = 0; i < customerObjects.Count; i++)
         {
-            Destroy(customers[i]);
+            Destroy(customerObjects[i]);
         }
 
         startDayButton.SetActive(true);
@@ -658,6 +732,13 @@ public class Controller : MonoBehaviour
 
         for (int i = 0; i < theScreens.Count; i++)
         {
+            int days = theScreens[i].GetDaysOfConstruction();
+            if (days == 1)
+            {
+                screenObjectList[i].GetComponent<SpriteRenderer>().sprite = screenImages[theScreens[i].getUpgradeLevel()];
+                newShowTimes();
+            }
+
             theScreens[i].progressOneDay();
         }
 
@@ -709,10 +790,14 @@ public class Controller : MonoBehaviour
         for (int i = 0; i < filmShowings.Count; i++)
         {
             int screenNum = filmShowings[i].getScreenNumber();
-            int upgradeLevel = theScreens[screenNum].getUpgradeLevel();
-            int numCustomers = filmShowings[i].getTicketsSold();
 
-            totalIntake += (2 + 1 * upgradeLevel) * numCustomers;
+            if (!theScreens[screenNum].ConstructionInProgress())
+            {
+                int upgradeLevel = theScreens[screenNum-1].getUpgradeLevel();
+                int numCustomers = filmShowings[i].getTicketsSold();
+
+                totalIntake += (2 + (1 * upgradeLevel)) * numCustomers;
+            }
         }
 
         return totalIntake;
@@ -784,9 +869,6 @@ public class Controller : MonoBehaviour
         {
             queueCount += Time.deltaTime;
 
-            Debug.Log("Queue Count: " + queueCount);
-            Debug.Log("Staff: " + ticketStaff.Count);
-
             if (queueCount > 2.5f)
             {
                 queueCount = 0;
@@ -809,13 +891,33 @@ public class Controller : MonoBehaviour
 
             for (int j = 0; j < allCustomers.Count; j++)
             {
-                if (allCustomers[j].inQueue) { allCustomers[j].DecreasePatience(1); }
+                if (allCustomers[j].inQueue)
+                {
+                    allCustomers[j].DecreasePatience(1);
+
+                    if (allCustomers[j].GetPatience() < 1)
+                    {
+                        WalkAway(j);
+                    }
+
+                }
+
             }
 
         }
         else {
             queueCount = 0;
         }
+    }
+
+    void WalkAway(int index)
+    {
+        float x = floorTiles[0, 45].transform.position.x;
+        float y = floorTiles[0, 45].transform.position.y;
+        allCustomers[index].SetTravellingTo(x, y);
+        allCustomers[index].inQueue = false;
+        allCustomers[index].pointsToVisit.Add(new Coordinate(0, 45));
+        // have to do the dequeue thing - but from middle... may need to change structure
     }
 
     public void objectMoveComplete(bool confirmed)
@@ -871,43 +973,51 @@ public class Controller : MonoBehaviour
 
                 Screen temp = null;
 
-                try
-                {
-                    for (int i = 0; i < screenObjectList.Count; i++)
-                    {
-                        if (screenObjectList[i].name == "Screen#" + (id + 1))
-                        {
-                            temp = screenObjectList[i].GetComponent<Screen_Script>().theScreen;
-                            screenObjectList.RemoveAt(i);
-                        }
-                    }
-                    Destroy(GameObject.Find("Screen#" + theScreens[id].getScreenNumber()));
-                }
-                catch (Exception) { }
+                //try
+                //{
+                //    for (int i = 0; i < screenObjectList.Count; i++)
+                //    {
+                //        if (screenObjectList[i].name == "Screen#" + (id + 1))
+                //        {
+                //            temp = screenObjectList[i].GetComponent<Screen_Script>().theScreen;
+                //            screenObjectList.RemoveAt(i);
+                //        }
+                //    }
+                //    Destroy(GameObject.Find("Screen#" + theScreens[id].getScreenNumber()));
+                //}
+                //catch (Exception) { }
 
+                GameObject theScreen = GameObject.Find("Screen#" + theScreens[id].getScreenNumber());
+                temp = theScreen.GetComponent<Screen_Script>().theScreen;
 
-                GameObject theScreen = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity);
-                theScreen.GetComponent<Screen_Script>().theScreen = temp;
-                theScreen.name = "Screen#" + temp.getScreenNumber();
-                theScreen.tag = "Screen";
+                //GameObject theScreen = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity);
+                //theScreen.GetComponent<Screen_Script>().theScreen = temp;
+                //theScreen.name = "Screen#" + temp.getScreenNumber();
+                //theScreen.tag = "Screen";
                 theScreen.GetComponent<SpriteRenderer>().sortingOrder = height - y;
-                screenObjectList.Add(theScreen);
+                theScreen.transform.position = pos;
+                //screenObjectList.Add(theScreen);
+                if (temp.ConstructionInProgress())
+                {
+                    theScreen.GetComponent<SpriteRenderer>().sprite = screenImages[0];
+                }
 
+                theScreen.GetComponent<Renderer>().enabled = true;
             }
             else {
-                try
-                {
-                    for (int i = 0; i < gameObjectList.Count; i++)
-                    {
-                        if (gameObjectList[i].name == "Element#" + id)
-                        {
-                            gameObjectList.RemoveAt(i);
-                        }
-                    }
-                    Destroy(GameObject.Find("Element#" + id));
+                //try
+                //{
+                //    for (int i = 0; i < gameObjectList.Count; i++)
+                //    {
+                //        if (gameObjectList[i].name == "Element#" + id)
+                //        {
+                //            gameObjectList.RemoveAt(i);
+                //        }
+                //    }
+                //    Destroy(GameObject.Find("Element#" + id));
 
-                }
-                catch (Exception) { }
+                //}
+                //catch (Exception) { }
 
                 Vector3 pos = new Vector3(x + 0.05f, y * 0.8f, 0);
 
@@ -954,12 +1064,16 @@ public class Controller : MonoBehaviour
                     theTag = "Vending Machine";
                 }
 
+                GameObject theObject = GameObject.Find("Element#" + id);
+                theObject.transform.position = pos;
 
-                GameObject theObject = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity);
-                theObject.name = "Element#" + (otherObjects.Count - 1);
-                theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y;
-                theObject.tag = theTag;
-                gameObjectList.Add(theObject);
+                theObject.GetComponent<Renderer>().enabled = true;
+
+                //GameObject theObject = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity);
+                //theObject.name = "Element#" + (otherObjects.Count - 1);
+                //theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y;
+                //theObject.tag = theTag;
+                //gameObjectList.Add(theObject);
             }
             itemToAddID = -1;
 
@@ -970,6 +1084,9 @@ public class Controller : MonoBehaviour
                 setTiles(0, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
                 changeColour(carpetColour, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
             }
+
+            CheckForPath();
+
         }
         else if (confirmed)
         {
@@ -1000,6 +1117,8 @@ public class Controller : MonoBehaviour
                 screenThing.GetComponent<Screen_Script>().theScreen = theScreens[newID];
                 screenThing.name = "Screen#" + theScreens[newID].getScreenNumber();
                 screenThing.GetComponent<SpriteRenderer>().sortingOrder = height - y;
+                screenThing.GetComponent<SpriteRenderer>().sprite = screenImages[0];
+
                 screenThing.tag = "Screen";
                 screenObjectList.Add(screenThing);
             }
@@ -1049,6 +1168,7 @@ public class Controller : MonoBehaviour
 
             setTiles(2, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
 
+            CheckForPath();
         }
         else {
             changeColour(carpetColour, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
@@ -1063,6 +1183,35 @@ public class Controller : MonoBehaviour
 
         statusCode = 0;
 
+    }
+
+    public void CheckForPath()
+    {
+        List<int> unreachableScreens = theTileManager.IsPathAvailable();
+
+        if (unreachableScreens.Count > 0)
+        {
+            String screenList = "";
+            for (int i = 0; i < unreachableScreens.Count; i++)
+            {
+                screenList += "Screen " + unreachableScreens[i] + "\n";
+            }
+
+            warningIcon.enabled = true;
+
+            warningLabel.text = warning1 + screenList + warning2;
+            Debug.Log("CAUTION: " + screenList + " ARE UNREACHABLE. YOUR CUSTOMERS FOR THIS SCREEN WILL NOT REACH THE SCREEN AND WILL LEAVE - RUINING THE REPUTATION OF YOUR FINE CINEMA!");
+        }
+        else
+        {
+            warningIcon.enabled = false;
+        }
+        warningPanel.SetActive(false);
+    }
+
+    public void DisplayWarning()
+    {
+        warningPanel.SetActive(!warningPanel.active);
     }
 
     public void moveScreen()
@@ -1082,7 +1231,6 @@ public class Controller : MonoBehaviour
         closeInfo.SetActive(false);
 
         statusCode = 2;
-        Debug.Log("PRESSED");
 
         for (int i = 0; i < screenObjectList.Count; i++)
         {
@@ -1187,7 +1335,9 @@ public class Controller : MonoBehaviour
 
         Color newColour;
 
-        if (valid)
+        
+
+        if (valid) 
         {
             newColour = Color.green;
         }

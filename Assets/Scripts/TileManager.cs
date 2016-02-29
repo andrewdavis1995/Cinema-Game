@@ -3,8 +3,10 @@ using System.Collections;
 using Assets.Classes;
 using System;
 using System.IO;
+using System.Collections.Generic;
 
-public class TileManager : MonoBehaviour {
+public class TileManager : MonoBehaviour
+{
 
     public Floor floor;
     public Sprite carpetSprite;
@@ -32,13 +34,14 @@ public class TileManager : MonoBehaviour {
     Vector3 previousPosition = new Vector3(0, 0, 0);
 
     // Use this for initialization
-    void Start() {
+    void Start()
+    {
 
         Controller.updateTileState += updateTileState;
 
 
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
-        
+
 
         floor = new Floor(height, width);
 
@@ -58,7 +61,7 @@ public class TileManager : MonoBehaviour {
                 newTile.tag = "Floor Tile";
 
                 newTile.transform.position = new Vector3(currentTile.yCoord, currentTile.xCoord - (0.2f * x), 0);
-                
+
 
                 tilesRenderer.sprite = carpetSprite;
 
@@ -68,13 +71,14 @@ public class TileManager : MonoBehaviour {
     }
 
     // Update is called once per frame
-    void Update() {
-       
+    void Update()
+    {
+
         if (mainController.statusCode == 2 && toMoveX > -1 && toMoveY > -1)
         {
             #region PC movement
             if (Input.GetKeyDown(KeyCode.A))
-            {               
+            {
                 if (toMoveX >= 1)
                 {
                     if (validMove)
@@ -85,7 +89,7 @@ public class TileManager : MonoBehaviour {
                     {
                         validMove = checkValidity(toMoveX - 1, toMoveY, fullWidth, fullHeight);
                     }
-                
+
                     updateColumn(toMoveX + fullWidth - 1, toMoveY, false, -1);
                     updateColumn(toMoveX - 1, toMoveY, true, -1);
                     toMoveX--;
@@ -151,9 +155,32 @@ public class TileManager : MonoBehaviour {
                 }
             }
             #endregion
-         
+
             previousValidMove = validMove;
         }
+    }
+
+    public List<int> IsPathAvailable()
+    {
+        List<int> unreachableScreens = new List<int>();
+
+        // loop through all screens
+        for (int i = 0; i < Controller.theScreens.Count; i++)
+        {
+            // check that it is possible to reach them from the start point - i.e. ticket office
+            int screenX = Controller.theScreens[i].getX() + 5;
+            int screenY = Controller.theScreens[i].getY();
+
+            Node path = floor.FindPath(40, 5, screenX, screenY);
+
+            // if it finds one that isn't reachable, set bool to false and break
+            if (path == null)
+            {
+                unreachableScreens.Add(Controller.theScreens[i].getScreenNumber());
+            }
+        }
+
+        return unreachableScreens;
     }
 
     public void doMove(int code)
@@ -170,9 +197,10 @@ public class TileManager : MonoBehaviour {
                 {
                     validMove = checkValidity(toMoveX - 1, toMoveY, fullWidth, fullHeight);
                 }
-
+                
                 updateColumn(toMoveX + fullWidth - 1, toMoveY, false, -1);
                 updateColumn(toMoveX - 1, toMoveY, true, -1);
+                
                 toMoveX--;
             }
 
@@ -190,10 +218,10 @@ public class TileManager : MonoBehaviour {
                 {
                     validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, fullHeight);
                 }
-
-                // check validity
+                
                 updateRow(toMoveX, toMoveY + fullHeight - 1, false, -1);
                 updateRow(toMoveX, toMoveY - 1, true, -1);
+                
                 toMoveY--;
             }
         }
@@ -209,10 +237,11 @@ public class TileManager : MonoBehaviour {
                 {
                     validMove = checkValidity(toMoveX + 1, toMoveY, fullWidth, fullHeight);
                 }
+                
 
-                // check validity
                 updateColumn(toMoveX, toMoveY, false, 1);
                 updateColumn(toMoveX + fullWidth, toMoveY, true, 1);
+
                 toMoveX++;
             }
         }
@@ -228,16 +257,17 @@ public class TileManager : MonoBehaviour {
                 {
                     validMove = checkValidity(toMoveX, toMoveY + 1, fullWidth, fullHeight);
                 }
+                
 
-                // check validity
                 updateRow(toMoveX, toMoveY, false, 1);
                 updateRow(toMoveX, toMoveY + fullHeight, true, 1);
                 toMoveY++;
             }
+
         }
 
         previousValidMove = validMove;
-        
+
     }
 
     /*public void doMove(int code)
@@ -316,7 +346,8 @@ public class TileManager : MonoBehaviour {
         {
             for (int j = startX; j < startX + width; j++)
             {
-                if (floor.floorTiles[i, j].inUse != 0) {
+                if (floor.floorTiles[i, j].inUse != 0)
+                {
                     return false;
                 }
 
@@ -331,13 +362,13 @@ public class TileManager : MonoBehaviour {
         validMove = checkValidity(x, y, fullWidth, fullHeight);
         Color col;
         if (validMove) { col = Color.green; mainController.confirmPanel.SetActive(true); } else { col = Color.red; mainController.confirmPanel.SetActive(false); }
-        
+
         colourAllTiles(x, y, col);
 
     }
 
     void colourAllTiles(int startX, int startY, Color col)
-    {        
+    {
         for (int i = startY; i < startY + fullHeight; i++)
         {
             for (int j = startX; j < startX + fullWidth; j++)
@@ -348,7 +379,6 @@ public class TileManager : MonoBehaviour {
                 }
                 catch (Exception)
                 {
-                    Debug.Log("ERROR!!!! X = " + i + ", Y = " + j);
                 }
             }
         }
@@ -359,12 +389,13 @@ public class TileManager : MonoBehaviour {
 
         mainController.confirmPanel.SetActive(validMove);
 
-        if (!newState) {
+        if (!newState)
+        {
             for (int j = y; j < y + fullHeight; j++)
             {
                 //if (!floor.floorTiles[x, j].inUse)
                 //{
-                    //floor.floorTiles[x, j].inUse = newState;
+                //floor.floorTiles[x, j].inUse = newState;
                 //}
 
                 mainController.floorTiles[j, x].GetComponent<SpriteRenderer>().color = mainController.carpetColour;
@@ -375,7 +406,7 @@ public class TileManager : MonoBehaviour {
         else {
 
             Color newColour;
-            
+
             if (validMove)
             {
                 newColour = Color.green;
@@ -386,7 +417,7 @@ public class TileManager : MonoBehaviour {
 
 
             if (validMove != previousValidMove)
-            {  
+            {
                 colourAllTiles(toMoveX + direction, toMoveY, newColour);
                 // hide / show confirm button
             }
@@ -396,7 +427,7 @@ public class TileManager : MonoBehaviour {
                 {
                     //if (!floor.floorTiles[x, j].inUse)
                     //{
-                        //floor.floorTiles[x, j].inUse = newState;
+                    //floor.floorTiles[x, j].inUse = newState;
                     //}
 
                     mainController.floorTiles[j, x].GetComponent<SpriteRenderer>().color = newColour;
@@ -463,11 +494,8 @@ public class TileManager : MonoBehaviour {
         {
             for (int j = x; j < x + w; j++)
             {
-
-                Debug.Log(i + ", " + j);
-
                 floor.floorTiles[i, j].inUse = newState;
-                
+
                 if (complete)
                 {
                     mainController.floorTiles[i, j].GetComponent<SpriteRenderer>().color = mainController.carpetColour;
@@ -475,7 +503,7 @@ public class TileManager : MonoBehaviour {
             }
         }
 
-        
+
 
         if (w == 11 && h == 15 && newState == 2)
         {
@@ -511,5 +539,5 @@ public class TileManager : MonoBehaviour {
 
     }
 
-    
+
 }

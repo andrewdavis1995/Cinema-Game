@@ -25,7 +25,8 @@ public class ShopScript : MonoBehaviour {
                 mainController.placeObject(10, 10, 11, 15);
                 break;
             case 1:
-                StaffMember sm = new StaffMember(mainController.staffMembers.Count);
+                int index = UnityEngine.Random.Range(0, 2);
+                StaffMember sm = new StaffMember(mainController.staffMembers.Count, "New", mainController.staffMembers[index].getTransform());
                 mainController.addStaffMember(sm);
                 break;
             case 2: // Plant

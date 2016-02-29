@@ -42,7 +42,6 @@ public class Screen
         upgradeLevel++;
             
         int cost = calculateUpgradeCost();
-            
 
         if (constructionTimeRemaining < 1)
         {
@@ -50,6 +49,11 @@ public class Screen
         }
 
         capacity = getNewCapacity();
+    }
+
+    public int GetDaysOfConstruction()
+    {
+        return this.constructionTimeRemaining;
     }
 
     public void progressOneDay()
@@ -60,7 +64,7 @@ public class Screen
         }
         else if (constructionTimeRemaining == 1)
         {
-            constructionTimeRemaining = 0;
+            upgradeComplete();
         }
     }
 

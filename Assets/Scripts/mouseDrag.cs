@@ -14,7 +14,8 @@ using System.Collections.Generic;
 */
 
 
-public class mouseDrag : MonoBehaviour {
+public class mouseDrag : MonoBehaviour
+{
 
     public delegate void addStaffMember(StaffMember staff);
     public static event addStaffMember addStaff;
@@ -41,7 +42,7 @@ public class mouseDrag : MonoBehaviour {
 
     public float offset;
     private Animator animator;
-    
+
     int maxTicketStaff = 1;
 
     bool dragging = false;
@@ -65,7 +66,7 @@ public class mouseDrag : MonoBehaviour {
         animator = GetComponent<Animator>();
 
         // calculate staffIndex
-        
+
 
         //StaffMember staff = new StaffMember(staffIndex);
 
@@ -81,7 +82,6 @@ public class mouseDrag : MonoBehaviour {
             addStaff(staff);
         }
     }
-
 
     void Update()
     {
@@ -100,7 +100,7 @@ public class mouseDrag : MonoBehaviour {
         //Debug.Log("StW: " + Camera.main.ScreenToWorldPoint(Input.mousePosition).x); // this one
         ////Debug.Log("StV: " + Camera.main.ScreenToViewportPoint(Input.mousePosition).x);
 
-        if (dragging && (mainController.statusCode == 1 || mainController.statusCode == 0))
+        if (dragging && (mainController.statusCode == 1 || mainController.statusCode == 0 || mainController.statusCode == 6))
         {
             doDragging();
             mainController.statusCode = 1;
@@ -123,7 +123,7 @@ public class mouseDrag : MonoBehaviour {
             tmp.z = -10f;
             Camera.main.transform.position = tmp;
         }
-        if (theX > - 10)
+        if (theX > -10)
         {
             Vector3 tmp = Camera.main.transform.position;
             tmp.x = 17f;
@@ -151,7 +151,7 @@ public class mouseDrag : MonoBehaviour {
     void OnMouseDown()
     {
 
-        if (mainController.statusCode == 0)
+        if (mainController.statusCode == 0 || mainController.statusCode == 6)
         {
             dragging = true;
             prevCameraZoom = Camera.main.orthographicSize;
@@ -197,7 +197,7 @@ public class mouseDrag : MonoBehaviour {
         for (int j = 0; j < staff.Count; j++)
         {
             if (staff[j].getJobID() == target) { staffCount++; }
-        }      
+        }
 
         return staffCount < maxStaff;
     }
@@ -205,20 +205,25 @@ public class mouseDrag : MonoBehaviour {
     void OnMouseUp()
     {
 
-        if(mainController.statusCode == 1)
-        { 
-        dragging = false;
-        mainController.statusCode = 0;
-
-        for (int i = 0; i < numSlots; i++)
+        if (mainController.statusCode == 1)
         {
-            staffSlot[i].GetComponent<Renderer>().enabled = false;
-        }
+            dragging = false;
+            mainController.statusCode = 0;
 
-        transform.localScale = new Vector3(1, 1, 1);
-        animator.SetTrigger("land");
-        triggerSet = false;
-        transform.position = new Vector3(transform.position.x, transform.position.y + 1f, 0);
+            for (int i = 0; i < numSlots; i++)
+            {
+                staffSlot[i].GetComponent<Renderer>().enabled = false;
+            }
+
+            this.transform.localScale = new Vector3(1, 1, 1);
+            animator.SetTrigger("land");
+            triggerSet = false;
+            this.transform.position = new Vector3(transform.position.x, transform.position.y + 1f, 0);
+
+            float x = this.transform.position.x;
+            float y = this.transform.position.y;
+
+            this.staffMember.SetVector(x, y);
 
             for (int i = 0; i < numSlots; i++)
             {
@@ -266,13 +271,14 @@ public class mouseDrag : MonoBehaviour {
 
     }
 
-
     void doDragging()
     {
-        transform.position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        transform.position = new Vector3(transform.position.x + 0.75f, transform.position.y -1f, 0);
 
-       
+
+        transform.position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        transform.position = new Vector3(transform.position.x + 0.75f, transform.position.y - 1f, 0);
+
+
         if (!triggerSet)
         {
             animator.SetTrigger("fly");
@@ -282,6 +288,7 @@ public class mouseDrag : MonoBehaviour {
         for (int i = 0; i < numSlots; i++)
         {
             Bounds b1 = staffSlot[i].GetComponent<Renderer>().bounds;
+
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             mousePos = new Vector3(mousePos.x, mousePos.y, 0f);
 
@@ -298,31 +305,33 @@ public class mouseDrag : MonoBehaviour {
             {
                 staffSlot[i].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("empty slot");
             }
+
         }
 
 
-        
+
         if (Camera.main.WorldToScreenPoint(transform.position).x > UnityEngine.Screen.width - 50)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0.10f, 0, 0); ;
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0.20f, 0, 0); 
         }
         if (Camera.main.WorldToScreenPoint(transform.position).x < 50)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(-0.10f, 0, 0); ;
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(-0.20f, 0, 0); 
         }
         if (Camera.main.WorldToScreenPoint(transform.position).y > UnityEngine.Screen.height - 50)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, 0.10f, 0); ;
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, 0.20f, 0); 
         }
         if (Camera.main.WorldToScreenPoint(transform.position).y < 50)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, -0.10f, 0); ;
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, -0.20f, 0); 
         }
 
+        Camera.main.GetComponent<CameraControls>().endPos = Camera.main.transform.position;
         //Vector3 tmp = Camera.main.WorldToScreenPoint(transform.position);
         //tmp.z = -10;
         //tmp.x -= UnityEngine.Screen.width / 2;
         //tmp.y -= UnityEngine.Screen.height / 2;
     }
-    
+
 }

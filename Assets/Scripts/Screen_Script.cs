@@ -35,7 +35,26 @@ public class Screen_Script : MonoBehaviour {
     {
         if (showBuildingMenu != null)
         {
-            showBuildingMenu("Screen " + theScreen.getScreenNumber(), "Level " + theScreen.getUpgradeLevel());
+            string screenNum = "Screen " + theScreen.getScreenNumber();
+            string level;
+
+            if (!theScreen.ConstructionInProgress())
+            {
+                level = "Level " + theScreen.getUpgradeLevel();
+            }
+            else
+            {
+                if (theScreen.getUpgradeLevel() > 1)
+                {
+                    level = "Upgrading: " + theScreen.GetDaysOfConstruction() + " day(s) remaining";
+                }
+                else
+                {
+                    level = "Constructing: " + theScreen.GetDaysOfConstruction() + " day(s) remaining";
+                }
+            }
+
+            showBuildingMenu(screenNum, level);
             theController.statusCode = 3;
             theController.objectSelected = name;
         }

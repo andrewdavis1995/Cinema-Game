@@ -7,6 +7,8 @@ public class CameraControls : MonoBehaviour
     private Vector3 lastPosition;
     float mouseSensitivity = 0.05f;
     
+    public Vector3 endPos = new Vector3(0, 0, -10);
+
     public float orthographicZoomSpeed = .4f;
 
     GameObject[] staff;
@@ -18,11 +20,18 @@ public class CameraControls : MonoBehaviour
     {
         staff = GameObject.FindGameObjectsWithTag("Staff");
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
+        endPos = transform.position;
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        if (transform.position != endPos)
+        {
+            transform.position = Vector3.Lerp(transform.position, endPos, Time.deltaTime * 5);
+        }
+
         if (Input.GetAxis("Mouse ScrollWheel") > 0)
         {
             Camera.main.orthographicSize--;
@@ -48,7 +57,7 @@ public class CameraControls : MonoBehaviour
             lastPosition = Input.mousePosition;
         }
 
-        if (mainController.statusCode != 5 && mainController.statusCode != 1 && mainController.statusCode != 3)
+        if (mainController.statusCode != 5 && mainController.statusCode != 1 && mainController.statusCode != 3 && mainController.statusCode != 6)
         {
 
             mainController.objectInfo.SetActive(false);
@@ -108,6 +117,7 @@ public class CameraControls : MonoBehaviour
                 {
                     Vector3 delta = Input.mousePosition - lastPosition;
                     Camera.main.transform.Translate(-delta.x * mouseSensitivity, -delta.y * mouseSensitivity, 0);
+                    endPos = transform.position;
                     lastPosition = Input.mousePosition;
                 }
             }

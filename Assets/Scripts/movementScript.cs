@@ -48,13 +48,13 @@ public class movementScript : MonoBehaviour {
         Controller.queueDone += sortQueuePosition;
     }
 
-    private void moveCustomer(int index)
+    private void moveCustomer()
     {
         //get direction
         int newDir = 0;
         string direction = "idle";
 
-        if (customer != null)
+        if (customer != null && customer.pointsToVisit != null)
         {
             if (!customer.inQueue && customer.pointsToVisit.Count > 0)
             {
@@ -112,12 +112,11 @@ public class movementScript : MonoBehaviour {
 
                         int queueLength = getQueueTicketsSize();
 
-                        float yPos = -4.65f - queueLength * 0.8f;
 
                         // this will have to change - TODO
 
                         Vector3 temp = gameObject.transform.position;
-                        temp.y = yPos;
+                        temp.y -= queueLength * 0.8f;
                         temp.x -= 1.5f;
 
                         gameObject.transform.position = temp;
@@ -196,7 +195,7 @@ public class movementScript : MonoBehaviour {
     // Update is called once per frame
     void Update () {
 
-        moveCustomer(0);
+        moveCustomer();
         
     }
 

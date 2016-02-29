@@ -19,7 +19,7 @@ public class Customer
     
     int index;
     public int currentDirection = 0;     // 1 down, 2 up, 3 left, 4 right, 0 still
-    int patience = 1250;
+    int patience = 800;
     
     public int GetPatience()
     {
@@ -50,6 +50,12 @@ public class Customer
     Floor theFloor;
 
     public List<Coordinate> pointsToVisit = new List<Coordinate>();
+
+    public void SetTravellingTo(float x, float y)
+    {
+        travellingToX = x;
+        travellingToY = y;
+    }
 
     float travellingToX = 0;
     float travellingToY = 0;
@@ -148,41 +154,48 @@ public class Customer
 
         else
         {
-            // get which screen the customer is going to
-            int targetScreen = filmShowing.getScreenNumber();
-            List<Screen> screenList = Controller.theScreens;
-
-            int x = 0;
-            int y = 0;
-            
-            for (int i = 0; i < screenList.Count; i++)
+            if (patience > 0)
             {
-                // find the location of the screen
-                if (screenList[i].getScreenNumber() == targetScreen)
+                // get which screen the customer is going to
+                int targetScreen = filmShowing.getScreenNumber();
+                List<Screen> screenList = Controller.theScreens;
+
+                int x = 0;
+                int y = 0;
+
+                for (int i = 0; i < screenList.Count; i++)
                 {
-                    x = screenList[i].getX() + 5;
-                    y = screenList[i].getY();
+                    // find the location of the screen
+                    if (screenList[i].getScreenNumber() == targetScreen)
+                    {
+                        x = screenList[i].getX() + 5;
+                        y = screenList[i].getY();
+                    }
                 }
+
+                Debug.Log("MY SCREEN IS AT: " + y + ", " + x);
+
+                int currX = (int)Math.Round(travellingToX, 0) - 2;
+                int currY = (int)Math.Round((travellingToY / 0.8), 0);
+
+                // get a path to it's location            
+                Node endPoint = theFloor.FindPath(currX, currY, x, y);     // (2, 40) will have to change - TODO
+
+                for (int i = 0; i < endPoint.path.Count; i++)
+                {
+                    pointsToVisit.Add(endPoint.path[i].location);
+                }
+
+
+                //call next point();
+                nextPoint(true);
+
+                goingToSeats = true;
             }
-
-            Debug.Log("MY SCREEN IS AT: " + y + ", " + x);
-
-            int currX = (int)Math.Round(travellingToX, 0) - 2;
-            int currY = (int)Math.Round((travellingToY / 0.8), 0);
-
-            // get a path to it's location            
-            Node endPoint = theFloor.FindPath(currX, currY, x, y);     // (2, 40) will have to change - TODO
-
-            for (int i = 0; i < endPoint.path.Count; i++)
+            else
             {
-                pointsToVisit.Add(endPoint.path[i].location);
+                pointsToVisit.Add(new Coordinate(0, 45));
             }
-
-
-            //call next point();
-            nextPoint(true);
-
-            goingToSeats = true;
         }
     }
 

@@ -158,7 +158,7 @@ public class Customer
             {
                 // get which screen the customer is going to
                 int targetScreen = filmShowing.getScreenNumber();
-                List<Screen> screenList = Controller.theScreens;
+                List<ScreenObject> screenList = Controller.theScreens;
 
                 int x = 0;
                 int y = 0;

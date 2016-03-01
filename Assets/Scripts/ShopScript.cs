@@ -20,13 +20,13 @@ public class ShopScript : MonoBehaviour {
 
         switch (id)
         {
-            case 0: // Screen
+            case 0: // ScreenObject
                 mainController.objectSelected = "NEW SCREEN";
                 mainController.placeObject(10, 10, 11, 15);
                 break;
             case 1:
-                int index = UnityEngine.Random.Range(0, 2);
-                StaffMember sm = new StaffMember(mainController.staffMembers.Count, "New", mainController.staffMembers[index].getTransform());
+                int index = UnityEngine.Random.Range(0, 5);
+                StaffMember sm = new StaffMember(mainController.staffMembers.Count, "New", mainController.staffPrefabs[index], mainController.currDay);
                 mainController.addStaffMember(sm);
                 break;
             case 2: // Plant
@@ -59,7 +59,7 @@ public class ShopScript : MonoBehaviour {
 
 IDs: 
 
-    0   -   Screen
+    0   -   ScreenObject
     1   -   Staff Member
     2   -   5 x Popcorn
 

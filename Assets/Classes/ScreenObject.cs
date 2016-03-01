@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 
 [System.Serializable]
-public class Screen
+public class ScreenObject
 {
     int screenNumber;
     int capacity;
@@ -25,7 +25,7 @@ public class Screen
     public int getX() { return this.pointX; }
     public int getY() { return this.pointY; }
 
-    public Screen(int screenID, int numSeats)
+    public ScreenObject(int screenID, int numSeats)
     {
         screenNumber = screenID;
         capacity = numSeats;

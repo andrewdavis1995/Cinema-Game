@@ -12,18 +12,42 @@ namespace Assets.Scripts
     {
         int index;
         int currentJob = 0;     // 0 = idle, 1 = tickets, 2 = food
+        int dayHired;
         string name;
         Transform transform;
-        int upgradeLevel = 1;
+
+        int[] attributes = new int[4];
 
         float xPos = 0;
         float yPos = 0;
 
-        public StaffMember(int i, string n, Transform t)
+        public StaffMember(int i, string n, Transform t, int dH)
         {
             index = i;
             name = n;
             transform = t;
+            dayHired = dH;
+
+            attributes[0] = 1;
+            attributes[1] = 1;
+            attributes[2] = 1;
+            attributes[3] = 1;
+
+        }
+
+        public void Upgrade(int index)
+        {
+            attributes[index]++;
+        }
+
+        public int[] GetAttributes()
+        {
+            return attributes;
+        }
+
+        public int GetStartDay()
+        {
+            return this.dayHired;
         }
 
         public Vector3 GetVector() { return new Vector3(xPos, yPos, 0); }
@@ -34,21 +58,16 @@ namespace Assets.Scripts
             return name;
         }
 
-        public void Upgrade()
+        public void UpdateName(string newName)
         {
-            upgradeLevel++;
+            this.name = newName;
         }
 
         public Transform getTransform()
         {
             return transform;
         }
-
-        public int GetUpgradeLevel()
-        {
-            return this.upgradeLevel;
-        }
-
+       
         public int getIndex() { return this.index; }
 
         public void setJob(int jobID)

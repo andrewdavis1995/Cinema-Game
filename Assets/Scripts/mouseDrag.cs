@@ -330,8 +330,8 @@ public class mouseDrag : MonoBehaviour
         Camera.main.GetComponent<CameraControls>().endPos = Camera.main.transform.position;
         //Vector3 tmp = Camera.main.WorldToScreenPoint(transform.position);
         //tmp.z = -10;
-        //tmp.x -= UnityEngine.Screen.width / 2;
-        //tmp.y -= UnityEngine.Screen.height / 2;
+        //tmp.x -= UnityEngine.ScreenObject.width / 2;
+        //tmp.y -= UnityEngine.ScreenObject.height / 2;
     }
 
 }

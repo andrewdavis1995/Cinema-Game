@@ -1,11 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class CameraControls : MonoBehaviour
 {
 
     private Vector3 lastPosition;
     float mouseSensitivity = 0.05f;
+
+    //float minLeft;
     
     public Vector3 endPos = new Vector3(0, 0, -10);
 
@@ -15,17 +18,36 @@ public class CameraControls : MonoBehaviour
 
     Controller mainController;
 
+    float vertExtent;
+    float horizExtent;
+
+    public GameObject bottomBar;
+
+    float bottomBarHeight;
+
+    float minX, maxX, minY, maxY;
+
     // Use this for initialization
     void Start()
     {
+
         staff = GameObject.FindGameObjectsWithTag("Staff");
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
         endPos = transform.position;
+        //minLeft = mainController.floorTiles[0, 0].transform.position.x;
     }
 
     // Update is called once per frame
     void Update()
     {
+        vertExtent = Camera.main.orthographicSize;
+        horizExtent = vertExtent * Screen.width / Screen.height;
+        bottomBarHeight = vertExtent / bottomBar.transform.localScale.y;
+        
+        minX = horizExtent;
+        maxX = 72.2f - ((Camera.main.orthographicSize - 4) * 1.81429f);
+        minY = vertExtent;
+        maxY = 27.6f - ((Camera.main.orthographicSize - 4));
 
         if (transform.position != endPos)
         {
@@ -92,8 +114,6 @@ public class CameraControls : MonoBehaviour
 
             }
 
-            //mainController.statusCode = 4;
-
             if (Input.GetMouseButton(0))
             {
                 bool overlapping = false;
@@ -121,13 +141,34 @@ public class CameraControls : MonoBehaviour
                     lastPosition = Input.mousePosition;
                 }
             }
-            //else
-            //{
-            //    mainController.statusCode = 0;
-            //}
         }
 
-        
+
+        // check if out of bounds
+        Vector3 currPos = (Camera.main.transform.position);
+        float x = currPos.x;
+        float y = currPos.y;
+
+
+        if (x < minX)
+        {
+            currPos.x = minX;
+        }
+        if (y < minY - bottomBarHeight)
+        {
+            currPos.y = minY - bottomBarHeight;
+        }
+        if (x > maxX)
+        {
+            currPos.x = maxX;
+        }
+        if (y > maxY)
+        {
+            currPos.y = maxY;
+        }
+
+        currPos.z = -10;
+        Camera.main.transform.position = (currPos);
 
     }
 }

@@ -8,7 +8,7 @@ public class Screen_Script : MonoBehaviour {
     
     public Sprite sprite;
 
-    public Screen theScreen;
+    public ScreenObject theScreen;
     
     public delegate void showBuildingOptions(string screen, string upgrade);
     public static event showBuildingOptions showBuildingMenu;

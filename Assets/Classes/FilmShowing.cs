@@ -30,7 +30,7 @@ public class FilmShowing
     {
         List<Customer> customers = new List<Customer>();
 
-        for (int i = 0; i < ticketsSold; i++)     // ticketsSold
+        for (int i = 0; i < 1; i++)     // ticketsSold
         {
             customers.Add(new Customer(this, (currentCount + i), theFloor));
         }

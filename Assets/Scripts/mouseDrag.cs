@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using Assets.Scripts;
 using System.Collections.Generic;
+using Assets.Classes;
 
 [RequireComponent(typeof(BoxCollider2D))]
 
@@ -100,7 +101,7 @@ public class mouseDrag : MonoBehaviour
         //Debug.Log("StW: " + Camera.main.ScreenToWorldPoint(Input.mousePosition).x); // this one
         ////Debug.Log("StV: " + Camera.main.ScreenToViewportPoint(Input.mousePosition).x);
 
-        if (dragging && (mainController.statusCode == 1 || mainController.statusCode == 0 || mainController.statusCode == 6))
+        if (dragging && (mainController.statusCode == 1 || mainController.statusCode == 0 || mainController.statusCode == 6 || mainController.statusCode != 7))
         {
             doDragging();
             mainController.statusCode = 1;
@@ -151,7 +152,7 @@ public class mouseDrag : MonoBehaviour
     void OnMouseDown()
     {
 
-        if (mainController.statusCode == 0 || mainController.statusCode == 6)
+        if ((mainController.statusCode == 1 || mainController.statusCode == 0 || mainController.statusCode == 6 || mainController.statusCode != 7))
         {
             dragging = true;
             prevCameraZoom = Camera.main.orthographicSize;
@@ -205,7 +206,7 @@ public class mouseDrag : MonoBehaviour
     void OnMouseUp()
     {
 
-        if (mainController.statusCode == 1)
+        if (dragging && (mainController.statusCode == 1 || mainController.statusCode == 0 || mainController.statusCode == 6 || mainController.statusCode != 7))
         {
             dragging = false;
             mainController.statusCode = 0;
@@ -265,10 +266,10 @@ public class mouseDrag : MonoBehaviour
                     }
                 }
             }
+
+            Camera.main.orthographicSize = prevCameraZoom;
         }
-
-        Camera.main.orthographicSize = prevCameraZoom;
-
+        
     }
 
     void doDragging()

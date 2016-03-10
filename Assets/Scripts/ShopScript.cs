@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Assets.Scripts;
+using Assets.Classes;
 
 public class ShopScript : MonoBehaviour {
 
@@ -26,7 +27,7 @@ public class ShopScript : MonoBehaviour {
                 break;
             case 1:
                 int index = UnityEngine.Random.Range(0, 5);
-                StaffMember sm = new StaffMember(mainController.staffMembers.Count, "New", mainController.staffPrefabs[index], mainController.currDay);
+                StaffMember sm = new StaffMember(mainController.staffMembers.Count, "New", mainController.staffPrefabs[index], mainController.currDay, index);
                 mainController.addStaffMember(sm);
                 break;
             case 2: // Plant

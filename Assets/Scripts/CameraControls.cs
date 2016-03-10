@@ -79,7 +79,7 @@ public class CameraControls : MonoBehaviour
             lastPosition = Input.mousePosition;
         }
 
-        if (mainController.statusCode != 5 && mainController.statusCode != 1 && mainController.statusCode != 3 && mainController.statusCode != 6)
+        if (mainController.statusCode != 5 && mainController.statusCode != 1 && mainController.statusCode != 3 && mainController.statusCode != 6 && mainController.statusCode != 7) 
         {
 
             mainController.objectInfo.SetActive(false);

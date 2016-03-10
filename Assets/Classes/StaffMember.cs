@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Assets.Scripts
+namespace Assets.Classes
 {
 
     [System.Serializable]
@@ -15,24 +15,35 @@ namespace Assets.Scripts
         int dayHired;
         string name;
         Transform transform;
+        int transformID;
 
         int[] attributes = new int[4];
 
         float xPos = 0;
         float yPos = 0;
 
-        public StaffMember(int i, string n, Transform t, int dH)
+        public StaffMember(int i, string n, Transform t, int dH, int tID)
         {
             index = i;
             name = n;
             transform = t;
             dayHired = dH;
-
+            transformID = tID;
             attributes[0] = 1;
             attributes[1] = 1;
             attributes[2] = 1;
             attributes[3] = 1;
 
+        }
+
+        public void SetAttributes(int[] att)
+        {
+            attributes = att;
+        }
+
+        public int GetTransformID()
+        {
+            return this.transformID;
         }
 
         public void Upgrade(int index)

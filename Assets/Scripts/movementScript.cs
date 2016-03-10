@@ -16,6 +16,8 @@ public class movementScript : MonoBehaviour {
     public delegate int getTicketQueueSize();
     public static event getTicketQueueSize getQueueTicketsSize;
 
+    Controller mainController;
+
     public static GameObject customerStatus;
 
     public Transform greenGuy;
@@ -41,6 +43,11 @@ public class movementScript : MonoBehaviour {
     // Use this for initialization
     void Start ()
     {
+        //int sprite = UnityEngine.Random.Range(0, 3);
+
+        
+        mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
+         
         animator = GetComponent<Animator>();
 
 		imgs = customerStatus.GetComponentsInChildren<Image>();
@@ -50,7 +57,7 @@ public class movementScript : MonoBehaviour {
 
     private void moveCustomer()
     {
-        //get direction
+        ////get direction
         int newDir = 0;
         string direction = "idle";
 
@@ -107,7 +114,7 @@ public class movementScript : MonoBehaviour {
                     newDir = customer.currentDirection;
                     customer.nextPoint(false);
 
-                    if (!customer.isGoingToSeat() && !customer.NeedsTickets())
+                    if (customer.NeedsTickets() && customer.pointsToVisit.Count < 2)
                     {
 
                         int queueLength = getQueueTicketsSize();
@@ -131,9 +138,10 @@ public class movementScript : MonoBehaviour {
                             direction = "queue";
                         }
                     }
-                    else
+                    else if (customer.isGoingToSeat())
                     {
-                        // finished
+                        //finished
+                        customer.goingToSeats = false; 
                     }
                 }
             }
@@ -159,10 +167,21 @@ public class movementScript : MonoBehaviour {
             }
 
             customer.currentDirection = newDir;
-        }
+        //}
 
+        //transform.Translate(new Vector3(+moveSpeed * Time.deltaTime, 0, 0));
+        //        //change direction
+        //        newDir = 4;
+        //        //customers[index].updatePosition(theX + moveSpeed, theY);
+        //        direction = "right";
+        //        if (customer.currentDirection != newDir)
+        //        {
+        //            animator.SetTrigger(direction);
+        //        }
+        //    }
+        }
     }
-    
+
     IEnumerator showPatienceBar()
     {
         if (imgs != null)
@@ -195,8 +214,27 @@ public class movementScript : MonoBehaviour {
     // Update is called once per frame
     void Update () {
 
-        moveCustomer();
-        
+        if (customer.getCharIndex() == 0)
+        {
+            Debug.Log(customer.getCharIndex() + " --- ARRIVED: " + customer.arrived);
+            Debug.Log(customer.getCharIndex() + " --- TICKET: " + customer.NeedsTickets());
+            Debug.Log(customer.getCharIndex() + " --- SEATS: " + customer.isGoingToSeat());
+        }
+
+        if (!customer.arrived)
+        {
+            if (customer.hasArrived(mainController.hours, mainController.minutes))
+            {
+                customer.pointsToVisit = new List<Coordinate>();
+                customer.nextPoint(true);
+                float left = customer.getTravellingToX();
+
+                customer.transform.position = new Vector3(left, 0, 0); // y = -11
+            }
+        }
+        else {
+            moveCustomer();
+        }
     }
 
     public int getQueueTicketSize()
@@ -221,7 +259,7 @@ public class movementScript : MonoBehaviour {
         {
             transform.position = transform.position + new Vector3(0, 0.8f, 0);            
         }
-        else if(cust.inQueue)
+        else 
         {
             customer = cust;
 
@@ -229,6 +267,7 @@ public class movementScript : MonoBehaviour {
             // set trigger
             Vector3 tmp = transform.position;
             tmp.y = customer.getTravellingToY();
+            customer.goingToSeats = true;
             transform.position = tmp;
 
             animator.SetTrigger("left");

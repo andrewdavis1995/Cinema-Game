@@ -20,7 +20,8 @@ public class Customer
     int index;
     public int currentDirection = 0;     // 1 down, 2 up, 3 left, 4 right, 0 still
     int patience = 800;
-    
+    public Transform transform;
+
     public int GetPatience()
     {
         return patience;
@@ -45,7 +46,7 @@ public class Customer
     bool needsTickets;
     bool needsToilet;
 
-    bool goingToSeats = false;
+    public bool goingToSeats = false;
 
     Floor theFloor;
 
@@ -65,6 +66,8 @@ public class Customer
 
     public Customer(FilmShowing fs, int ID, Floor f)
     {
+
+        pointsToVisit = new List<Coordinate>();
         theFloor = f;
 
         filmShowing = fs;
@@ -105,6 +108,9 @@ public class Customer
     public void nextPoint(bool first)
     {
 
+        //travellingToX = 20;
+        //travellingToY = -4;
+
         try
         {
             pointsToVisit.RemoveAt(0);
@@ -115,7 +121,8 @@ public class Customer
         {
             travellingToX = tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.x;
             travellingToY = tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.y;
-        } else
+        }
+        else
         {
             nextPlace(first);
         }
@@ -123,6 +130,7 @@ public class Customer
 
     public void nextPlace(bool first)
     {
+
         pointsToVisit.Clear();
 
         if (needsTickets)
@@ -152,7 +160,7 @@ public class Customer
 
         // food, toilets go here
 
-        else
+        else if (goingToSeats)
         {
             if (patience > 0)
             {
@@ -189,18 +197,19 @@ public class Customer
 
                 //call next point();
                 nextPoint(true);
-
-                goingToSeats = true;
+                
             }
             else
             {
                 pointsToVisit.Add(new Coordinate(0, 45));
             }
         }
+        else if (!inQueue)
+        {
+            UnityEngine.Object.Destroy(transform.gameObject);
+        }
     }
-
-
-
+    
     public void doneWithQueue() { this.inQueue = false; }
     
     public float getTravellingToX() { return travellingToX; }

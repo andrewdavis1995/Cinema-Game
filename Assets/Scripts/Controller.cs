@@ -21,7 +21,7 @@ public class Controller : MonoBehaviour
 
     GameObject startDayButton;
     public float mouseSensitivity = 1.0f;
-
+    
     public GameObject colourPicker;
     public GameObject objectInfo;
     GameObject confirmMovePanel;
@@ -30,13 +30,14 @@ public class Controller : MonoBehaviour
     public GameObject closeInfo;
     public GameObject closeColourPicker;
     GameObject moveButtons;
-    
+
+    public GameObject confirmationPanel;
 
     const string warning1 = "WARNING! \n\nThe Following Screen(s) are inaccessible to Customers:\n\n";
     const string warning2 = "\nYou have built objects which block the path to these Screens. If you do not move them, the customers for these screens will leave and you will not get money from them! Plus, your reputation will be ruined!";
 
     public string objectSelected = "";
-
+    
     List<GameObject> gameObjectList = new List<GameObject>();
     List<GameObject> screenObjectList = new List<GameObject>();
 
@@ -46,7 +47,7 @@ public class Controller : MonoBehaviour
     Queue<Customer> ticketQueue = new Queue<Customer>();
     List<Customer> allCustomers = new List<Customer>();
 
-    public int statusCode = 0;     // 0 = free, 1 = dragging staff, 2 = moving object, 3 = in menu, 4 = moving camera, 5 = shop, 6 = staff menu
+    public int statusCode = 0;     // 0 = free, 1 = dragging staff, 2 = moving object, 3 = in menu, 4 = moving camera, 5 = shop, 6 = staff menu, 7 = staff member info
 
     public Color carpetColour;
 
@@ -96,7 +97,7 @@ public class Controller : MonoBehaviour
     
     public GameObject[,] floorTiles;
 
-    List<GameObject> customerObjects = new List<GameObject>();
+    //List<GameObject> customerObjects = new List<GameObject>();
 
     public bool simulationRunning = false;
 
@@ -113,8 +114,8 @@ public class Controller : MonoBehaviour
 
     float count = 0;
 
-    int minutes = 0;
-    int hours = 9;
+    public int minutes = 0;
+    public int hours = 9;
 
     public void OpenShop()
     {
@@ -173,6 +174,7 @@ public class Controller : MonoBehaviour
         warningPanel.SetActive(false);
         warningIcon.enabled = false;
         staffMenu.gameObject.SetActive(false);
+        confirmationPanel.SetActive(false);
         #endregion
 
         #region Add Delegate references
@@ -188,6 +190,7 @@ public class Controller : MonoBehaviour
         OtherObjectScript.showBuildingMenu += ShowBuildingOptions;
         #endregion
 
+        
         #region Load / New Game
         // get Player data. If not null, load game
         if (ButtonScript.loadGame == null)
@@ -224,7 +227,7 @@ public class Controller : MonoBehaviour
             for (int i = 0; i < 2; i++)
             {
                 int index = UnityEngine.Random.Range(0, 5);
-                addStaffMember(new StaffMember(i, "Andrew", staffPrefabs[index], currDay));
+                addStaffMember(new StaffMember(i, "Andrew", staffPrefabs[index], currDay, index));
             }
 
         }
@@ -232,18 +235,7 @@ public class Controller : MonoBehaviour
         {
             PlayerData data = ButtonScript.loadGame;
 
-            theScreens = new List<ScreenObject>(data.theScreens);
             carpetColour = new Color(data.carpetColour[0], data.carpetColour[1], data.carpetColour[2]);
-            staffMembers = new List<StaffMember>(data.staffMembers);
-            filmShowings = new List<FilmShowing>(data.filmShowings);
-            totalCoins = data.totalCoins;
-            currDay = data.currentDay;
-            numScreens = theScreens.Count;
-            numPopcorn = data.numPopcorn;
-            otherObjects = new List<OtherObject>(data.otherObjects);
-
-
-            nextDay(false);
 
             #region Floor Tiles
             // initialise the floor tiles
@@ -261,6 +253,35 @@ public class Controller : MonoBehaviour
             }
             #endregion
 
+            theScreens = new List<ScreenObject>(data.theScreens);
+            SaveableStaff[] s = data.staffMembers;
+
+            for (int i = 0; i < s.Length; i++)
+            {
+                int id = s[i].index;
+                string name = s[i].name;
+                Transform transform = staffPrefabs[s[i].transformID];
+                int dayHired = s[i].dayHired;
+                int tID = s[i].transformID;
+                int[] attributes = s[i].attributes;
+
+                StaffMember newStaff = new StaffMember(id, name, transform, dayHired, tID);
+
+                newStaff.SetAttributes(attributes);
+
+                addStaffMember(newStaff);
+            }
+
+            filmShowings = new List<FilmShowing>(data.filmShowings);
+            totalCoins = data.totalCoins;
+            currDay = data.currentDay;
+            numScreens = theScreens.Count;
+            numPopcorn = data.numPopcorn;
+            otherObjects = new List<OtherObject>(data.otherObjects);
+
+
+            nextDay(false);
+            
 
             // hopefully un-fucks things
             for (int i = 0; i < theScreens.Count; i++)
@@ -403,6 +424,7 @@ public class Controller : MonoBehaviour
 
     public void ViewStaffMemberInfo(int staffID)
     {
+        statusCode = 7;
         staffMenu.gameObject.SetActive(false);
         staffMemberInfo.SetActive(true);
 
@@ -448,6 +470,7 @@ public class Controller : MonoBehaviour
         txts2[index].text = txts[2].text;
 
         selectedStaff = -1;
+        statusCode = 0;
     }
 
     public void MoveToStaffLocation(int staffID)
@@ -459,7 +482,7 @@ public class Controller : MonoBehaviour
         //Camera.main.transform.position = (pos);
         Camera.main.GetComponent<CameraControls>().endPos = pos;
     }
-
+    
     public void UpgradeStaffAttribute(int index)
     {
         //TODO: check if less than 4
@@ -475,7 +498,7 @@ public class Controller : MonoBehaviour
         
     }
 
-    public void changeColour(Color c, int x, int y, int width, int height)
+    public void ChangeColour(Color c, int x, int y, int width, int height)
     {
         for (int i = y; i < y + height; i++)
         {
@@ -520,7 +543,7 @@ public class Controller : MonoBehaviour
 
         if (newState != 0) { newColour = carpetColour; } else { newColour = Color.green; }
 
-        changeColour(newColour, x, y, width, height);
+        ChangeColour(newColour, x, y, width, height);
 
         updateTiles(x, y, width, height, newState);
     }
@@ -659,7 +682,7 @@ public class Controller : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {
+    { 
 
         if (Input.GetKeyDown(KeyCode.P))
         {
@@ -692,23 +715,25 @@ public class Controller : MonoBehaviour
 
 
 
-                for (int j = 0; j < allCustomers.Count; j++)
-                {
-                    if (!allCustomers[j].arrived)
-                    {
-                        if (allCustomers[j].hasArrived(hours, minutes))
-                        {
 
-                            allCustomers[j].nextPoint(true);
-                            float left = allCustomers[j].getTravellingToX();
 
-                            customerObjects[j].transform.position = new Vector3(left, -11, 0);
+                //// move to movementScript
+                //for (int j = 0; j < allCustomers.Count; j++)
+                //{
+                //    if (!allCustomers[j].arrived)
+                //    {
+                //        if (allCustomers[j].hasArrived(hours, minutes))
+                //        {
 
-                            customerObjects[j].GetComponent<movementScript>().customer = allCustomers[j];
+                //            allCustomers[j].nextPoint(true);
+                //            float left = allCustomers[j].getTravellingToX();
 
-                        }
-                    }
-                }
+                //            allCustomers[j].transform.position = new Vector3(left, 0, 0); // y = -11
+                            
+
+                //        }
+                //    }
+                //}
 
             }
 
@@ -757,18 +782,21 @@ public class Controller : MonoBehaviour
             if (sprite == 0)
             {
                 // change to repositioning
-                customerObjects.Add(Instantiate(greenGuy.gameObject, new Vector3(0, 0, 0), Quaternion.identity) as GameObject);
+                allCustomers[i].transform = (Instantiate(greenGuy, new Vector3(0, 0, 0), Quaternion.identity) as Transform);
             }
             else if (sprite == 1)
             {
                 // change to repositioning
-                customerObjects.Add(Instantiate(blueGuy.gameObject, new Vector3(0, 0, 0), Quaternion.identity) as GameObject);
+                allCustomers[i].transform = Instantiate(blueGuy, new Vector3(0, 0, 0), Quaternion.identity) as Transform;
             }
             else if (sprite == 2)
             {
                 // change to repositioning
-                customerObjects.Add(Instantiate(orangeGuy.gameObject, new Vector3(0, 0, 0), Quaternion.identity) as GameObject);
+                allCustomers[i].transform = (Instantiate(orangeGuy, new Vector3(0, 0, 0), Quaternion.identity) as Transform);
             }
+
+            allCustomers[i].transform.GetComponent<movementScript>().setCustomer(allCustomers[i]);
+
         }
     }
 
@@ -780,9 +808,9 @@ public class Controller : MonoBehaviour
         queueCount = 0;
         ticketQueue.Clear();
         
-        for (int i = 0; i < customerObjects.Count; i++)
+        for (int i = 0; i < allCustomers.Count; i++)
         {
-            Destroy(customerObjects[i]);
+            Destroy(allCustomers[i].transform);
         }
 
         startDayButton.SetActive(true);
@@ -840,6 +868,8 @@ public class Controller : MonoBehaviour
         hours = 9;
 
         timeLabel.text = "09:00";
+
+        statusCode = 0;
 
         Save();
 
@@ -949,8 +979,8 @@ public class Controller : MonoBehaviour
                     {
                         allCustomers[index].doneWithQueue();
                         allCustomers[index].ticketsDone();
-                        allCustomers[index].nextPoint(true);
                         queueDone(allCustomers[index]);
+                        allCustomers[index].nextPoint(true);
                     }
                     ticketQueue.Dequeue();
                 }
@@ -978,6 +1008,9 @@ public class Controller : MonoBehaviour
         }
     }
 
+
+
+    // move to movementScript
     void WalkAway(int index)
     {
         float x = floorTiles[0, 45].transform.position.x;
@@ -1150,7 +1183,7 @@ public class Controller : MonoBehaviour
             if (!confirmed)
             {
                 setTiles(0, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
-                changeColour(carpetColour, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
+                ChangeColour(carpetColour, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
             }
 
             CheckForPath();
@@ -1239,7 +1272,7 @@ public class Controller : MonoBehaviour
             CheckForPath();
         }
         else {
-            changeColour(carpetColour, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
+            ChangeColour(carpetColour, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
         }
 
         theTileManager.origX = -1;
@@ -1499,7 +1532,7 @@ public class PlayerData
     //Transform[] gameObjectList;
     public ScreenObject[] theScreens;
     public int[] carpetColour;
-    public StaffMember[] staffMembers;
+    public SaveableStaff[] staffMembers;
     public FilmShowing[] filmShowings;
     public int totalCoins;
     public int numPopcorn;
@@ -1511,7 +1544,16 @@ public class PlayerData
         //gameObjectList = sO.ToArray();
         theScreens = screens.ToArray();
         carpetColour = new int[4] { (int)col.r, (int)col.g, (int)col.b, (int)col.a };
-        staffMembers = staff.ToArray();
+
+        List<SaveableStaff> staffList = new List<SaveableStaff>();
+
+        for (int i = 0; i < staff.Count; i++)
+        {
+            SaveableStaff s = new SaveableStaff(staff[i]);
+            staffList.Add(s);
+        }
+
+        staffMembers = staffList.ToArray();
         filmShowings = films.ToArray();
         totalCoins = coins;
         currentDay = day;

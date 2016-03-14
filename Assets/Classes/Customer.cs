@@ -54,8 +54,8 @@ public class Customer
 
     public void SetTravellingTo(float x, float y)
     {
-        travellingToX = x;
-        travellingToY = y;
+        this.travellingToX = x;
+        this.travellingToY = y;
     }
 
     float travellingToX = 0;
@@ -107,6 +107,7 @@ public class Customer
 
     public void nextPoint(bool first)
     {
+        Debug.Log("I HAVE BEEN AFFECTED: " + index);
 
         //travellingToX = 20;
         //travellingToY = -4;
@@ -130,7 +131,6 @@ public class Customer
 
     public void nextPlace(bool first)
     {
-
         pointsToVisit.Clear();
 
         if (needsTickets)
@@ -141,14 +141,8 @@ public class Customer
 
             // 11, 40
             // 0, 40
-            Node endPoint = theFloor.FindPath(40, 0, 40, 11);
-
-            for (int i = 0; i < endPoint.path.Count; i++)
-            {
-                pointsToVisit.Add(endPoint.path[i].location);
-            }
-
-
+            pointsToVisit = theFloor.FindPath(40, 0, 40, 11);
+            
             //call next point();
             if (!first)
             {
@@ -187,13 +181,8 @@ public class Customer
                 int currY = (int)Math.Round((travellingToY / 0.8), 0);
 
                 // get a path to it's location            
-                Node endPoint = theFloor.FindPath(currX, currY, x, y);     // (2, 40) will have to change - TODO
-
-                for (int i = 0; i < endPoint.path.Count; i++)
-                {
-                    pointsToVisit.Add(endPoint.path[i].location);
-                }
-
+                pointsToVisit = theFloor.FindPath(currX, currY, x, y);     // (2, 40) will have to change - TODO
+                
 
                 //call next point();
                 nextPoint(true);
@@ -206,7 +195,7 @@ public class Customer
         }
         else if (!inQueue)
         {
-            UnityEngine.Object.Destroy(transform.gameObject);
+            //UnityEngine.Object.Destroy(transform.gameObject);
         }
     }
     

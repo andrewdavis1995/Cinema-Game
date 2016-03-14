@@ -33,7 +33,7 @@ namespace Assets.Classes
             return floorTiles[x, y];
         }
 
-        public Node FindPath(int startX, int startY, int goalX, int goalY)
+        public List<Coordinate> FindPath(int startX, int startY, int goalX, int goalY)
         {
             // OutputStates();
 
@@ -109,7 +109,43 @@ namespace Assets.Classes
             if (found)
             {
                 head.path.Add(new Node(new Coordinate(goalX, goalY)));
-                return head;
+
+                List<Coordinate> pointsToVisit = new List<Coordinate>();
+
+                for (int i = 0; i < head.path.Count; i++)
+                {
+                    pointsToVisit.Add(head.path[i].location);
+                }
+                bool xORy = true;
+                for (int i = 0; i < pointsToVisit.Count - 1; i++)
+                {
+                    if (xORy)
+                    {
+                        if (pointsToVisit[i].x != pointsToVisit[i + 1].x)
+                        {
+                            pointsToVisit.RemoveAt(i);
+                            i--;
+                        }
+                        else
+                        {
+                            xORy = false;
+                        }
+                    }
+                    else
+                    {
+                        if (pointsToVisit[i].y != pointsToVisit[i + 1].y)
+                        {
+                            pointsToVisit.RemoveAt(i);
+                            i--;
+                        }
+                        else
+                        {
+                            xORy = true;
+                        }
+                    }
+                }
+
+                return pointsToVisit;
                 // Customer.path = head.path;
 
             }

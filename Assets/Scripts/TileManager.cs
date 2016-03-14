@@ -171,7 +171,7 @@ public class TileManager : MonoBehaviour
             int screenX = Controller.theScreens[i].getX() + 5;
             int screenY = Controller.theScreens[i].getY();
 
-            Node path = floor.FindPath(40, 5, screenX, screenY);
+            List<Coordinate> path = floor.FindPath(40, 5, screenX, screenY);
 
             // if it finds one that isn't reachable, set bool to false and break
             if (path == null)

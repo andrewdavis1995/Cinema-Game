@@ -81,7 +81,7 @@ public class Controller : MonoBehaviour
     TileManager theTileManager;
     public GameObject confirmPanel;
 
-    public delegate void doneWithQueue(Customer c);
+    public delegate void doneWithQueue();
     public static event doneWithQueue queueDone;
 
     public delegate void setTileStates(int startX, int startY, int w, int h, int newState, bool complete);
@@ -636,9 +636,9 @@ public class Controller : MonoBehaviour
     {
         carpetColour = c;
 
-        for (int i = 0; i < width; i++)
+        for (int i = 0; i < height; i++)
         {
-            for (int j = 0; j < height; j++)
+            for (int j = 0; j < width; j++)
             {
                 floorTiles[i, j].GetComponent<SpriteRenderer>().color = c;
 
@@ -712,31 +712,8 @@ public class Controller : MonoBehaviour
                 {
                     nextDay(true);
                 }
-
-
-
-
-
-                //// move to movementScript
-                //for (int j = 0; j < allCustomers.Count; j++)
-                //{
-                //    if (!allCustomers[j].arrived)
-                //    {
-                //        if (allCustomers[j].hasArrived(hours, minutes))
-                //        {
-
-                //            allCustomers[j].nextPoint(true);
-                //            float left = allCustomers[j].getTravellingToX();
-
-                //            allCustomers[j].transform.position = new Vector3(left, 0, 0); // y = -11
-                            
-
-                //        }
-                //    }
-                //}
-
+                                
             }
-
 
             string minString = minutes.ToString();
             string hourString = hours.ToString();
@@ -977,9 +954,9 @@ public class Controller : MonoBehaviour
 
                     if (queueDone != null)
                     {
-                        allCustomers[index].doneWithQueue();
                         allCustomers[index].ticketsDone();
-                        queueDone(allCustomers[index]);
+                        allCustomers[index].doneWithQueue();
+                        queueDone();
                         allCustomers[index].nextPoint(true);
                     }
                     ticketQueue.Dequeue();
@@ -997,11 +974,8 @@ public class Controller : MonoBehaviour
                     {
                         WalkAway(j);
                     }
-
                 }
-
             }
-
         }
         else {
             queueCount = 0;

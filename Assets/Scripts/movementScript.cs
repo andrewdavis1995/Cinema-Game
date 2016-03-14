@@ -26,7 +26,7 @@ public class movementScript : MonoBehaviour {
 
     private Animator animator;
 
-    public Customer customer;
+    Customer customer;
     
     public Animation anim;
 
@@ -45,19 +45,19 @@ public class movementScript : MonoBehaviour {
     {
         //int sprite = UnityEngine.Random.Range(0, 3);
 
-        
+        Controller.queueDone += sortQueuePosition;
+
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
          
         animator = GetComponent<Animator>();
 
 		imgs = customerStatus.GetComponentsInChildren<Image>();
-
-        Controller.queueDone += sortQueuePosition;
+        
     }
 
     private void moveCustomer()
     {
-        ////get direction
+        //get direction
         int newDir = 0;
         string direction = "idle";
 
@@ -112,13 +112,11 @@ public class movementScript : MonoBehaviour {
                 {
                     //newDir = 0;
                     newDir = customer.currentDirection;
-                    customer.nextPoint(false);
 
                     if (customer.NeedsTickets() && customer.pointsToVisit.Count < 2)
                     {
-
+                        customer.nextPoint(false);
                         int queueLength = getQueueTicketsSize();
-
 
                         // this will have to change - TODO
 
@@ -141,6 +139,7 @@ public class movementScript : MonoBehaviour {
                     else if (customer.isGoingToSeat())
                     {
                         //finished
+                        customer.nextPoint(false);
                         customer.goingToSeats = false; 
                     }
                 }
@@ -159,26 +158,13 @@ public class movementScript : MonoBehaviour {
                 }
             }
 
-            Debug.Log(newDir);
-
             if (customer.currentDirection != newDir)
             {
                 animator.SetTrigger(direction);
             }
 
             customer.currentDirection = newDir;
-        //}
-
-        //transform.Translate(new Vector3(+moveSpeed * Time.deltaTime, 0, 0));
-        //        //change direction
-        //        newDir = 4;
-        //        //customers[index].updatePosition(theX + moveSpeed, theY);
-        //        direction = "right";
-        //        if (customer.currentDirection != newDir)
-        //        {
-        //            animator.SetTrigger(direction);
-        //        }
-        //    }
+        
         }
     }
 
@@ -213,13 +199,7 @@ public class movementScript : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-
-        if (customer.getCharIndex() == 0)
-        {
-            Debug.Log(customer.getCharIndex() + " --- ARRIVED: " + customer.arrived);
-            Debug.Log(customer.getCharIndex() + " --- TICKET: " + customer.NeedsTickets());
-            Debug.Log(customer.getCharIndex() + " --- SEATS: " + customer.isGoingToSeat());
-        }
+        
 
         if (!customer.arrived)
         {
@@ -253,16 +233,14 @@ public class movementScript : MonoBehaviour {
     }
 
 
-    public void sortQueuePosition(Customer cust)
+    public void sortQueuePosition()
     {
-        if (customer.inQueue && !cust.inQueue )
+        if (customer.inQueue)
         {
-            transform.position = transform.position + new Vector3(0, 0.8f, 0);            
+            transform.position = transform.position + new Vector3(0, 0.8f, 0);
         }
-        else 
+        else
         {
-            customer = cust;
-
             // finished with Queue
             // set trigger
             Vector3 tmp = transform.position;

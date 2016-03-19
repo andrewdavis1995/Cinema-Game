@@ -116,12 +116,31 @@ namespace Assets.Classes
                 {
                     pointsToVisit.Add(head.path[i].location);
                 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 bool xORy = true;
-                for (int i = 0; i < pointsToVisit.Count - 1; i++)
+                for (int i = 0; i < pointsToVisit.Count - 2; i++)
                 {
                     if (xORy)
                     {
-                        if (pointsToVisit[i].x != pointsToVisit[i + 1].x)
+                        if (pointsToVisit[i].x == pointsToVisit[i + 1].x)
                         {
                             pointsToVisit.RemoveAt(i);
                             i--;
@@ -133,7 +152,7 @@ namespace Assets.Classes
                     }
                     else
                     {
-                        if (pointsToVisit[i].y != pointsToVisit[i + 1].y)
+                        if (pointsToVisit[i].y == pointsToVisit[i + 1].y)
                         {
                             pointsToVisit.RemoveAt(i);
                             i--;
@@ -144,6 +163,26 @@ namespace Assets.Classes
                         }
                     }
                 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                 return pointsToVisit;
                 // Customer.path = head.path;

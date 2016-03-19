@@ -4,6 +4,7 @@ using System;
 using UnityEngine.UI;
 using System.Timers;
 using System.Collections.Generic;
+using System.Threading;
 
 public class movementScript : MonoBehaviour {
 
@@ -57,9 +58,6 @@ public class movementScript : MonoBehaviour {
 
     private void moveCustomer()
     {
-        //get direction
-        int newDir = 0;
-        string direction = "idle";
 
         if (customer != null && customer.pointsToVisit != null)
         {
@@ -69,53 +67,17 @@ public class movementScript : MonoBehaviour {
                 float theX = transform.position.x;
                 float theY = transform.position.y;
 
-                //Debug.Log("I am at: " + theX + ", " + theY);
-                //Debug.Log("I am travelling to: " + customer.getTravellingToX() + ", " + customer.getTravellingToY());
 
-                if (theY > customer.getTravellingToY() + 0.3f)
-                {
-                    // move up
-                    transform.Translate(new Vector3(0, -moveSpeed * Time.deltaTime, 0));
-                    //change direction
-                    newDir = 1;
-                    //customers[index].updatePosition(theX, theY - moveSpeed);
-                    direction = "down";
-                }
-                else if (theY < customer.getTravellingToY() - 0.3f)
-                {
-                    // move down
-                    transform.Translate(new Vector3(0, moveSpeed * Time.deltaTime, 0));
-                    //change direction
-                    newDir = 2;
-                    //customers[index].updatePosition(theX, theY + moveSpeed);
-                    direction = "up";
-                }
-                else if (theX < customer.getTravellingToX() - 0.3f)
-                {
-                    // move left
-                    transform.Translate(new Vector3(+moveSpeed * Time.deltaTime, 0, 0));
-                    //change direction
-                    newDir = 4;
-                    //customers[index].updatePosition(theX + moveSpeed, theY);
-                    direction = "right";
-                }
-                else if (theX > customer.getTravellingToX() + 0.3f)
-                {
-                    // move right
-                    transform.Translate(new Vector3(-moveSpeed * Time.deltaTime, 0, 0));
-                    //change direction
-                    newDir = 3;
-                    //customers[index].updatePosition(theX - moveSpeed, theY);
-                    direction = "left";
-                }
-                else
-                {
-                    //newDir = 0;
-                    newDir = customer.currentDirection;
+                bool checkY1 = theY < customer.getTravellingToY() + 0.5f;
+                bool checkY2 = theY > customer.getTravellingToY() - 0.6f;
+                bool checkX1 = theX < customer.getTravellingToX() + 0.6f;
+                bool checkX2 = theX > customer.getTravellingToX() - 0.6f;
 
+                if (checkX1 && checkX2 && checkY1 && checkY2)
+                {
                     if (customer.NeedsTickets() && customer.pointsToVisit.Count < 2)
                     {
-                        customer.nextPoint(false);
+                        //customer.nextPoint(false);
                         int queueLength = getQueueTicketsSize();
 
                         // this will have to change - TODO
@@ -129,42 +91,38 @@ public class movementScript : MonoBehaviour {
                         // delay here - QUEUE
                         if (addToQueueTickets != null)
                         {
+
+                            // do next point here???
+
                             addToQueueTickets(customer);
                             customer.inQueue = true;
                             customer.pointsToVisit.Clear();
-                            newDir = 0;
-                            direction = "queue";
+
+                            customer.ticketsDone();
+                            customer.animator.SetTrigger("queue");
+
+                            //customer.SetPos(customer.transform.position.x, customer.transform.position.y);
+
+                            //Thread thread = new Thread(() => customer.nextPlace(false));
+                            //thread.Start();
+
+                            //Thread thr = new Thread(new ThreadStart(customer.nextPlace));
+                            customer.nextPlace(false);      // different Thread
                         }
                     }
-                    else if (customer.isGoingToSeat())
+                    else
                     {
-                        //finished
                         customer.nextPoint(false);
-                        customer.goingToSeats = false; 
                     }
                 }
-            }
-            else
-            {
-                timeInQueue++;
 
-                if (timeInQueue % 1000 == 0)
+                //actually move
+                else
                 {
-                    direction = "queue";
-                }
-                else if (timeInQueue % 1000 == 500)
-                {
-                    direction = "bored";
+                    Vector2 movementVector = customer.MovementVector * Time.deltaTime * moveSpeed;
+                    transform.Translate(movementVector);
                 }
             }
-
-            if (customer.currentDirection != newDir)
-            {
-                animator.SetTrigger(direction);
-            }
-
-            customer.currentDirection = newDir;
-        
         }
     }
 
@@ -198,23 +156,9 @@ public class movementScript : MonoBehaviour {
 
 
     // Update is called once per frame
-    void Update () {
-        
-
-        if (!customer.arrived)
-        {
-            if (customer.hasArrived(mainController.hours, mainController.minutes))
-            {
-                customer.pointsToVisit = new List<Coordinate>();
-                customer.nextPoint(true);
-                float left = customer.getTravellingToX();
-
-                customer.transform.position = new Vector3(left, 0, 0); // y = -11
-            }
-        }
-        else {
-            moveCustomer();
-        }
+    void Update ()
+    { 
+        moveCustomer();        
     }
 
     public int getQueueTicketSize()
@@ -243,12 +187,15 @@ public class movementScript : MonoBehaviour {
         {
             // finished with Queue
             // set trigger
-            Vector3 tmp = transform.position;
-            tmp.y = customer.getTravellingToY();
+            //Vector3 tmp = transform.position;
+            //tmp.y = customer.getTravellingToY();
             customer.goingToSeats = true;
-            transform.position = tmp;
+            customer.SetTravellingTo(38, (float)(11 * 0.8));
+            customer.pointsToVisit.Clear();
+            //customer.nextPoint(false);
+            //customer.SetTravellingTo(customer.getTravellingToX(), customer.getTravellingToY() / 0.8f);
+            //transform.position = tmp;
 
-            animator.SetTrigger("left");
         }
     }
 

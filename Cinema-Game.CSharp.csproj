@@ -84,6 +84,7 @@
     <Compile Include="Assets\Scripts\CameraControls.cs" />
     <Compile Include="Assets\Scripts\ConfirmationScript.cs" />
     <Compile Include="Assets\Scripts\Controller.cs" />
+    <Compile Include="Assets\Scripts\ObjectPool.cs" />
     <Compile Include="Assets\Scripts\OtherObjectScript.cs" />
     <Compile Include="Assets\Scripts\Screen_Script.cs" />
     <Compile Include="Assets\Scripts\ShopScript.cs" />

@@ -15,6 +15,7 @@ public class FilmShowing
     public int timeM;
 
     Floor theFloor;
+    //Controller mainController;
 
     public FilmShowing(int id, int screenNumber, int tickets, int hours, int minutes, Floor f)
     {
@@ -24,15 +25,16 @@ public class FilmShowing
         timeH = hours;
         timeM = minutes;
         theFloor = f;
+        //mainController = c;
     }
 
-    public List<Customer> createCustomerList(int currentCount)
+    public List<Customer> createCustomerList(int currentCount, Controller c)
     {
         List<Customer> customers = new List<Customer>();
 
         for (int i = 0; i < ticketsSold; i++)     // ticketsSold
         {
-            customers.Add(new Customer(this, (currentCount + i), theFloor));
+            customers.Add(new Customer(this, (currentCount + i), theFloor, c));
         }
         
 

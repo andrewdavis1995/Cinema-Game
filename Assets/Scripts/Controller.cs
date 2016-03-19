@@ -21,7 +21,7 @@ public class Controller : MonoBehaviour
 
     GameObject startDayButton;
     public float mouseSensitivity = 1.0f;
-    
+
     public GameObject colourPicker;
     public GameObject objectInfo;
     GameObject confirmMovePanel;
@@ -37,7 +37,7 @@ public class Controller : MonoBehaviour
     const string warning2 = "\nYou have built objects which block the path to these Screens. If you do not move them, the customers for these screens will leave and you will not get money from them! Plus, your reputation will be ruined!";
 
     public string objectSelected = "";
-    
+
     List<GameObject> gameObjectList = new List<GameObject>();
     List<GameObject> screenObjectList = new List<GameObject>();
 
@@ -72,7 +72,7 @@ public class Controller : MonoBehaviour
     Button shopButton;
     Button staffMenuButton;
 
-    
+
     public List<StaffMember> staffMembers = new List<StaffMember>();
 
     private List<FilmShowing> filmShowings = new List<FilmShowing>();
@@ -94,7 +94,7 @@ public class Controller : MonoBehaviour
 
     const int width = 80;
     const int height = 40;
-    
+
     public GameObject[,] floorTiles;
 
     //List<GameObject> customerObjects = new List<GameObject>();
@@ -104,6 +104,10 @@ public class Controller : MonoBehaviour
     public GameObject warningPanel;
     public Image warningIcon;
     public Text warningLabel;
+
+
+    List<List<Coordinate>> screenPaths = new List<List<Coordinate>>();
+
 
     int totalCoins = 0;
     int numPopcorn = 0;
@@ -130,10 +134,11 @@ public class Controller : MonoBehaviour
     {
         //if (staffMenu.gameObject.active)
         //{
-            statusCode = 6;
-            staffMenu.gameObject.SetActive(true);
+        statusCode = 6;
+        staffMenu.gameObject.SetActive(true);
         //}
     }
+
 
 
     // Use this for initialization
@@ -190,7 +195,7 @@ public class Controller : MonoBehaviour
         OtherObjectScript.showBuildingMenu += ShowBuildingOptions;
         #endregion
 
-        
+
         #region Load / New Game
         // get Player data. If not null, load game
         if (ButtonScript.loadGame == null)
@@ -281,7 +286,7 @@ public class Controller : MonoBehaviour
 
 
             nextDay(false);
-            
+
 
             // hopefully un-fucks things
             for (int i = 0; i < theScreens.Count; i++)
@@ -387,6 +392,11 @@ public class Controller : MonoBehaviour
         }
     }
 
+    public List<Coordinate> GetScreenPath(int index)
+    {
+        return this.screenPaths[index];
+    }
+
     void createStaff(StaffMember staff)
     {
         Vector3 pos = new Vector3(floorTiles[0, 44 + (staff.getIndex() * 2)].transform.position.x, floorTiles[0, 44 + (staff.getIndex() * 2)].transform.position.y, 0);
@@ -405,7 +415,7 @@ public class Controller : MonoBehaviour
 
         GameObject go = (GameObject)Instantiate(staffInfoObject.gameObject, new Vector3(0, 0, 0), Quaternion.identity);
         go.transform.SetParent(staffList, false);
-        
+
         go.transform.localPosition = new Vector3(0, 280 - (32 * staffMembers.Count), 0);
 
         Image[] imgs = go.GetComponentsInChildren<Image>();
@@ -459,7 +469,7 @@ public class Controller : MonoBehaviour
     public void StaffMemberUpdate()
     {
         Text[] txts = staffMemberInfo.GetComponentsInChildren<Text>();
-        
+
         staffMembers[selectedStaff].UpdateName(txts[2].text);
         staffMemberInfo.SetActive(false);
 
@@ -482,20 +492,20 @@ public class Controller : MonoBehaviour
         //Camera.main.transform.position = (pos);
         Camera.main.GetComponent<CameraControls>().endPos = pos;
     }
-    
+
     public void UpgradeStaffAttribute(int index)
     {
         //TODO: check if less than 4
         //TODO: check if enough money
         staffMembers[selectedStaff].Upgrade(index);
-        
+
         Image[] imgs = staffMemberInfo.GetComponentsInChildren<Image>();
 
         //TODO: remove money
         int attributeEffected = staffMembers[selectedStaff].GetAttributes()[index];
 
         imgs[6 + (index * 4)].fillAmount = 0.25f * attributeEffected;
-        
+
     }
 
     public void ChangeColour(Color c, int x, int y, int width, int height)
@@ -556,7 +566,7 @@ public class Controller : MonoBehaviour
         staffMenu.gameObject.SetActive(false);
         colourPicker.SetActive(false);
         staffMemberInfo.SetActive(false);
-        
+
         statusCode = 0;
     }
 
@@ -682,13 +692,13 @@ public class Controller : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    { 
+    {
 
         if (Input.GetKeyDown(KeyCode.P))
         {
             Save();
         }
-        
+
         if (simulationRunning)
         {
             count += Time.deltaTime;
@@ -712,7 +722,7 @@ public class Controller : MonoBehaviour
                 {
                     nextDay(true);
                 }
-                                
+
             }
 
             string minString = minutes.ToString();
@@ -730,10 +740,51 @@ public class Controller : MonoBehaviour
             timeLabel.text = hourString + ":" + minString;
 
         }
+
+        for (int i = 0; i < allCustomers.Count; i++)
+        {
+            if (!allCustomers[i].arrived)
+            {
+                if (allCustomers[i].hasArrived(hours, minutes))
+                {
+                    allCustomers[i].pointsToVisit = new List<Coordinate>();
+
+                    // TODO: Handle if null
+                    allCustomers[i].transform = ObjectPool.current.GetGameObject().transform;
+                    
+                    allCustomers[i].transform.position = new Vector3(40, -3);
+
+                    allCustomers[i].transform.GetComponent<movementScript>().setCustomer(allCustomers[i]);
+
+                    allCustomers[i].transform.gameObject.SetActive(true);
+
+                    allCustomers[i].animator = allCustomers[i].transform.GetComponent<Animator>();
+
+                    allCustomers[i].nextPoint(true);
+
+                    float left = allCustomers[i].getTravellingToX();
+
+                    allCustomers[i].transform.position = new Vector3(left, 0, 0); // y = -11
+
+                }
+            }
+        }
+
     }
 
     public void startDay()
     {
+
+        screenPaths.Clear();
+
+        // find paths to allScreens
+        for (int i = 0; i < theScreens.Count; i++)
+        {
+            List<Coordinate> points = theTileManager.floor.FindPath(38, 11, theScreens[i].getX() + 5, theScreens[i].getY());
+            screenPaths.Add(points);
+        }
+
+
         // hide the button
         startDayButton.SetActive(false);
         shopButton.gameObject.SetActive(false);
@@ -746,49 +797,23 @@ public class Controller : MonoBehaviour
             simulationRunning = true;
         }
 
-        InstantiateCustomers();
-
-    }
-
-    void InstantiateCustomers()
-    {
-        for (int i = 0; i < allCustomers.Count; i++)
-        {
-            int sprite = UnityEngine.Random.Range(0, 3);
-
-            if (sprite == 0)
-            {
-                // change to repositioning
-                allCustomers[i].transform = (Instantiate(greenGuy, new Vector3(0, 0, 0), Quaternion.identity) as Transform);
-            }
-            else if (sprite == 1)
-            {
-                // change to repositioning
-                allCustomers[i].transform = Instantiate(blueGuy, new Vector3(0, 0, 0), Quaternion.identity) as Transform;
-            }
-            else if (sprite == 2)
-            {
-                // change to repositioning
-                allCustomers[i].transform = (Instantiate(orangeGuy, new Vector3(0, 0, 0), Quaternion.identity) as Transform);
-            }
-
-            allCustomers[i].transform.GetComponent<movementScript>().setCustomer(allCustomers[i]);
-
-        }
     }
 
     public void nextDay(bool shouldCollect)
     {
         simulationRunning = false;
-        allCustomers.Clear();
 
         queueCount = 0;
         ticketQueue.Clear();
-        
+
         for (int i = 0; i < allCustomers.Count; i++)
         {
-            Destroy(allCustomers[i].transform);
+            if (allCustomers[i].transform != null)
+            {
+                allCustomers[i].transform.gameObject.SetActive(false);
+            }
         }
+        allCustomers.Clear();
 
         startDayButton.SetActive(true);
         shopButton.gameObject.SetActive(true);
@@ -833,11 +858,11 @@ public class Controller : MonoBehaviour
                 currentCount += filmShowings[j].getTicketsSold();
             }
 
-            List<Customer> tmp = filmShowings[i].createCustomerList(currentCount);
+            List<Customer> tmp = filmShowings[i].createCustomerList(currentCount, this);
             allCustomers.AddRange(tmp);
         }
 
-        //// update day output 
+        // update day output 
         dayLabel.text = "DAY: " + currDay.ToString();
 
         count = 0;
@@ -918,7 +943,7 @@ public class Controller : MonoBehaviour
     {
         filmShowings.Clear();
 
-        for (int i = 0; i < numScreens; i++)
+        for (int i = 0; i < theScreens.Count; i++)
         {
             if (!theScreens[i].ConstructionInProgress())
             {
@@ -944,7 +969,7 @@ public class Controller : MonoBehaviour
         {
             queueCount += Time.deltaTime;
 
-            if (queueCount > 2.5f)
+            if (queueCount > 0.5f)
             {
                 queueCount = 0;
 
@@ -952,30 +977,41 @@ public class Controller : MonoBehaviour
                 {
                     int index = ticketQueue.Peek().getCharIndex();
 
-                    if (queueDone != null)
-                    {
-                        allCustomers[index].ticketsDone();
-                        allCustomers[index].doneWithQueue();
-                        queueDone();
-                        allCustomers[index].nextPoint(true);
-                    }
+                    //if (queueDone != null)
+                    //{
+                    //    queueDone();
+                    //    allCustomers[index].nextPoint(false);
+                    //}
+                    allCustomers[index].doneWithQueue();
+
                     ticketQueue.Dequeue();
-                }
-            }
 
-
-            for (int j = 0; j < allCustomers.Count; j++)
-            {
-                if (allCustomers[j].inQueue)
-                {
-                    allCustomers[j].DecreasePatience(1);
-
-                    if (allCustomers[j].GetPatience() < 1)
+                    for (int j = 0; j < allCustomers.Count; j++)
                     {
-                        WalkAway(j);
+                        if (allCustomers[j].inQueue && allCustomers[j].GetPatience() > 0)
+                        {
+                            allCustomers[j].transform.position = new Vector2(allCustomers[j].transform.position.x, allCustomers[j].transform.position.y + 0.8f);
+                        }
+                    }
+
+                }
+
+                for (int j = 0; j < allCustomers.Count; j++)
+                {
+                    if (allCustomers[j].inQueue)
+                    {
+                        allCustomers[j].DecreasePatience(1);
+
+                        if (allCustomers[j].GetPatience() < 1)
+                        {
+                            WalkAway(j);
+                        }
                     }
                 }
+
             }
+
+
         }
         else {
             queueCount = 0;
@@ -1410,9 +1446,9 @@ public class Controller : MonoBehaviour
 
         Color newColour;
 
-        
 
-        if (valid) 
+
+        if (valid)
         {
             newColour = Color.green;
         }

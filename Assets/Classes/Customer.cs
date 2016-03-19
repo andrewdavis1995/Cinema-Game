@@ -21,6 +21,10 @@ public class Customer
     public int currentDirection = 0;     // 1 down, 2 up, 3 left, 4 right, 0 still
     int patience = 800;
     public Transform transform;
+    public Controller mainController;
+    public Animator animator;
+
+    public Vector2 MovementVector = new Vector2(2, 0);
 
     public int GetPatience()
     {
@@ -64,11 +68,12 @@ public class Customer
     FilmShowing filmShowing;
     public static GameObject[,] tiles;
 
-    public Customer(FilmShowing fs, int ID, Floor f)
+    public Customer(FilmShowing fs, int ID, Floor f, Controller c)
     {
 
         pointsToVisit = new List<Coordinate>();
         theFloor = f;
+        mainController = c;
 
         filmShowing = fs;
 
@@ -91,7 +96,7 @@ public class Customer
             minuteDue += 60;
             hourDue--;
         }
-        
+                
     }
 
     public bool hasArrived(int hours, int minutes)
@@ -107,26 +112,74 @@ public class Customer
 
     public void nextPoint(bool first)
     {
-        Debug.Log("I HAVE BEEN AFFECTED: " + index);
-
         //travellingToX = 20;
         //travellingToY = -4;
 
         try
         {
-            pointsToVisit.RemoveAt(0);
+            this.pointsToVisit.RemoveAt(0);
         }
         catch (Exception) { }
 
-        if (pointsToVisit.Count > 0)
+        if (this.pointsToVisit.Count > 0)
         {
             travellingToX = tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.x;
             travellingToY = tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.y;
         }
         else
         {
+            if (goingToSeats) { goingToSeats = false; }
+
             nextPlace(first);
         }
+
+
+         
+
+        try
+        {
+            // set up the new movement vector
+            int x = 0; int y = 0;
+
+
+            // this bit breaks stuff because of cross threading -----------------------------------------------------------
+
+            string trigger = "idle";
+
+            if (transform.position.x < (tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.x) - 0.6f)
+            {
+                x = 1;
+                trigger = "right";
+            }
+            else if (transform.position.x > (tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.x) + 0.6f)
+            {
+                x = -1;
+                trigger = "left";
+            }
+            else if (transform.position.y < (tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.y) - 0.6f)
+            {
+                y = 1;
+                trigger = "up";
+            }
+            else if (transform.position.y > (tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.y) + 0.3f)
+            {
+                y = -1;
+                trigger = "down";
+            }
+            // ---------------------------------------------------------------------------------------------------------
+
+
+            // generate a new movement vecctor
+            if (x != MovementVector.x || y != MovementVector.y)
+            {
+                // do trigger
+                animator.SetTrigger(trigger);
+            }
+
+            MovementVector = new Vector2(x, y);
+        }
+        catch (Exception) { }
+
     }
 
     public void nextPlace(bool first)
@@ -142,14 +195,15 @@ public class Customer
             // 11, 40
             // 0, 40
             pointsToVisit = theFloor.FindPath(40, 0, 40, 11);
-            
+
             //call next point();
             if (!first)
             {
                 needsTickets = false;
             }
-
-            nextPoint(false);
+            else {
+                nextPoint(false);
+            }
         }
 
         // food, toilets go here
@@ -158,34 +212,19 @@ public class Customer
         {
             if (patience > 0)
             {
-                // get which screen the customer is going to
                 int targetScreen = filmShowing.getScreenNumber();
-                List<ScreenObject> screenList = Controller.theScreens;
 
-                int x = 0;
-                int y = 0;
 
-                for (int i = 0; i < screenList.Count; i++)
+
+
+                // the path gets set here
+                List<Coordinate> copy = mainController.GetScreenPath(targetScreen - 1);
+
+                for (int i = 0; i < copy.Count; i++)
                 {
-                    // find the location of the screen
-                    if (screenList[i].getScreenNumber() == targetScreen)
-                    {
-                        x = screenList[i].getX() + 5;
-                        y = screenList[i].getY();
-                    }
+                    pointsToVisit.Add(copy[i]);
                 }
-
-                Debug.Log("MY SCREEN IS AT: " + y + ", " + x);
-
-                int currX = (int)Math.Round(travellingToX, 0) - 2;
-                int currY = (int)Math.Round((travellingToY / 0.8), 0);
-
-                // get a path to it's location            
-                pointsToVisit = theFloor.FindPath(currX, currY, x, y);     // (2, 40) will have to change - TODO
                 
-
-                //call next point();
-                nextPoint(true);
                 
             }
             else
@@ -195,15 +234,19 @@ public class Customer
         }
         else if (!inQueue)
         {
-            //UnityEngine.Object.Destroy(transform.gameObject);
+            // arrived at screen - FINISHED
+            transform.gameObject.SetActive(false);
         }
     }
     
-    public void doneWithQueue() { this.inQueue = false; }
+    public void doneWithQueue() {
+        this.inQueue = false;
+        SetTravellingTo(38, 8.5f);
+    }
     
     public float getTravellingToX() { return travellingToX; }
     public float getTravellingToY() { return travellingToY; }
-    public void ticketsDone() { this.needsTickets = false; }
+    public void ticketsDone() { this.needsTickets = false; goingToSeats = true; }
     public bool isGoingToSeat() { return this.goingToSeats; }
     public int getCharIndex() { return this.index; }
 

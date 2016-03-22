@@ -341,7 +341,7 @@ public class Controller : MonoBehaviour
             instance.GetComponent<Screen_Script>().theScreen = theScreens[i];
             instance.name = "Screen#" + theScreens[i].getScreenNumber();
             instance.tag = "Screen";
-            instance.GetComponent<SpriteRenderer>().sortingOrder = height - theScreens[i].getY();
+            instance.GetComponent<SpriteRenderer>().sortingOrder = height - theScreens[i].getY() - 1;
 
             screenObjectList.Add(instance);
 
@@ -1067,6 +1067,9 @@ public class Controller : MonoBehaviour
 
     public void objectMoveComplete(bool confirmed)
     {
+        
+        statusCode = 0;
+
         GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
         for (int i = 0; i < staff.Length; i++)
         {
@@ -1139,7 +1142,7 @@ public class Controller : MonoBehaviour
                 //theScreen.GetComponent<Screen_Script>().theScreen = temp;
                 //theScreen.name = "ScreenObject#" + temp.getScreenNumber();
                 //theScreen.tag = "ScreenObject";
-                theScreen.GetComponent<SpriteRenderer>().sortingOrder = height - y;
+                theScreen.GetComponent<SpriteRenderer>().sortingOrder = height - y - 1;
                 theScreen.transform.position = pos;
                 //screenObjectList.Add(theScreen);
                 if (temp.ConstructionInProgress())
@@ -1261,7 +1264,7 @@ public class Controller : MonoBehaviour
                 GameObject screenThing = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity) as GameObject;
                 screenThing.GetComponent<Screen_Script>().theScreen = theScreens[newID];
                 screenThing.name = "Screen#" + theScreens[newID].getScreenNumber();
-                screenThing.GetComponent<SpriteRenderer>().sortingOrder = height - y;
+                screenThing.GetComponent<SpriteRenderer>().sortingOrder = height - y - 1;
                 screenThing.GetComponent<SpriteRenderer>().sprite = screenImages[0];
 
                 screenThing.tag = "Screen";

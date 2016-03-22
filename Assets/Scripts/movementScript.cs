@@ -160,8 +160,8 @@ public class movementScript : MonoBehaviour {
 
     // Update is called once per frame
     void Update ()
-    { 
-        moveCustomer();        
+    {
+        moveCustomer();
     }
 
     public int getQueueTicketSize()

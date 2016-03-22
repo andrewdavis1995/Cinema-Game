@@ -12,9 +12,15 @@ public class Controller : MonoBehaviour
 {
     int selectedStaff = -1;
 
+
+    public List<Transform> staffSlot = new List<Transform>();
+    public Transform slotPrefab;
+
     public Transform staffMenu;
     public Transform staffInfoObject;
     public Transform staffList;
+
+    public GameObject redCarpet;
 
     public Sprite[] screenImages;
     public int itemToAddID = -1;
@@ -69,8 +75,8 @@ public class Controller : MonoBehaviour
     public Text coinLabel;
     public Text popcornLabel;
 
-    Button shopButton;
-    Button staffMenuButton;
+    public Button shopButton;
+    public Button staffMenuButton;
 
 
     public List<StaffMember> staffMembers = new List<StaffMember>();
@@ -78,7 +84,7 @@ public class Controller : MonoBehaviour
     private List<FilmShowing> filmShowings = new List<FilmShowing>();
 
     List<StaffMember> ticketStaff = new List<StaffMember>();
-    TileManager theTileManager;
+    public TileManager theTileManager;
     public GameObject confirmPanel;
 
     public delegate void doneWithQueue();
@@ -107,7 +113,7 @@ public class Controller : MonoBehaviour
 
 
     List<List<Coordinate>> screenPaths = new List<List<Coordinate>>();
-
+    List<Coordinate> exitPath = new List<Coordinate>();
 
     int totalCoins = 0;
     int numPopcorn = 0;
@@ -123,10 +129,14 @@ public class Controller : MonoBehaviour
 
     public void OpenShop()
     {
-        if (shopButton.gameObject.active)
+        if (statusCode == 0)
         {
             statusCode = 5;
             shopCanvas.SetActive(true);
+        }
+        else
+        { 
+            shopCanvas.SetActive(false);
         }
     }
 
@@ -135,7 +145,7 @@ public class Controller : MonoBehaviour
         //if (staffMenu.gameObject.active)
         //{
         statusCode = 6;
-        staffMenu.gameObject.SetActive(true);
+        staffMenu.gameObject.SetActiveRecursively(true);
         //}
     }
 
@@ -149,7 +159,7 @@ public class Controller : MonoBehaviour
         theTileManager = GameObject.Find("TileManagement").GetComponent<TileManager>();
         confirmPanel = GameObject.Find("pnlConfirm");
         //shopButton = GameObject.Find("cmdShop").GetComponent<Button>();
-        shopButton = GameObject.Find("cmdStaffMenu").GetComponent<Button>();
+        //shopButton = GameObject.Find("cmdStaffMenu").GetComponent<Button>();
         shopCanvas = GameObject.Find("Shop Canvas");
         //colourPicker = GameObject.Find("Colour Panel");
         GameObject custStatus = GameObject.Find("Customer Status");
@@ -180,6 +190,7 @@ public class Controller : MonoBehaviour
         warningIcon.enabled = false;
         staffMenu.gameObject.SetActive(false);
         confirmationPanel.SetActive(false);
+        redCarpet.SetActive(false);
         #endregion
 
         #region Add Delegate references
@@ -194,6 +205,16 @@ public class Controller : MonoBehaviour
         Screen_Script.showBuildingMenu += ShowBuildingOptions;
         OtherObjectScript.showBuildingMenu += ShowBuildingOptions;
         #endregion
+
+
+
+
+        // TODO - load slots if load game
+        for (int i = 0; i < 2; i++)
+        {
+            staffSlot.Add(Instantiate(slotPrefab, new Vector3(40, 12.4f - i * 10, 0), Quaternion.identity) as Transform );
+            staffSlot[i].GetComponent<SpriteRenderer>().enabled = false;
+        }
 
 
         #region Load / New Game
@@ -581,27 +602,27 @@ public class Controller : MonoBehaviour
         {
             gO.GetComponent<Image>().sprite = colourCircle;
 
-            int r, g, b;
+            float r, g, b;
 
-            int columnMultiple = (column * 50);
+            float columnMultiple = (column * 0.2f);
 
             if (row == 0)
             {
-                r = 255 - columnMultiple;
+                r = 1 - columnMultiple;
                 g = columnMultiple;
                 b = 0;
             }
             else if (row == 1)
             {
                 r = 0;
-                g = 255 - columnMultiple;
+                g = 1 - columnMultiple;
                 b = columnMultiple;
             }
             else
             {
                 r = columnMultiple;
                 g = 0;
-                b = 255 - columnMultiple;
+                b = 1 - columnMultiple;
             }
             gO.GetComponent<Image>().color = new Color(r, g, b, 100);
         }
@@ -642,9 +663,12 @@ public class Controller : MonoBehaviour
 
     }
 
+
     void colourClicked(Color c, Sprite s)
     {
         carpetColour = c;
+
+        
 
         for (int i = 0; i < height; i++)
         {
@@ -662,7 +686,7 @@ public class Controller : MonoBehaviour
 
                     if ((i % 2 != j % 2))
                     {
-                        floorTiles[i, j].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0);
+                        floorTiles[i, j].GetComponent<SpriteRenderer>().color = new Color(0.5f, 0.5f, 0.5f);
                     }
                 }
             }
@@ -748,11 +772,10 @@ public class Controller : MonoBehaviour
                 if (allCustomers[i].hasArrived(hours, minutes))
                 {
                     allCustomers[i].pointsToVisit = new List<Coordinate>();
-
-                    // TODO: Handle if null
+                    
                     allCustomers[i].transform = ObjectPool.current.GetGameObject().transform;
                     
-                    allCustomers[i].transform.position = new Vector3(40, -3);
+                    allCustomers[i].transform.position = new Vector3(40, -10);
 
                     allCustomers[i].transform.GetComponent<movementScript>().setCustomer(allCustomers[i]);
 
@@ -764,7 +787,7 @@ public class Controller : MonoBehaviour
 
                     float left = allCustomers[i].getTravellingToX();
 
-                    allCustomers[i].transform.position = new Vector3(left, 0, 0); // y = -11
+                    allCustomers[i].transform.position = new Vector3(left, -15, 0); // y = -11
 
                 }
             }
@@ -785,9 +808,12 @@ public class Controller : MonoBehaviour
         }
 
 
+
+
         // hide the button
         startDayButton.SetActive(false);
         shopButton.gameObject.SetActive(false);
+        staffMenuButton.gameObject.SetActive(false);
 
         Customer.tiles = floorTiles;
 
@@ -817,6 +843,7 @@ public class Controller : MonoBehaviour
 
         startDayButton.SetActive(true);
         shopButton.gameObject.SetActive(true);
+        staffMenuButton.gameObject.SetActive(true);
 
         if (shouldCollect)
         {
@@ -969,7 +996,7 @@ public class Controller : MonoBehaviour
         {
             queueCount += Time.deltaTime;
 
-            if (queueCount > 0.5f)
+            if (queueCount > 1.5f)
             {
                 queueCount = 0;
 
@@ -1000,11 +1027,15 @@ public class Controller : MonoBehaviour
                 {
                     if (allCustomers[j].inQueue)
                     {
-                        allCustomers[j].DecreasePatience(1);
+                        allCustomers[j].DecreasePatience(50);
 
                         if (allCustomers[j].GetPatience() < 1)
                         {
                             WalkAway(j);
+                        }
+                        else if (allCustomers[j].GetPatience() == 150)
+                        {
+                            allCustomers[j].animator.SetTrigger("bored");
                         }
                     }
                 }
@@ -1023,11 +1054,14 @@ public class Controller : MonoBehaviour
     // move to movementScript
     void WalkAway(int index)
     {
-        float x = floorTiles[0, 45].transform.position.x;
-        float y = floorTiles[0, 45].transform.position.y;
-        allCustomers[index].SetTravellingTo(x, y);
+        int x = (int)Math.Round(allCustomers[index].transform.position.x);
+        int y = (int)Math.Round(allCustomers[index].transform.position.y);
+        
+        allCustomers[index].SetTravellingTo(x + 0.5f, y);
         allCustomers[index].inQueue = false;
-        allCustomers[index].pointsToVisit.Add(new Coordinate(0, 45));
+
+        allCustomers[index].pointsToVisit = theTileManager.floor.FindPath(x, y, 45, 0);
+        
         // have to do the dequeue thing - but from middle... may need to change structure
     }
 
@@ -1270,7 +1304,7 @@ public class Controller : MonoBehaviour
                 GameObject theObject = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity) as GameObject;
                 theObject.name = "Element#" + (otherObjects.Count - 1);
                 theObject.tag = theTag;
-                theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y;
+                theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y ;
 
                 gameObjectList.Add(theObject);
 

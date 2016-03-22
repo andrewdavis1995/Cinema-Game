@@ -45,6 +45,9 @@ public class ShopScript : MonoBehaviour {
                 mainController.objectSelected = "NEW VENDING MACHINE";
                 mainController.placeObject(10, 10, 3, 5);
                 break;
+            case 6: // Red Carpet
+                mainController.redCarpet.SetActive(true);
+                break;
         }
     }
 

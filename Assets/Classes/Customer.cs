@@ -146,17 +146,17 @@ public class Customer
 
             string trigger = "idle";
 
-            if (transform.position.x < (tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.x) - 0.6f)
+            if (transform.position.x < (tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.x) - 0.3f)
             {
                 x = 1;
                 trigger = "right";
             }
-            else if (transform.position.x > (tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.x) + 0.6f)
+            else if (transform.position.x > (tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.x) + 0.3f)
             {
                 x = -1;
                 trigger = "left";
             }
-            else if (transform.position.y < (tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.y) - 0.6f)
+            else if (transform.position.y < (tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.y) - 0.3f)
             {
                 y = 1;
                 trigger = "up";
@@ -241,7 +241,7 @@ public class Customer
     
     public void doneWithQueue() {
         this.inQueue = false;
-        SetTravellingTo(38, 8.5f);
+        SetTravellingTo(38.5f, 8.5f);
     }
     
     public float getTravellingToX() { return travellingToX; }

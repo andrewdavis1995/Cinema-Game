@@ -19,6 +19,8 @@ public class TileManager : MonoBehaviour
     public int toMoveX = -1;
     public int toMoveY = -1;
 
+    int code;
+
     public int origX = -1;
     public int origY = -1;
 
@@ -45,7 +47,7 @@ public class TileManager : MonoBehaviour
 
         floor = new Floor(height, width);
 
-        // part of this code was ooperated on with Flatmate
+        // part of this code was cooperated on with Flatmate
         for (int x = 0; x < floor.height; x++)
         {
             for (int y = 0; y < floor.width; y++)
@@ -62,7 +64,6 @@ public class TileManager : MonoBehaviour
 
                 newTile.transform.position = new Vector3(currentTile.yCoord, currentTile.xCoord - (0.2f * x), 0);
 
-
                 tilesRenderer.sprite = carpetSprite;
 
                 newTile.transform.SetParent(this.transform, true);
@@ -73,6 +74,16 @@ public class TileManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        if (mouseDown && code > -1)
+        {
+            mouseDownCount++;
+            if (mouseDownCount > 15)
+            {
+                doMove(code);
+                mouseDownCount = 0;
+            }
+        }
 
         if (mainController.statusCode == 2 && toMoveX > -1 && toMoveY > -1)
         {
@@ -538,6 +549,22 @@ public class TileManager : MonoBehaviour
         file.Close();
 
     }
+
+    bool mouseDown = false;
+    int mouseDownCount = 0;
+
+    public void OnPointerDown(int i)
+    {
+        code = i;
+        mouseDown = true;
+    }
+    public void OnPointerUp()
+    {
+        code = -1;
+        mouseDownCount = 0;
+        mouseDown = false;
+    }
+
 
 
 }

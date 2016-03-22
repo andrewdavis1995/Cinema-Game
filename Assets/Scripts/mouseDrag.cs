@@ -39,7 +39,6 @@ public class mouseDrag : MonoBehaviour
     int numTicketSlots = 1;
     int numFrontDoorSlots = 1;
 
-    List<GameObject> staffSlot = new List<GameObject>();
 
     public float offset;
     private Animator animator;
@@ -53,27 +52,16 @@ public class mouseDrag : MonoBehaviour
     public StaffMember staffMember;
 
     Controller mainController;
+    
+
 
     void Start()
     {
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
 
-        for (int i = 0; i < numSlots; i++)
-        {
-            staffSlot.Add((GameObject)GameObject.Find("Slot " + i));
-            staffSlot[i].GetComponent<Renderer>().enabled = false;
-        }
 
         animator = GetComponent<Animator>();
-
-        // calculate staffIndex
-
-
-        //StaffMember staff = new StaffMember(staffIndex);
-
-        //addToStaffList(staff);
-
-
+        
     }
 
     void addToStaffList(StaffMember staff)
@@ -164,7 +152,7 @@ public class mouseDrag : MonoBehaviour
             {
                 if (validDrop(i))
                 {
-                    staffSlot[i].GetComponent<Renderer>().enabled = true;
+                    mainController.staffSlot[i].GetComponent<Renderer>().enabled = true;
                 }
             }
         }
@@ -208,12 +196,10 @@ public class mouseDrag : MonoBehaviour
 
         if (dragging && (mainController.statusCode == 1 || mainController.statusCode == 0 || mainController.statusCode == 6 || mainController.statusCode != 7))
         {
-            dragging = false;
-            mainController.statusCode = 0;
 
             for (int i = 0; i < numSlots; i++)
             {
-                staffSlot[i].GetComponent<Renderer>().enabled = false;
+                mainController.staffSlot[i].GetComponent<Renderer>().enabled = false;
             }
 
             this.transform.localScale = new Vector3(1, 1, 1);
@@ -228,7 +214,7 @@ public class mouseDrag : MonoBehaviour
 
             for (int i = 0; i < numSlots; i++)
             {
-                Bounds b1 = staffSlot[i].GetComponent<Renderer>().bounds;
+                Bounds b1 = mainController.staffSlot[i].GetComponent<Renderer>().bounds;
                 Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 mousePos = new Vector3(mousePos.x, mousePos.y, 0f);
 
@@ -269,7 +255,10 @@ public class mouseDrag : MonoBehaviour
 
             Camera.main.orthographicSize = prevCameraZoom;
         }
-        
+        dragging = false;
+        mainController.statusCode = 0;
+
+
     }
 
     void doDragging()
@@ -286,25 +275,25 @@ public class mouseDrag : MonoBehaviour
             triggerSet = true;
         }
 
-        for (int i = 0; i < numSlots; i++)
+        for (int i = 0; i < 2; i++)
         {
-            Bounds b1 = staffSlot[i].GetComponent<Renderer>().bounds;
+            Bounds b1 = mainController.staffSlot[i].GetComponent<Renderer>().bounds;
 
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             mousePos = new Vector3(mousePos.x, mousePos.y, 0f);
 
             if (b1.Contains(mousePos))
             {
-                staffSlot[i].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("empty slot 2");
+                mainController.staffSlot[i].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("empty slot 2");
                 // lock to pos
-                Vector3 position = staffSlot[i].transform.position;
+                Vector3 position = mainController.staffSlot[i].transform.position;
                 position.y -= 1.8f;
                 transform.position = position;
                 // change image / animation ?
             }
             else
             {
-                staffSlot[i].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("empty slot");
+                mainController.staffSlot[i].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("empty slot");
             }
 
         }

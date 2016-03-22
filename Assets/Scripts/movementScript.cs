@@ -63,15 +63,20 @@ public class movementScript : MonoBehaviour {
         {
             if (!customer.inQueue && customer.pointsToVisit.Count > 0)
             {
+                // TODO: ORDER IN LAYER
 
                 float theX = transform.position.x;
                 float theY = transform.position.y;
 
+                if (customer.goingToSeats)
+                {
+                    customer.transform.GetComponent<SpriteRenderer>().sortingOrder =  mainController.theTileManager.floor.height - (int)(Math.Round(theY * 0.8f)) - 1;
+                }
 
-                bool checkY1 = theY < customer.getTravellingToY() + 0.5f;
-                bool checkY2 = theY > customer.getTravellingToY() - 0.6f;
-                bool checkX1 = theX < customer.getTravellingToX() + 0.6f;
-                bool checkX2 = theX > customer.getTravellingToX() - 0.6f;
+                bool checkY1 = theY < customer.getTravellingToY() + 0.3f;
+                bool checkY2 = theY > customer.getTravellingToY() - 0.3f;
+                bool checkX1 = theX < customer.getTravellingToX() + 0.3f;
+                bool checkX2 = theX > customer.getTravellingToX() - 0.3f;
 
                 if (checkX1 && checkX2 && checkY1 && checkY2)
                 {
@@ -80,7 +85,7 @@ public class movementScript : MonoBehaviour {
                         //customer.nextPoint(false);
                         int queueLength = getQueueTicketsSize();
 
-                        // this will have to change - TODO
+                        // this will have to change - TODO          ????????????????????????????????? can't remember why this has to change!
 
                         Vector3 temp = gameObject.transform.position;
                         temp.y -= queueLength * 0.8f;
@@ -91,9 +96,7 @@ public class movementScript : MonoBehaviour {
                         // delay here - QUEUE
                         if (addToQueueTickets != null)
                         {
-
-                            // do next point here???
-
+                            
                             addToQueueTickets(customer);
                             customer.inQueue = true;
                             customer.pointsToVisit.Clear();
@@ -190,7 +193,7 @@ public class movementScript : MonoBehaviour {
             //Vector3 tmp = transform.position;
             //tmp.y = customer.getTravellingToY();
             customer.goingToSeats = true;
-            customer.SetTravellingTo(38, (float)(11 * 0.8));
+            customer.SetTravellingTo(38.5f, (float)(11 * 0.8));
             customer.pointsToVisit.Clear();
             //customer.nextPoint(false);
             //customer.SetTravellingTo(customer.getTravellingToX(), customer.getTravellingToY() / 0.8f);

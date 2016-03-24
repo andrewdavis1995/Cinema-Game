@@ -12,6 +12,8 @@ public class Controller : MonoBehaviour
 {
     int selectedStaff = -1;
 
+    public GameObject picProfile;
+    public static Sprite profilePicture;
 
     public List<Transform> staffSlot = new List<Transform>();
     public Transform slotPrefab;
@@ -155,6 +157,8 @@ public class Controller : MonoBehaviour
     void Start()
     {
 
+        picProfile.GetComponent<SpriteRenderer>().sprite = profilePicture;
+
         #region Find Objects
         theTileManager = GameObject.Find("TileManagement").GetComponent<TileManager>();
         confirmPanel = GameObject.Find("pnlConfirm");
@@ -235,6 +239,8 @@ public class Controller : MonoBehaviour
 
                 tmpArray[i].GetComponent<SpriteRenderer>().color = carpetColour;
                 tmpArray[i].GetComponent<SpriteRenderer>().sprite = ColourBackground;
+                //tmpArray[i].GetComponent<SpriteRenderer>().sprite = profilePicture;   // for funny times, uncomment this line
+
                 floorTiles[x, y] = tmpArray[i];
             }
             #endregion

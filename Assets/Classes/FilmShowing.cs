@@ -37,7 +37,6 @@ public class FilmShowing
             customers.Add(new Customer(this, (currentCount + i), theFloor, c));
         }
         
-
         return customers;
     }
 

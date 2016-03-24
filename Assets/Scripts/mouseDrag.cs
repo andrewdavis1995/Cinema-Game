@@ -145,7 +145,7 @@ public class mouseDrag : MonoBehaviour
             dragging = true;
             prevCameraZoom = Camera.main.orthographicSize;
             Camera.main.orthographicSize = 9;
-            transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+            transform.localScale = new Vector3(2f, 2f, 2f);
             changeStaffJob(staffMember.getIndex(), 0);
 
             for (int i = 0; i < numSlots; i++)

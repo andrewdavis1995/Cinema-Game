@@ -5,12 +5,11 @@ using System.Threading;
 
 public class Screen_Script : MonoBehaviour {
 
-    
-    public Sprite sprite;
+    Transform transform;
 
     public ScreenObject theScreen;
     
-    public delegate void showBuildingOptions(string screen, string upgrade);
+    public delegate void showBuildingOptions(string screen, string upgrade, Sprite s);
     public static event showBuildingOptions showBuildingMenu;
 
     Controller theController;
@@ -19,6 +18,7 @@ public class Screen_Script : MonoBehaviour {
     void Start ()
     {
         theController = GameObject.Find("Central Controller").GetComponent<Controller>();
+        transform = GameObject.Find(gameObject.name).GetComponent<Transform>();
     }
     
 
@@ -54,7 +54,9 @@ public class Screen_Script : MonoBehaviour {
                 }
             }
 
-            showBuildingMenu(screenNum, level);
+            Sprite s = transform.GetComponent<SpriteRenderer>().sprite;
+
+            showBuildingMenu(screenNum, level, s);
             theController.statusCode = 3;
             theController.objectSelected = name;
         }

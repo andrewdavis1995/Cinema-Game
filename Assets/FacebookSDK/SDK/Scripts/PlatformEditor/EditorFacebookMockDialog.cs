@@ -49,7 +49,7 @@ namespace Facebook.Unity.Editor
 
         public void OnGUI()
         {
-            GUI.Window(
+            GUI.ModalWindow(
                 this.GetHashCode(),
                 this.modalRect,
                 this.OnGUIDialog,

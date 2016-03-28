@@ -56,6 +56,11 @@ namespace Assets.Classes
             return attributes;
         }
 
+        public int GetAttributeByIndex(int index)
+        {
+            return this.attributes[index];
+        }
+
         public int GetStartDay()
         {
             return this.dayHired;

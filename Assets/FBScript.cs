@@ -80,7 +80,7 @@ public class FBScript : MonoBehaviour {
 
     void DisplayUsername(IResult result)
     {
-        txtUsername.text = "Welcome back " + result.ResultDictionary["first_name"].ToString() + " " + result.ResultDictionary["last_name"].ToString() + "\n... you worthless pile of garbage";
+        txtUsername.text = "Welcome back " + result.ResultDictionary["first_name"].ToString() + " " + result.ResultDictionary["last_name"].ToString();
     }
 
     void DisplayProfilePic(IGraphResult result)

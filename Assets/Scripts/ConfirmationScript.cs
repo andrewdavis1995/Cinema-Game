@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using Assets.Classes;
 
 public class ConfirmationScript : MonoBehaviour {
 
@@ -12,6 +13,7 @@ public class ConfirmationScript : MonoBehaviour {
     static GameObject theConfirmPanel;
     static Text[] textElements;
     static Image[] imageElements;
+    public Sprite[] currencyImages;
 
     void Start()
     {
@@ -29,37 +31,82 @@ public class ConfirmationScript : MonoBehaviour {
         parameters = p;
 
         textElements[4].text = "Are you sure you wish to " + p[0];
-        // TODO: set the currency image
-        textElements[3].text = p[2];
-
+        textElements[3].text = p[1];
+        imageElements[4].sprite = mainController.confirmationPanel.GetComponentInChildren<ConfirmationScript>().currencyImages[int.Parse(p[2])];
     }
 
     public void AttributeUpgrade(int index)
     {
-        string[] parameters = new string[4];
-        parameters[0] = "Upgrade this staff Member's attribute?";
-        parameters[1] = "0";
-        parameters[2] = "50"; // TODO - set price based on the current level
-        parameters[3] = index.ToString();
-        OptionSelected(1, parameters);
+        if (mainController.staffMembers[mainController.selectedStaff].GetAttributeByIndex(index) < 4)
+        {
+            string[] parameters = new string[4];
+            parameters[0] = "Upgrade this staff Member's attribute?";
+            parameters[1] = "50"; // TODO - set price based on the current level
+            parameters[2] = "0";
+            parameters[3] = index.ToString();
+            OptionSelected(1, parameters);
+        }
+        else
+        {
+            Debug.Log("PINEAPPLES");
+        }
     }
 
     public void Cancel() { mainController.confirmationPanel.SetActive(false); }
 
     public void Confirmed ()
     {
-        mainController.confirmationPanel.SetActive(false);
+        int cost = int.Parse(parameters[1]);
 
-        switch (actionCode)
+        if ((mainController.totalCoins >= cost && parameters[2].Equals("0")) || (mainController.numPopcorn >= cost && parameters[2].Equals("1")))
         {
-            case 0:
-                int id = int.Parse(parameters[0]);
-                theShop.Purchase(id);
-                break;
-            case 1:
-                int index = int.Parse(parameters[3]);
-                mainController.UpgradeStaffAttribute(index);
-                break;
+
+            mainController.confirmationPanel.SetActive(false);
+            if (parameters[2].Equals("0"))
+            {
+                mainController.totalCoins -= cost;
+                mainController.coinLabel.text = mainController.totalCoins.ToString();
+            }
+            else
+            {
+                mainController.numPopcorn -= int.Parse(parameters[1]);
+                mainController.popcornLabel.text = mainController.numPopcorn.ToString();
+            }
+
+            switch (actionCode)
+            {
+                case 0:
+                    mainController.AddNewObject(int.Parse(parameters[3]), int.Parse(parameters[4]));
+                    break;
+                case 1:
+                    int index = int.Parse(parameters[3]);
+                    mainController.UpgradeStaffAttribute(index);
+                    break;
+                case 2:
+                    // hire new staff
+                    // ( index2 & name would be passed from the appearance selection page inside parameters )
+                    int index2 = UnityEngine.Random.Range(0, 5);
+                    StaffMember sm = new StaffMember(mainController.staffMembers.Count, "New", mainController.staffPrefabs[index2], mainController.currDay, index2);
+                    mainController.addStaffMember(sm);
+                    break;
+                case 3:
+                    // upgrade screen
+                    int screenIndex = int.Parse(parameters[3]);
+                    ScreenObject theScreen = mainController.screenObjectList[screenIndex].GetComponent<Screen_Script>().theScreen;
+                    theScreen.upgrade();
+                    mainController.screenObjectList[screenIndex].GetComponent<SpriteRenderer>().sprite = mainController.screenImages[0];
+
+                    mainController.objectInfo.SetActive(false);
+                    mainController.closeInfo.SetActive(false);
+
+                    mainController.newShowTimes();
+                    mainController.statusCode = 0;
+                    break;
+            }
+        }
+        else
+        {
+            Debug.Log("NOT ENUFF MONEH");
         }
     }
 

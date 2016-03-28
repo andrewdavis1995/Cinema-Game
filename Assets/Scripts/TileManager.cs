@@ -78,7 +78,7 @@ public class TileManager : MonoBehaviour
         if (mouseDown && code > -1)
         {
             mouseDownCount++;
-            if (mouseDownCount > 15)
+            if (mouseDownCount > 10)
             {
                 doMove(code);
                 mouseDownCount = 0;
@@ -404,14 +404,9 @@ public class TileManager : MonoBehaviour
         {
             for (int j = y; j < y + fullHeight; j++)
             {
-                //if (!floor.floorTiles[x, j].inUse)
-                //{
-                //floor.floorTiles[x, j].inUse = newState;
-                //}
-
+                // IMAGE CHANGE HERE
+                // MARBLE CHECK HERE
                 mainController.floorTiles[j, x].GetComponent<SpriteRenderer>().color = mainController.carpetColour;
-                //floor.floorTiles[x, j].inUse = false;            
-
             }
         }
         else {
@@ -436,18 +431,11 @@ public class TileManager : MonoBehaviour
             {
                 for (int j = y; j < y + fullHeight; j++)
                 {
-                    //if (!floor.floorTiles[x, j].inUse)
-                    //{
-                    //floor.floorTiles[x, j].inUse = newState;
-                    //}
-
+                    // IMAGE CHANGE HERE
                     mainController.floorTiles[j, x].GetComponent<SpriteRenderer>().color = newColour;
-
                 }
             }
         }
-        //}
-
     }
 
     void updateRow(int x, int y, bool newState, int direction)
@@ -458,16 +446,17 @@ public class TileManager : MonoBehaviour
         {
             for (int i = x; i < x + fullWidth; i++)
             {
-                //    for (int j = y; j < y + 15; j++)
-                //{
-                mainController.floorTiles[y, i].GetComponent<SpriteRenderer>().color = mainController.carpetColour;
-                //}
+                // IMAGE CHANGE HERE      
+                // MARBLE CHECK HERE     
+                mainController.floorTiles[y, i].GetComponent<SpriteRenderer>().color = mainController.carpetColour;     
             }
         }
         else {
 
             Color newColour;
 
+
+            // IMAGE CHANGE HERE
             if (validMove)
             {
                 newColour = Color.green;
@@ -486,11 +475,7 @@ public class TileManager : MonoBehaviour
             {
                 for (int j = x; j < x + fullWidth; j++)
                 {
-                    //if (!floor.floorTiles[x, j].inUse)
-                    //{
-                    //floor.floorTiles[x, j].inUse = newState;
-                    //}
-
+                    // IMAGE CHANGE HERE
                     mainController.floorTiles[y, j].GetComponent<SpriteRenderer>().color = newColour;
 
                 }
@@ -509,6 +494,7 @@ public class TileManager : MonoBehaviour
 
                 if (complete)
                 {
+                    // IMAGE CHANGE HERE
                     mainController.floorTiles[i, j].GetComponent<SpriteRenderer>().color = mainController.carpetColour;
                 }
             }

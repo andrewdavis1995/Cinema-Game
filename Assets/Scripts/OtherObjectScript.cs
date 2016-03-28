@@ -4,12 +4,14 @@ using System.Collections;
 public class OtherObjectScript : MonoBehaviour {
 
     Controller theController;
-    public delegate void showBuildingOptions(string screen, string upgrade);
+    public delegate void showBuildingOptions(string screen, string upgrade, Sprite s);
     public static event showBuildingOptions showBuildingMenu;
+    Transform transform;
 
     // Use this for initialization
     void Start () {
         theController = GameObject.Find("Central Controller").GetComponent<Controller>();
+        transform = GameObject.Find(gameObject.name).GetComponent<Transform>(); 
     }
 	
 	// Update is called once per frame
@@ -35,7 +37,10 @@ public class OtherObjectScript : MonoBehaviour {
 
         if (showBuildingMenu != null)
         {
-            showBuildingMenu(tag, message);
+
+            Sprite s = transform.GetComponent<SpriteRenderer>().sprite;
+
+            showBuildingMenu(tag, message, s);
             theController.statusCode = 3;
             theController.objectSelected = name;
         }

@@ -10,7 +10,9 @@ using System.IO;
 [System.Serializable]
 public class Controller : MonoBehaviour
 {
-    int selectedStaff = -1;
+    public int selectedStaff = -1;
+
+    public Sprite[] validityTiles;
 
     public GameObject picProfile;
     public static Sprite profilePicture;
@@ -47,7 +49,7 @@ public class Controller : MonoBehaviour
     public string objectSelected = "";
 
     List<GameObject> gameObjectList = new List<GameObject>();
-    List<GameObject> screenObjectList = new List<GameObject>();
+    public List<GameObject> screenObjectList = new List<GameObject>();
 
     public static List<ScreenObject> theScreens = new List<ScreenObject>();
     List<OtherObject> otherObjects = new List<OtherObject>();
@@ -98,7 +100,7 @@ public class Controller : MonoBehaviour
     public Sprite ColourBackground;
     public Sprite colourCircle;
     public Sprite marbleBackground;
-    public Sprite marbleSquare;
+    public Sprite[] marbleSquares;
 
     const int width = 80;
     const int height = 40;
@@ -117,8 +119,8 @@ public class Controller : MonoBehaviour
     List<List<Coordinate>> screenPaths = new List<List<Coordinate>>();
     List<Coordinate> exitPath = new List<Coordinate>();
 
-    int totalCoins = 0;
-    int numPopcorn = 0;
+    public int totalCoins = 1000;
+    public int numPopcorn = 15;
 
     public int currDay = 0;
 
@@ -131,24 +133,24 @@ public class Controller : MonoBehaviour
 
     public void OpenShop()
     {
-        if (statusCode == 0)
-        {
+        //if (statusCode == 0)
+        //{
             statusCode = 5;
             shopCanvas.SetActive(true);
-        }
-        else
-        { 
-            shopCanvas.SetActive(false);
-        }
+        //}
+        //else
+        //{ 
+        //    shopCanvas.SetActive(false);
+        //}
     }
 
     public void OpenStaffMenu()
     {
-        //if (staffMenu.gameObject.active)
-        //{
-        statusCode = 6;
-        staffMenu.gameObject.SetActiveRecursively(true);
-        //}
+        if (statusCode == 0)
+        {
+            statusCode = 6;
+            staffMenu.gameObject.SetActiveRecursively(true);
+        }
     }
 
 
@@ -225,7 +227,7 @@ public class Controller : MonoBehaviour
         // get Player data. If not null, load game
         if (ButtonScript.loadGame == null)
         {
-            carpetColour = new Color(0, 0, 255, 100);
+            carpetColour = GetColourFromID(5);
 
             #region Floor Tiles
             // initialise the floor tiles
@@ -322,7 +324,6 @@ public class Controller : MonoBehaviour
                 theScreens[i].setPosition((int)pos.x, (int)(pos.y));
             }
 
-            coinLabel.text = totalCoins.ToString();
             dayLabel.text = "DAY: " + currDay.ToString();
             popcornLabel.text = numPopcorn.ToString();
 
@@ -410,19 +411,27 @@ public class Controller : MonoBehaviour
             setTiles(2, (int)(otherObjects[i].xPos), (int)(otherObjects[i].yPos), w, h);
         }
 
-        createColourPicker();
+        //createColourPicker();
 
         if (updateTileState != null)
         {
-            updateTileState(38, 0, 12, 16, 1, true);
-            updateTileState(38, 16, 12, 4, 2, true);
+            updateTileState(37, 0, 13, 16, 1, true);
+            updateTileState(37, 16, 13, 4, 2, true);
         }
+
+
+        coinLabel.text = totalCoins.ToString();
+        popcornLabel.text = numPopcorn.ToString();
+
     }
 
     public List<Coordinate> GetScreenPath(int index)
     {
         return this.screenPaths[index];
     }
+
+
+    List<GameObject> staffMenuList = new List<GameObject>();
 
     void createStaff(StaffMember staff)
     {
@@ -457,6 +466,8 @@ public class Controller : MonoBehaviour
         Button b2 = imgs[3].GetComponent<Button>();
         b2.onClick.AddListener(() => ViewStaffMemberInfo(staff.getIndex()));
 
+        staffMenuList.Add(go);
+
     }
 
     public void ViewStaffMemberInfo(int staffID)
@@ -488,7 +499,7 @@ public class Controller : MonoBehaviour
 
         for (int i = 0; i < 4; i++)
         {
-            imgs[6 + (i * 4)].fillAmount = 0.25f * attributes[i];
+            imgs[7 + (i * 4)].fillAmount = 0.25f * attributes[i];
         }
 
     }
@@ -524,6 +535,7 @@ public class Controller : MonoBehaviour
     {
         //TODO: check if less than 4
         //TODO: check if enough money
+
         staffMembers[selectedStaff].Upgrade(index);
 
         Image[] imgs = staffMemberInfo.GetComponentsInChildren<Image>();
@@ -531,7 +543,10 @@ public class Controller : MonoBehaviour
         //TODO: remove money
         int attributeEffected = staffMembers[selectedStaff].GetAttributes()[index];
 
-        imgs[6 + (index * 4)].fillAmount = 0.25f * attributeEffected;
+        imgs[7 + (index * 4)].fillAmount = 0.25f * attributeEffected;
+
+        NewTicketQueueSpeed();
+        
 
     }
 
@@ -542,6 +557,7 @@ public class Controller : MonoBehaviour
             for (int j = x; j < x + width; j++)
             {
                 floorTiles[i, j].GetComponent<SpriteRenderer>().color = c;
+                //floorTiles[i, j].GetComponent<SpriteRenderer>().sprite = validityTiles[1];
             }
         }
     }
@@ -556,10 +572,9 @@ public class Controller : MonoBehaviour
 
                 if (theScreen.getUpgradeLevel() < 4 && !theScreen.ConstructionInProgress())
                 {
-                    theScreen.upgrade();
-                    screenObjectList[i].GetComponent<SpriteRenderer>().sprite = screenImages[0];
 
-                    newShowTimes();
+                    ConfirmationScript.OptionSelected(3, new string[] { "upgrade Screen " + theScreen.getScreenNumber(), (theScreen.calculateUpgradeCost()).ToString(), "0", i.ToString() });
+
                     break;
                 }
             }
@@ -650,7 +665,7 @@ public class Controller : MonoBehaviour
 
         gO.AddComponent<Button>();
         Button btn = gO.GetComponent<Button>();
-        btn.onClick.AddListener(() => colourClicked(gO.GetComponent<Image>().color, gO.GetComponent<Image>().sprite));
+        // btn.onClick.AddListener(() => colourClicked(gO.GetComponent<Image>().color, gO.GetComponent<Image>().sprite));
     }
 
     void createColourPicker()
@@ -670,17 +685,42 @@ public class Controller : MonoBehaviour
     }
 
 
-    void colourClicked(Color c, Sprite s)
+    Color GetColourFromID(int id)
     {
-        carpetColour = c;
+        switch (id)
+        {
+            case 0: return new Color(0.663f, 0.149f, 0.149f);
+            case 1: return new Color(0.001f, 0.345f, 0.663f);
+            case 2: return new Color(0.098f, 0.361f, 0.098f);
+            case 3: return new Color(0.325f, 0.082f, 0.267f);
+            case 5: return new Color(0.333f, 0.332f, 0.494f);
+            case 6: return new Color(0.839f, 0.749f, 0.376f);
+            case 7: return new Color(0.573f, 0.376f, 0.165f);
+            default: return new Color(100, 100, 100);
+        }
+    }
 
+    Sprite GetSpriteFromID(int id)
+    {
+        switch (id)
+        {
+            case 4: return marbleBackground;
+            default: return ColourBackground;
+        }
+    }
+
+
+    public void colourClicked(int id)
+    {
+        carpetColour = GetColourFromID(id);
+        Sprite s = GetSpriteFromID(id);
         
 
         for (int i = 0; i < height; i++)
         {
             for (int j = 0; j < width; j++)
             {
-                floorTiles[i, j].GetComponent<SpriteRenderer>().color = c;
+                floorTiles[i, j].GetComponent<SpriteRenderer>().color = carpetColour;
 
                 if (!s.Equals(marbleBackground))
                 {
@@ -688,11 +728,14 @@ public class Controller : MonoBehaviour
                 }
                 else
                 {
-                    floorTiles[i, j].GetComponent<SpriteRenderer>().sprite = marbleSquare;
+                    int index = UnityEngine.Random.Range(0, 3);
+                    
+
+                    floorTiles[i, j].GetComponent<SpriteRenderer>().sprite = marbleSquares[index];
 
                     if ((i % 2 != j % 2))
                     {
-                        floorTiles[i, j].GetComponent<SpriteRenderer>().color = new Color(0.5f, 0.5f, 0.5f);
+                        floorTiles[i, j].GetComponent<SpriteRenderer>().color = new Color(0.8f, 0.8f, 0.8f);
                     }
                 }
             }
@@ -700,7 +743,7 @@ public class Controller : MonoBehaviour
 
 
         // change step colours
-        steps.GetComponent<SpriteRenderer>().color = carpetColour;
+        //steps.GetComponent<SpriteRenderer>().color = carpetColour;
 
     }
 
@@ -712,6 +755,23 @@ public class Controller : MonoBehaviour
                 return sm.getJobID() == 1;
             }
             );
+
+        NewTicketQueueSpeed();
+
+    }
+
+    void NewTicketQueueSpeed()
+    {
+        int overallLevel = 0;
+
+        for (int i = 0; i < ticketStaff.Count; i++)
+        {
+            overallLevel += ticketStaff[i].GetAttributeByIndex(0);
+        }
+
+        ticketStaffLevel = 4.5f - (float)(1.125 * overallLevel / ticketStaff.Count);
+
+        if (ticketStaffLevel < 0.5f) { ticketStaffLevel = 0.5f; }
     }
 
     public void ShowColourPicker()
@@ -775,7 +835,7 @@ public class Controller : MonoBehaviour
         {
             if (!allCustomers[i].arrived)
             {
-                if (allCustomers[i].hasArrived(hours, minutes))
+                if (allCustomers[i].hasArrived(hours, minutes) && simulationRunning)        // second simulationRunningCheck needed because of delays at the end
                 {
                     allCustomers[i].pointsToVisit = new List<Coordinate>();
                     
@@ -972,7 +1032,7 @@ public class Controller : MonoBehaviour
 
     }
 
-    private void newShowTimes()
+    public void newShowTimes()
     {
         filmShowings.Clear();
 
@@ -995,6 +1055,7 @@ public class Controller : MonoBehaviour
     }
 
     float queueCount = 0;
+    float ticketStaffLevel = 4.5f;
 
     void QueueController()
     {
@@ -1002,7 +1063,7 @@ public class Controller : MonoBehaviour
         {
             queueCount += Time.deltaTime;
 
-            if (queueCount > 1.5f)
+            if (queueCount > ticketStaffLevel)
             {
                 queueCount = 0;
 
@@ -1082,8 +1143,6 @@ public class Controller : MonoBehaviour
             staff[i].GetComponent<SpriteRenderer>().enabled = true;
         }
 
-        confirmMovePanel.SetActive(false);
-        moveButtons.SetActive(false);
         //objectInfo.SetActive(true);
 
         // re-place image
@@ -1240,93 +1299,156 @@ public class Controller : MonoBehaviour
             }
 
             CheckForPath();
+            theTileManager.origX = -1;
+            theTileManager.origY = -1;
+            theTileManager.toMoveX = -1;
+            theTileManager.toMoveY = -1;
+            theTileManager.fullWidth = -1;
+            theTileManager.fullHeight = -1;
+
+            statusCode = 0;
+            confirmMovePanel.SetActive(false);
+            moveButtons.SetActive(false);
 
         }
         else if (confirmed)
         {
+            String[] parameters = new String[5];
+            parameters[0] = "Add this object?";
+            parameters[1] = getCost().ToString();
+            parameters[2] = getCurrency();
+            parameters[3] = theTileManager.toMoveX.ToString();
+            parameters[4] = theTileManager.toMoveY.ToString();
+            ConfirmationScript.OptionSelected(0, parameters);
 
-            Vector3 pos = new Vector3(x + 0.05f, y * 0.8f, 0);
-
-
-            Transform newItem = null;
-            float xCorrection = 0;
-            float yCorrection = 0;
-
-            if (itemToAddID == 0)
-            {
-                newItem = screen;
-                xCorrection = 4.6f;
-                yCorrection = 6.05f;
-
-                int newID = theScreens.Count;
-                ScreenObject aScreen = new ScreenObject(newID + 1, 0);
-                aScreen.setPosition(x, y);
-                aScreen.upgrade();
-                theScreens.Add(aScreen);
-
-                pos.x += xCorrection;
-                pos.y += yCorrection;
-
-                GameObject screenThing = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity) as GameObject;
-                screenThing.GetComponent<Screen_Script>().theScreen = theScreens[newID];
-                screenThing.name = "Screen#" + theScreens[newID].getScreenNumber();
-                screenThing.GetComponent<SpriteRenderer>().sortingOrder = height - y - 1;
-                screenThing.GetComponent<SpriteRenderer>().sprite = screenImages[0];
-
-                screenThing.tag = "Screen";
-                screenObjectList.Add(screenThing);
-            }
-            else {
-
-                string theTag = "";
-
-                if (itemToAddID == 2)
-                {
-                    newItem = plant;
-                    xCorrection = 0.1f;
-                    yCorrection = 0.35f;
-                    otherObjects.Add(new OtherObject(x, y, 2, otherObjects.Count));
-                    theTag = "Plant";
-                }
-                else if (itemToAddID == 3)
-                {
-                    newItem = bust;
-                    xCorrection = 0.65f;
-                    yCorrection = 1.5f;
-                    otherObjects.Add(new OtherObject(x, y, 3, otherObjects.Count));
-                    theTag = "Bust of Game Creator";
-                }
-                else if (itemToAddID == 5)
-                {
-                    newItem = vendingMachine;
-                    xCorrection = 1.07f;
-                    yCorrection = 1.62f;
-                    otherObjects.Add(new OtherObject(x, y, 5, otherObjects.Count));
-                    theTag = "Vending Machine";
-                }
-
-
-                pos.x += xCorrection;
-                pos.y += yCorrection;
-
-
-                GameObject theObject = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity) as GameObject;
-                theObject.name = "Element#" + (otherObjects.Count - 1);
-                theObject.tag = theTag;
-                theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y ;
-
-                gameObjectList.Add(theObject);
-
-            }
-            itemToAddID = -1;
-
-            setTiles(2, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
-
-            CheckForPath();
         }
         else {
             ChangeColour(carpetColour, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
+            theTileManager.origX = -1;
+            theTileManager.origY = -1;
+            theTileManager.toMoveX = -1;
+            theTileManager.toMoveY = -1;
+            theTileManager.fullWidth = -1;
+            theTileManager.fullHeight = -1;
+            confirmMovePanel.SetActive(false);
+            moveButtons.SetActive(false);
+
+            statusCode = 0;
         }
+
+
+    }
+
+
+    int getCost()
+    {
+        switch (objectSelected)
+        {
+            case "NEW SCREEN": return 500;
+            case "NEW PLANT": return 80;
+            case "NEW BUST": return 7;
+            case "NEW VENDING MACHINE": return 90;
+            default : return 0;
+        }
+    }
+    String getCurrency()
+    {
+        // 0 = coins, 1 = popcorn
+        switch (objectSelected)
+        {
+            case "NEW SCREEN": return "0";
+            case "NEW PLANT": return "0";
+            case "NEW BUST": return "1";
+            case "NEW VENDING MACHINE": return "0";
+            default: return "0";
+        }
+    }
+
+    public void AddNewObject(int x, int y)
+    {
+
+        confirmMovePanel.SetActive(false);
+        moveButtons.SetActive(false);
+
+        Vector3 pos = new Vector3(x + 0.05f, y * 0.8f, 0);
+
+
+        Transform newItem = null;
+        float xCorrection = 0;
+        float yCorrection = 0;
+
+        if (itemToAddID == 0)
+        {
+            newItem = screen;
+            xCorrection = 4.6f;
+            yCorrection = 6.05f;
+
+            int newID = theScreens.Count;
+            ScreenObject aScreen = new ScreenObject(newID + 1, 0);
+            aScreen.setPosition(x, y);
+            aScreen.upgrade();
+            theScreens.Add(aScreen);
+
+            pos.x += xCorrection;
+            pos.y += yCorrection;
+
+            GameObject screenThing = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity) as GameObject;
+            screenThing.GetComponent<Screen_Script>().theScreen = theScreens[newID];
+            screenThing.name = "Screen#" + theScreens[newID].getScreenNumber();
+            screenThing.GetComponent<SpriteRenderer>().sortingOrder = height - y - 1;
+            screenThing.GetComponent<SpriteRenderer>().sprite = screenImages[0];
+
+            screenThing.tag = "Screen";
+            screenObjectList.Add(screenThing);
+        }
+        else {
+
+            string theTag = "";
+
+            if (itemToAddID == 2)
+            {
+                newItem = plant;
+                xCorrection = 0.1f;
+                yCorrection = 0.35f;
+                otherObjects.Add(new OtherObject(x, y, 2, otherObjects.Count));
+                theTag = "Plant";
+            }
+            else if (itemToAddID == 3)
+            {
+                newItem = bust;
+                xCorrection = 0.65f;
+                yCorrection = 1.5f;
+                otherObjects.Add(new OtherObject(x, y, 3, otherObjects.Count));
+                theTag = "Bust of Game Creator";
+            }
+            else if (itemToAddID == 5)
+            {
+                newItem = vendingMachine;
+                xCorrection = 1.07f;
+                yCorrection = 1.62f;
+                otherObjects.Add(new OtherObject(x, y, 5, otherObjects.Count));
+                theTag = "Vending Machine";
+            }
+
+
+            pos.x += xCorrection;
+            pos.y += yCorrection;
+
+
+            GameObject theObject = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity) as GameObject;
+            theObject.name = "Element#" + (otherObjects.Count - 1);
+            theObject.tag = theTag;
+            theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y;
+
+            gameObjectList.Add(theObject);
+
+        }
+        itemToAddID = -1;
+
+        setTiles(2, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
+        ChangeColour(carpetColour, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
+
+        CheckForPath();
 
         theTileManager.origX = -1;
         theTileManager.origY = -1;
@@ -1336,7 +1458,6 @@ public class Controller : MonoBehaviour
         theTileManager.fullHeight = -1;
 
         statusCode = 0;
-
     }
 
     public void CheckForPath()
@@ -1471,8 +1592,13 @@ public class Controller : MonoBehaviour
 
     }
 
-    public void placeObject(int x, int y, int width, int height)
+    public void placeObject(int width, int height)
     {
+
+
+        int startX = (int)Camera.main.transform.position.x;
+        int startY = (int)Camera.main.transform.position.y;
+
         GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
 
         for (int i = 0; i < staff.Length; i++)
@@ -1485,7 +1611,7 @@ public class Controller : MonoBehaviour
         confirmMovePanel.SetActive(true);
         moveButtons.SetActive(true);
 
-        bool valid = theTileManager.checkValidity(x, y, width, height);
+        bool valid = theTileManager.checkValidity(startX, startY, width, height);
 
         Color newColour;
 
@@ -1500,20 +1626,21 @@ public class Controller : MonoBehaviour
             newColour = Color.red;
         }
 
-        for (int i = y; i < y + height; i++)
+        for (int i = startY; i < startY + height; i++)
         {
-            for (int j = x; j < x + width; j++)
+            for (int j = startX; j < startX + width; j++)
             {
                 floorTiles[i, j].GetComponent<SpriteRenderer>().color = newColour;
             }
         }
 
 
-        theTileManager.toMoveX = 10;
-        theTileManager.toMoveY = 10;
+        theTileManager.toMoveX = startX;
+        theTileManager.toMoveY = startY;
         theTileManager.fullWidth = width;
         theTileManager.fullHeight = height;
-        theTileManager.NewItemAdded(10, 10);
+
+        theTileManager.NewItemAdded(startX, startY);
     }
 
     void Save()
@@ -1542,19 +1669,49 @@ public class Controller : MonoBehaviour
 
     public void updateStaffJob(int index, int job)
     {
+       
         staffMembers[index].setJob(job);
+
+        // TODO: Update the label in the staff list
+        if (job != 0)
+        {
+            //GameObject[] gOs = GameObject.FindGameObjectsWithTag("StaffInfoItem");
+            //staffMenuList[index
+        }
+
+        staffMenuList[index].GetComponentsInChildren<Text>()[1].text = "Current Job: " + jobTextFromID(job);
+
         UpdateJobList();
     }
 
+    string jobTextFromID(int index)
+    {
+        switch (index)
+        {
+            case 1:
+                return "Tickets";
+            case 2:
+                return "Front Door";
+            default:
+                return "Unassigned";
+        }
+    }
+
+
     public int getStaffJobById(int index) { return staffMembers[index].getJobID(); }
 
-    void ShowBuildingOptions(string line1, string line2)
+    void ShowBuildingOptions(string line1, string line2, Sprite theImage)
     {
         objectInfo.SetActive(true);
         closeInfo.SetActive(true);
         Text[] labels = objectInfo.gameObject.GetComponentsInChildren<Text>();
         labels[0].text = line1;
         labels[1].text = line2;
+        Image[] images = objectInfo.gameObject.GetComponentsInChildren<Image>();
+
+        if (line1.ToUpper().Contains("SCREEN")) { images[1].gameObject.GetComponent<Image>().color = Color.white; } else { images[1].gameObject.GetComponent<Image>().color = new Color(0.06f, 0.06f, 0.06f); }
+
+        images[3].sprite = theImage;
     }
 
     public List<StaffMember> getFullStaffList()

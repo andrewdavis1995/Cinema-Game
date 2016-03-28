@@ -40,8 +40,8 @@ public class ScreenObject
     {
         constructionInProgress = true;
         upgradeLevel++;
-            
-        int cost = calculateUpgradeCost();
+
+        calculateUpgradeCost();
 
         if (constructionTimeRemaining < 1)
         {
@@ -68,7 +68,7 @@ public class ScreenObject
         }
     }
 
-    private int calculateUpgradeCost()
+    public int calculateUpgradeCost()
     {
         if (upgradeLevel == 1)
         {
@@ -82,12 +82,12 @@ public class ScreenObject
         }
         else if (upgradeLevel == 3)
         {
-            constructionTimeRemaining = 3;
+            constructionTimeRemaining = 4;
             return 1500;
         }
         else
         {
-            constructionTimeRemaining = 6;
+            constructionTimeRemaining = 7;
             return 20000;
         }
     }        

@@ -152,7 +152,7 @@ public class movementScript : MonoBehaviour {
 
     void OnMouseDown()
     {
-		customerStatus.SetActive (true);
+		customerStatus.SetActive(true);
 
         StartCoroutine(showPatienceBar());       
     }

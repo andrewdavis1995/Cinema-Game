@@ -46,6 +46,7 @@ public class ScreenObject
         if (constructionTimeRemaining < 1)
         {
             upgradeComplete();
+            // NYAH
         }
 
         capacity = getNewCapacity();
@@ -67,6 +68,7 @@ public class ScreenObject
             upgradeComplete();
         }
     }
+
 
     public int calculateUpgradeCost()
     {

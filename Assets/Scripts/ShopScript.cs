@@ -44,7 +44,14 @@ public class ShopScript : MonoBehaviour {
                 mainController.placeObject(3, 3);
                 break;
             case 6: // Red Carpet
-                mainController.redCarpet.SetActive(true);
+                if (!mainController.hasUnlockedRedCarpet)
+                {
+                    ConfirmationScript.OptionSelected(4, new string[] { " unlock the Red Carpet?", "800", "0" });
+                }
+                else
+                {
+                    Debug.Log("Already Got it you silly sausage!");
+                }
                 break;
         }
     }

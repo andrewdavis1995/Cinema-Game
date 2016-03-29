@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 using Assets.Classes;
+using System.Collections.Generic;
 
 public class ConfirmationScript : MonoBehaviour {
 
@@ -48,7 +49,7 @@ public class ConfirmationScript : MonoBehaviour {
         }
         else
         {
-            Debug.Log("PINEAPPLES");
+            Debug.Log("FULL");
         }
     }
 
@@ -101,6 +102,30 @@ public class ConfirmationScript : MonoBehaviour {
 
                     mainController.newShowTimes();
                     mainController.statusCode = 0;
+
+                    mainController.CreateBuilder(theScreen.getX(), theScreen.getY(), theScreen.getScreenNumber());
+
+                    for (int k = 0; k < mainController.filmShowings.Count; k++)       // filmShowings.Count
+                    {
+                        int index3 = mainController.filmShowings[k].getScreenNumber();
+                        int ticketsSold = mainController.getTicketsSoldValue(Controller.theScreens[index3 - 1]);
+                        mainController.filmShowings[k].setTicketsSold(ticketsSold);
+
+                        int currentCount = 0;
+
+                        for (int j = 0; j < k; j++)
+                        {
+                            currentCount += mainController.filmShowings[j].getTicketsSold();
+                        }
+
+                        List<Customer> tmp = mainController.filmShowings[k].createCustomerList(currentCount, mainController);
+                        mainController.allCustomers.AddRange(tmp);
+                    }
+
+                    break;
+                case 4:
+                    mainController.redCarpet.SetActive(true);
+                    mainController.hasUnlockedRedCarpet = true;
                     break;
             }
         }

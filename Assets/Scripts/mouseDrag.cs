@@ -52,7 +52,7 @@ public class mouseDrag : MonoBehaviour
     public StaffMember staffMember;
 
     Controller mainController;
-    
+
 
 
     void Start()
@@ -61,7 +61,7 @@ public class mouseDrag : MonoBehaviour
 
 
         animator = GetComponent<Animator>();
-        
+
     }
 
     void addToStaffList(StaffMember staff)
@@ -140,7 +140,7 @@ public class mouseDrag : MonoBehaviour
     void OnMouseDown()
     {
 
-        if ((mainController.statusCode == 1 || mainController.statusCode == 0 || mainController.statusCode == 6 || mainController.statusCode != 7))
+        if ((mainController.statusCode < 3))
         {
             dragging = true;
             prevCameraZoom = Camera.main.orthographicSize;
@@ -302,19 +302,19 @@ public class mouseDrag : MonoBehaviour
 
         if (Camera.main.WorldToScreenPoint(transform.position).x > UnityEngine.Screen.width - 50)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0.20f, 0, 0); 
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0.20f, 0, 0);
         }
         if (Camera.main.WorldToScreenPoint(transform.position).x < 100)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(-0.20f, 0, 0); 
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(-0.20f, 0, 0);
         }
         if (Camera.main.WorldToScreenPoint(transform.position).y > UnityEngine.Screen.height)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, 0.20f, 0); 
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, 0.20f, 0);
         }
         if (Camera.main.WorldToScreenPoint(transform.position).y < 50)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, -0.20f, 0); 
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, -0.20f, 0);
         }
 
         Camera.main.GetComponent<CameraControls>().endPos = Camera.main.transform.position;

@@ -16,6 +16,8 @@ public class Controller : MonoBehaviour
 
     public Transform builderPrefab;
 
+    public Reputation reputation;
+
     public Sprite[] validityTiles;
 
     public GameObject picProfile;
@@ -29,6 +31,7 @@ public class Controller : MonoBehaviour
     public Transform staffList;
 
     public GameObject redCarpet;
+    public GameObject reputationPage;
     public bool hasUnlockedRedCarpet = false;
 
     public Sprite[] screenImages;
@@ -62,7 +65,7 @@ public class Controller : MonoBehaviour
     Queue<Customer> ticketQueue = new Queue<Customer>();
     public List<Customer> allCustomers = new List<Customer>();
 
-    public int statusCode = 0;     // 0 = free, 1 = dragging staff, 2 = moving object, 3 = in menu, 4 = moving camera, 5 = shop, 6 = staff menu, 7 = staff member info
+    public int statusCode = 0;     // 0 = free, 1 = dragging staff, 2 = moving object, 3 = in menu, 4 = moving camera, 5 = shop, 6 = staff menu, 7 = staff member info, 8 = Confirmation page, 9 = popup
 
     public Color carpetColour;
 
@@ -204,6 +207,7 @@ public class Controller : MonoBehaviour
         staffMenu.gameObject.SetActive(false);
         confirmationPanel.SetActive(false);
         redCarpet.SetActive(false);
+        reputationPage.SetActive(false);
         #endregion
 
         #region Add Delegate references
@@ -235,6 +239,8 @@ public class Controller : MonoBehaviour
         if (ButtonScript.loadGame == null)
         {
             carpetColour = GetColourFromID(1);
+            reputation = new Reputation();
+            reputation.Initialise();
 
             #region Floor Tiles
             // initialise the floor tiles
@@ -269,7 +275,11 @@ public class Controller : MonoBehaviour
             for (int i = 0; i < 2; i++)
             {
                 int index = UnityEngine.Random.Range(0, 5);
-                addStaffMember(new StaffMember(i, "Andrew", staffPrefabs[index], currDay, index));
+                
+                int x = 35 + (2 * (i % 6));
+                int y = (2 * (i / 6));
+
+                addStaffMember(new StaffMember(i, "Andrew", staffPrefabs[index], currDay, index), x, y);
             }
 
         }
@@ -287,6 +297,7 @@ public class Controller : MonoBehaviour
             }
 
             isMarbleFloor = data.marbleFloor;
+            reputation = data.reputation;
 
             #region Floor Tiles
             // initialise the floor tiles
@@ -328,7 +339,10 @@ public class Controller : MonoBehaviour
 
                 newStaff.SetAttributes(attributes);
 
-                addStaffMember(newStaff);
+                int x = 35 + (2 * (newStaff.getIndex() % 6)); ;
+                int y = 2 * (newStaff.getIndex() / 6);
+
+                addStaffMember(newStaff, x, y);
             }
 
             filmShowings = new List<FilmShowing>(data.filmShowings);
@@ -374,7 +388,15 @@ public class Controller : MonoBehaviour
             instance.name = "Screen#" + theScreens[i].getScreenNumber();
             instance.tag = "Screen";
             instance.GetComponent<SpriteRenderer>().sortingOrder = height - theScreens[i].getY() - 1;
-            instance.GetComponent<SpriteRenderer>().sprite = screenImages[theScreens[i].getUpgradeLevel()];
+            if (!theScreens[i].ConstructionInProgress())
+            {
+                instance.GetComponent<SpriteRenderer>().sprite = screenImages[theScreens[i].getUpgradeLevel()];
+            }
+            else
+            {
+                instance.GetComponent<SpriteRenderer>().sprite = screenImages[0];
+                CreateBuilder(theScreens[i].getX(), theScreens[i].getY(), theScreens[i].getScreenNumber());
+            }
 
             screenObjectList.Add(instance);
 
@@ -464,12 +486,12 @@ public class Controller : MonoBehaviour
 
     List<GameObject> staffMenuList = new List<GameObject>();
 
-    void createStaff(StaffMember staff)
+    void createStaff(StaffMember staff, int xPos, int yPos)
     {
-        Vector3 pos = new Vector3(floorTiles[0, 44 + (staff.getIndex() * 2)].transform.position.x, floorTiles[0, 44 + (staff.getIndex() * 2)].transform.position.y, 0);
+        Vector3 pos = new Vector3(xPos, yPos);
 
         Transform t = staff.getTransform();
-
+        
         GameObject goStaff = (GameObject)Instantiate(t.gameObject, pos, Quaternion.identity);
         goStaff.name = "Staff#" + staff.getIndex();
         goStaff.tag = "Staff";
@@ -945,6 +967,7 @@ public class Controller : MonoBehaviour
         if (shouldCollect)
         {
             totalCoins += money;
+            reputation.AddCoins(money);
             // output coins
             coinLabel.text = totalCoins.ToString();
             //lblCoins.Text = totalCoins.ToString();
@@ -958,37 +981,41 @@ public class Controller : MonoBehaviour
             nextWeek();
         }
 
-        for (int i = 0; i < theScreens.Count; i++)
-        {
-            theScreens[i].progressOneDay();
-            int days = theScreens[i].GetDaysOfConstruction();
-
-            if (days == 0 && screenObjectList.Count > 0)
+        if (shouldCollect) {
+            for (int i = 0; i < theScreens.Count; i++)
             {
-                screenObjectList[i].GetComponent<SpriteRenderer>().sprite = screenImages[theScreens[i].getUpgradeLevel()];
-                newShowTimes();
+                theScreens[i].progressOneDay();
+                int days = theScreens[i].GetDaysOfConstruction();
 
-                for (int k = 0; k < filmShowings.Count; k++)       // filmShowings.Count
+                if (days == 0 && screenObjectList.Count > 0)
                 {
-                    int index = filmShowings[k].getScreenNumber();
-                    int ticketsSold = getTicketsSoldValue(theScreens[index - 1]);
-                    filmShowings[k].setTicketsSold(ticketsSold);
 
-                    int currentCount = 0;
+                    reputation.SetFacilities(theScreens, redCarpet);
 
-                    for (int j = 0; j < k; j++)
+                    screenObjectList[i].GetComponent<SpriteRenderer>().sprite = screenImages[theScreens[i].getUpgradeLevel()];
+                    newShowTimes();
+
+                    for (int k = 0; k < filmShowings.Count; k++)       // filmShowings.Count
                     {
-                        currentCount += filmShowings[j].getTicketsSold();
+                        int index = filmShowings[k].getScreenNumber();
+                        int ticketsSold = getTicketsSoldValue(theScreens[index - 1]);
+                        filmShowings[k].setTicketsSold(ticketsSold);
+
+                        int currentCount = 0;
+
+                        for (int j = 0; j < k; j++)
+                        {
+                            currentCount += filmShowings[j].getTicketsSold();
+                        }
+
+                        List<Customer> tmp = filmShowings[k].createCustomerList(currentCount, this);
+                        allCustomers.AddRange(tmp);
+
+                        DestroyBuilderByScreenID(filmShowings[k].getScreenNumber());
+
                     }
-
-                    List<Customer> tmp = filmShowings[k].createCustomerList(currentCount, this);
-                    allCustomers.AddRange(tmp);
-
-                    DestroyBuilderByScreenID(filmShowings[k].getScreenNumber());
-
                 }
             }
-
         }
 
         for (int i = 0; i < filmShowings.Count; i++)       // filmShowings.Count
@@ -1023,9 +1050,32 @@ public class Controller : MonoBehaviour
 
         if (shouldCollect)
         {
-            // TODO: Actual values
-            ShowEndOfDayPopup(money, numWalkouts, 0, allCustomers.Count);
+            int oldOverall = reputation.GetOverall();
+            reputation.SetOverall();
+
+            int newOverall = reputation.GetOverall();
+
+            int repChange = newOverall - oldOverall;
+
+            ShowEndOfDayPopup(money, numWalkouts, repChange, allCustomers.Count);
         }
+
+
+        GameObject[] staffObjects = GameObject.FindGameObjectsWithTag("Staff");
+
+        for (int i = 0; i < staffObjects.Length; i++)
+        {
+
+            int x = 35 + (2 * (i % 6));
+            int y = (2 * (i / 6));
+
+            Transform t = staffObjects[i].transform;
+            t.position = new Vector3(x, y, 0);
+
+            //t.Translate(new Vector3(10, 0, 0));
+
+        }
+
 
         numWalkouts = 0;
 
@@ -1036,6 +1086,39 @@ public class Controller : MonoBehaviour
     void nextWeek()
     {
         newShowTimes();
+    }
+
+
+    public void ViewReputation()
+    {
+        popupBox.SetActive(false);
+        reputationPage.SetActive(true);
+
+        Text[] textElements = reputationPage.gameObject.GetComponentsInChildren<Text>();
+
+        textElements[2].text = reputation.GetTotalCoins().ToString();
+        textElements[4].text = reputation.GetOverall().ToString() + "%";
+        textElements[5].text = reputation.GetTotalCustomers().ToString();
+        textElements[6].text = reputation.GetHighestRep().ToString();
+
+        textElements[9].text = (4 * reputation.GetSpeedRating()).ToString();
+        textElements[11].text = (4 * reputation.GetCleanlinessRating()).ToString();
+        textElements[13].text = (4 * reputation.GetFacilitiesRating()).ToString();
+        textElements[15].text = (4 * reputation.GetFriendlinessRating()).ToString();
+
+        
+        Image[] imageElements = reputationPage.gameObject.GetComponentsInChildren<Image>();
+        imageElements[4].fillAmount = (float)reputation.GetSpeedRating() / 25f;
+        imageElements[7].fillAmount = (float)reputation.GetCleanlinessRating() / 25f;
+        imageElements[10].fillAmount = (float)reputation.GetFacilitiesRating() / 25f;
+        imageElements[13].fillAmount = (float)reputation.GetFriendlinessRating() / 25f;
+    }
+
+    public void CloseReputation()
+    {
+        reputationPage.SetActive(false);
+        popupBox.SetActive(true);
+        statusCode = 0;
     }
 
 
@@ -1077,9 +1160,11 @@ public class Controller : MonoBehaviour
     public int getTicketsSoldValue(ScreenObject screen)
     {
         UnityEngine.Random ran = new UnityEngine.Random();
-        int min = screen.getNumSeats() / 2;  // this will be affected by the #posters etc
+        int min = (int)(screen.getNumSeats() / 1.5);  // this will be affected by the posters etc, and rep
         int max = screen.getNumSeats();
         int ticketsSold = UnityEngine.Random.Range(min, max);
+        float repMultiplier = reputation.GetMultiplier();
+        ticketsSold = (int)(ticketsSold * repMultiplier);
 
         return ticketsSold;
     }
@@ -1178,6 +1263,10 @@ public class Controller : MonoBehaviour
                         {
                             WalkAway(j);
                             numWalkouts++;
+
+                            // negatively effect rep
+                            reputation.Walkout();
+
                         }
                         else if (allCustomers[j].GetPatience() == 150)
                         {
@@ -1614,10 +1703,11 @@ public class Controller : MonoBehaviour
         Text[] txts = popupBox.GetComponentsInChildren<Text>();
         txts[3].text = totalCoins.ToString();
         txts[4].text = todaysMoney.ToString();
-        txts[6].text = repChange.ToString();
+        txts[6].text = repChange.ToString() + "%";
         txts[7].text = numCustomers.ToString();
         txts[8].text = walkouts.ToString();
 
+        statusCode = 9;
 
     }
 
@@ -1802,7 +1892,7 @@ public class Controller : MonoBehaviour
         BinaryFormatter formatter = new BinaryFormatter();
         FileStream file = File.Create(Application.persistentDataPath + "/saveState.gd");
 
-        PlayerData data = new PlayerData(theScreens, carpetColour, staffMembers, filmShowings, totalCoins, currDay, numPopcorn, otherObjects, hasUnlockedRedCarpet, isMarbleFloor);
+        PlayerData data = new PlayerData(theScreens, carpetColour, staffMembers, filmShowings, totalCoins, currDay, numPopcorn, otherObjects, hasUnlockedRedCarpet, isMarbleFloor, reputation);
 
 
         formatter.Serialize(file, data);
@@ -1810,10 +1900,10 @@ public class Controller : MonoBehaviour
     }
 
     #region staff events
-    public void addStaffMember(StaffMember staff)
+    public void addStaffMember(StaffMember staff, int xPos, int yPos)
     {
         staffMembers.Add(staff);
-        createStaff(staff);
+        createStaff(staff, xPos, yPos);
     }
 
     public int getStaffSize()
@@ -1904,9 +1994,10 @@ public class PlayerData
     public OtherObject[] otherObjects;
     public bool hasRedCarpet;
     public bool marbleFloor;
+    public Reputation reputation;
     
 
-    public PlayerData(List<ScreenObject> screens, Color col, List<StaffMember> staff, List<FilmShowing> films, int coins, int day, int popcorn, List<OtherObject> others, bool redCarpet, bool marble)
+    public PlayerData(List<ScreenObject> screens, Color col, List<StaffMember> staff, List<FilmShowing> films, int coins, int day, int popcorn, List<OtherObject> others, bool redCarpet, bool marble, Reputation rep)
     {
         //gameObjectList = sO.ToArray();
         theScreens = screens.ToArray();
@@ -1928,6 +2019,7 @@ public class PlayerData
         otherObjects = others.ToArray();
         hasRedCarpet = redCarpet;
         marbleFloor = marble;
+        this.reputation = rep;
     }
 
 }

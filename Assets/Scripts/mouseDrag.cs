@@ -18,7 +18,7 @@ using Assets.Classes;
 public class mouseDrag : MonoBehaviour
 {
 
-    public delegate void addStaffMember(StaffMember staff);
+    public delegate void addStaffMember(StaffMember staff, int x, int y);
     public static event addStaffMember addStaff;
 
     public delegate int getStaffSize();
@@ -66,9 +66,14 @@ public class mouseDrag : MonoBehaviour
 
     void addToStaffList(StaffMember staff)
     {
+
+        int x = 35 + (2 * staff.getIndex() % 6);
+        int y = 3 * (staff.getIndex() / 6);
+
+
         if (addStaff != null)
         {
-            addStaff(staff);
+            addStaff(staff, x, y);
         }
     }
 
@@ -256,7 +261,11 @@ public class mouseDrag : MonoBehaviour
             Camera.main.orthographicSize = prevCameraZoom;
         }
         dragging = false;
-        mainController.statusCode = 0;
+
+        if (mainController.statusCode < 3)
+        {
+            mainController.statusCode = 0;
+        }
 
 
     }

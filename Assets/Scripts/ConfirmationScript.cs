@@ -27,7 +27,9 @@ public class ConfirmationScript : MonoBehaviour {
 
     public static void OptionSelected(int code, string[] p)
     {
+        mainController.statusCode = 8;
         mainController.confirmationPanel.SetActive(true);
+        
         actionCode = code;
         parameters = p;
 
@@ -88,7 +90,11 @@ public class ConfirmationScript : MonoBehaviour {
                     // ( index2 & name would be passed from the appearance selection page inside parameters )
                     int index2 = UnityEngine.Random.Range(0, 5);
                     StaffMember sm = new StaffMember(mainController.staffMembers.Count, "New", mainController.staffPrefabs[index2], mainController.currDay, index2);
-                    mainController.addStaffMember(sm);
+
+                    int x = 35 + 2 * (sm.getIndex() % 6);
+                    int y = 2 * (sm.getIndex() / 6);
+
+                    mainController.addStaffMember(sm, x, y);
                     break;
                 case 3:
                     // upgrade screen

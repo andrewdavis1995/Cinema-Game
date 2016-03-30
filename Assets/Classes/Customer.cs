@@ -236,6 +236,9 @@ public class Customer
         {
             // arrived at screen - FINISHED
             transform.gameObject.SetActive(false);
+
+            // update the speed portion of the Reputation
+            mainController.reputation.UpdateSpeedRating(GetPatience());
         }
     }
     

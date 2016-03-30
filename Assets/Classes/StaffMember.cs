@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Assets.Classes
 {
 
-    [System.Serializable]
+    [Serializable]
     public class StaffMember
     {
         int index;

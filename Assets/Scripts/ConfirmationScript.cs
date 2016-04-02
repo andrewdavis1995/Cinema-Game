@@ -137,8 +137,9 @@ public class ConfirmationScript : MonoBehaviour {
         }
         else
         {
-            Debug.Log("NOT ENUFF MONEH");
+            mainController.popup.SetActive(true);
         }
     }
+
 
 }

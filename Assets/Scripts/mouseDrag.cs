@@ -147,9 +147,14 @@ public class mouseDrag : MonoBehaviour
 
         if ((mainController.statusCode < 3))
         {
+            Transform pi3 = transform.FindChild("hiddenPointer");
+            pi3.GetComponent<SpriteRenderer>().enabled = false;
+
+            GetComponent<SpriteRenderer>().sortingLayerName = "Staff";
             dragging = true;
             prevCameraZoom = Camera.main.orthographicSize;
             Camera.main.orthographicSize = 9;
+            transform.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
             transform.localScale = new Vector3(2f, 2f, 2f);
             changeStaffJob(staffMember.getIndex(), 0);
 
@@ -198,9 +203,55 @@ public class mouseDrag : MonoBehaviour
 
     void OnMouseUp()
     {
+        GetComponent<SpriteRenderer>().sortingLayerName = "Front";
+
+        GameObject toHideBehind = null;
 
         if (dragging && (mainController.statusCode == 1 || mainController.statusCode == 0 || mainController.statusCode == 6 || mainController.statusCode != 7))
         {
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            mousePos = new Vector3(mousePos.x, mousePos.y, 0f);
+
+
+            // check if in an invalid place - in middle of screen or object - sort layer accordingly
+            bool hidden = false;
+            for (int i = 0; i < mainController.gameObjectList.Count; i++)
+            {
+
+                Bounds b1 = mainController.gameObjectList[i].GetComponent<Renderer>().bounds;
+               
+
+                if (b1.Contains(mousePos)) { hidden = true; toHideBehind = mainController.gameObjectList[i]; break; }
+
+            }
+
+            
+
+            if (!hidden)
+            {
+                for (int i = 0; i < mainController.screenObjectList.Count; i++)
+                {
+
+                    Bounds b1 = mainController.screenObjectList[i].GetComponent<Renderer>().bounds;
+
+                    Bounds bTop = new Bounds(new Vector3(b1.center.x, (b1.center.y + 3.741147f), 0), 2 * new Vector3(b1.extents.x, 2.15883f, 0.1f));
+                    Bounds bBottom = new Bounds(new Vector3(b1.center.x, (b1.center.y - b1.extents.y + 1.352084f), 0), 2 * new Vector3(b1.extents.x, 1.352084f, 0.1f));
+                    // adjust both ^^^ vvv
+
+
+                    if (bTop.Contains(mousePos)) { hidden = true; toHideBehind = mainController.screenObjectList[i]; break; }
+                    if (bBottom.Contains(mousePos)) { hidden = true; toHideBehind = mainController.screenObjectList[i]; break; }
+
+                    if (b1.Contains(mousePos) && Controller.theScreens[i].ConstructionInProgress())
+                    {
+                        hidden = true;
+                        toHideBehind = mainController.screenObjectList[i];
+                        break;
+                    }
+
+                }
+            }
+
 
             for (int i = 0; i < numSlots; i++)
             {
@@ -217,11 +268,11 @@ public class mouseDrag : MonoBehaviour
 
             this.staffMember.SetVector(x, y);
 
+
             for (int i = 0; i < numSlots; i++)
             {
                 Bounds b1 = mainController.staffSlot[i].GetComponent<Renderer>().bounds;
-                Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                mousePos = new Vector3(mousePos.x, mousePos.y, 0f);
+                
 
                 if (b1.Contains(mousePos))
                 {
@@ -259,6 +310,49 @@ public class mouseDrag : MonoBehaviour
             }
 
             Camera.main.orthographicSize = prevCameraZoom;
+
+            if (!hidden)
+            {
+                transform.GetComponent<SpriteRenderer>().sortingOrder = (int)(mainController.theTileManager.floor.height);
+            }
+            else
+            {
+                transform.GetComponent<SpriteRenderer>().sortingOrder = toHideBehind.GetComponent<SpriteRenderer>().sortingOrder + 5;
+                transform.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.175f);
+                
+                Transform pi3 = transform.FindChild("hiddenPointer");
+                pi3.GetComponent<SpriteRenderer>().enabled = true;
+                //pi.SetActive(true);
+
+                // check type of object - using tag
+
+
+            }
+
+
+
+            // check if overlapping wall
+
+            for (int k = 0; k < mainController.walls.Length; k++)
+            {
+                Bounds b = mainController.walls[k].GetComponent<Renderer>().bounds;
+
+                if (b.Contains(mousePos))
+                {
+
+                    float xPos = transform.position.x;
+
+                    if (xPos > 73)
+                    {
+                        xPos = 73;
+                    }
+
+                    transform.position = new Vector2(xPos, 0.8f);
+                }
+
+            }
+
+
         }
         dragging = false;
 

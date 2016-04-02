@@ -24,6 +24,16 @@ public class ShopScript : MonoBehaviour {
             case 0: // ScreenObject
                 mainController.objectSelected = "NEW SCREEN";
                 mainController.placeObject(11, 15);
+                
+                for (int i = 0; i < mainController.screenObjectList.Count; i++)
+                {
+                    mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.8f);
+                }
+                for (int i = 0; i < mainController.gameObjectList.Count; i++)
+                {
+                    mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
+                }
+
                 break;
             case 1:
                 ConfirmationScript.OptionSelected(2, new string[] { "hire a new Staff Member?", "800", "0" });
@@ -31,10 +41,30 @@ public class ShopScript : MonoBehaviour {
             case 2: // Plant
                 mainController.objectSelected = "NEW PLANT";
                 mainController.placeObject(1, 1);
+                
+                for (int i = 0; i < mainController.screenObjectList.Count; i++)
+                {
+                    mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.8f);
+                }
+                for (int i = 0; i < mainController.gameObjectList.Count; i++)
+                {
+                    mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
+                }
+
                 break;
             case 3: // Bust
                 mainController.objectSelected = "NEW BUST";
                 mainController.placeObject(2, 3);
+                
+                for (int i = 0; i < mainController.screenObjectList.Count; i++)
+                {
+                    mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.8f);
+                }
+                for (int i = 0; i < mainController.gameObjectList.Count; i++)
+                {
+                    mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
+                }
+
                 break;
             case 4: // 5 Popcorns
                 // micro-transactions - MONEY!
@@ -42,6 +72,16 @@ public class ShopScript : MonoBehaviour {
             case 5: // Vending Machine
                 mainController.objectSelected = "NEW VENDING MACHINE";
                 mainController.placeObject(3, 3);
+
+                for (int i = 0; i < mainController.screenObjectList.Count; i++)
+                {
+                    mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.8f);
+                }
+                for (int i = 0; i < mainController.gameObjectList.Count; i++)
+                {
+                    mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
+                }
+
                 break;
             case 6: // Red Carpet
                 if (!mainController.hasUnlockedRedCarpet)

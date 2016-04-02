@@ -11,8 +11,11 @@ using System.IO;
 public class Controller : MonoBehaviour
 {
     public int selectedStaff = -1;
+    
 
     int numWalkouts = 0;
+
+    public GameObject[] walls;
 
     public Transform builderPrefab;
 
@@ -49,6 +52,8 @@ public class Controller : MonoBehaviour
     public GameObject closeColourPicker;
     GameObject moveButtons;
 
+    public GameObject popup;
+
     public GameObject confirmationPanel;
 
     const string warning1 = "WARNING! \n\nThe Following Screen(s) are inaccessible to Customers:\n\n";
@@ -56,7 +61,7 @@ public class Controller : MonoBehaviour
 
     public string objectSelected = "";
 
-    List<GameObject> gameObjectList = new List<GameObject>();
+    public List<GameObject> gameObjectList = new List<GameObject>();
     public List<GameObject> screenObjectList = new List<GameObject>();
 
     public static List<ScreenObject> theScreens = new List<ScreenObject>();
@@ -206,6 +211,7 @@ public class Controller : MonoBehaviour
         warningIcon.enabled = false;
         staffMenu.gameObject.SetActive(false);
         confirmationPanel.SetActive(false);
+        popup.SetActive(false);
         redCarpet.SetActive(false);
         reputationPage.SetActive(false);
         #endregion
@@ -224,8 +230,7 @@ public class Controller : MonoBehaviour
         #endregion
 
 
-
-
+        
         // TODO - load slots if load game
         for (int i = 0; i < 2; i++)
         {
@@ -451,7 +456,7 @@ public class Controller : MonoBehaviour
             // change pos and element here
             GameObject instance = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity);
             instance.name = "Element#" + (i);
-            instance.GetComponent<SpriteRenderer>().sortingOrder = height - otherObjects[i].yPos;
+            instance.GetComponent<SpriteRenderer>().sortingOrder = height - otherObjects[i].yPos - 1;
             instance.tag = tag;
 
             gameObjectList.Add(instance);
@@ -471,6 +476,23 @@ public class Controller : MonoBehaviour
         coinLabel.text = totalCoins.ToString();
         popcornLabel.text = numPopcorn.ToString();
 
+
+        GameObject[] pointers = GameObject.FindGameObjectsWithTag("Pointer");
+
+        for (int i = 0; i < pointers.Length; i++)
+        {
+            pointers[i].GetComponent<Transform>().GetComponent<SpriteRenderer>().enabled = false;
+        }
+        
+
+    }
+
+
+    public void HidePopup()
+    {
+        popup.SetActive(false);
+        confirmationPanel.SetActive(false);
+        statusCode = 5;
     }
 
     public List<Coordinate> GetScreenPath(int index)
@@ -768,27 +790,29 @@ public class Controller : MonoBehaviour
         carpetColour = GetColourFromID(id);
         Sprite s = GetSpriteFromID(id);
 
+        //carpetRoll.GetComponent<SpriteRenderer>().color = carpetColour;
+        CarpetRollScript.current.Begin(carpetColour, this);
 
-        for (int i = 0; i < height; i++)
-        {
-            for (int j = 0; j < width; j++)
-            {
-                floorTiles[i, j].GetComponent<SpriteRenderer>().color = carpetColour;
+        //for (int i = 0; i < height; i++)
+        //{
+        //    for (int j = 0; j < width; j++)
+        //    {
+        //        floorTiles[i, j].GetComponent<SpriteRenderer>().color = carpetColour;
 
-                if (!s.Equals(marbleBackground))
-                {
-                    floorTiles[i, j].GetComponent<SpriteRenderer>().sprite = ColourBackground;
-                }
-                else
-                {
-                    int index = UnityEngine.Random.Range(0, 3);
+        //        if (!s.Equals(marbleBackground))
+        //        {
+        //            floorTiles[i, j].GetComponent<SpriteRenderer>().sprite = ColourBackground;
+        //        }
+        //        else
+        //        {
+        //            int index = UnityEngine.Random.Range(0, 3);
 
 
-                    floorTiles[i, j].GetComponent<SpriteRenderer>().sprite = marbleSquares[index];
+        //            floorTiles[i, j].GetComponent<SpriteRenderer>().sprite = marbleSquares[index];
 
-                }
-            }
-        }
+        //        }
+        //    }
+        //}
 
 
         // change step colours
@@ -913,6 +937,11 @@ public class Controller : MonoBehaviour
     public void startDay()
     {
 
+        //for (int i = 0; i < screenObjectList.Count; i++)
+        //{
+        //    screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.55f);
+        //}
+
         screenPaths.Clear();
 
         // find paths to allScreens
@@ -984,10 +1013,12 @@ public class Controller : MonoBehaviour
         if (shouldCollect) {
             for (int i = 0; i < theScreens.Count; i++)
             {
+                int prevDays = theScreens[i].GetDaysOfConstruction();
+
                 theScreens[i].progressOneDay();
                 int days = theScreens[i].GetDaysOfConstruction();
 
-                if (days == 0 && screenObjectList.Count > 0)
+                if (prevDays == 1 && days == 0 && screenObjectList.Count > 0)
                 {
 
                     reputation.SetFacilities(theScreens, redCarpet);
@@ -1072,7 +1103,15 @@ public class Controller : MonoBehaviour
             Transform t = staffObjects[i].transform;
             t.position = new Vector3(x, y, 0);
 
-            //t.Translate(new Vector3(10, 0, 0));
+            staffObjects[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+
+            try
+            {
+                Transform pi3 = transform.FindChild("hiddenPointer");
+                pi3.GetComponent<SpriteRenderer>().enabled = true;
+            }
+            catch (Exception) { }
+            //t.Translate(new Vector3(10, o0, 0));
 
         }
 
@@ -1441,6 +1480,7 @@ public class Controller : MonoBehaviour
                 theObject.transform.position = pos;
 
                 theObject.GetComponent<Renderer>().enabled = true;
+                theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y - 1;
 
                 //GameObject theObject = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity);
                 //theObject.name = "Element#" + (otherObjects.Count - 1);
@@ -1482,6 +1522,18 @@ public class Controller : MonoBehaviour
             confirmMovePanel.SetActive(false);
             moveButtons.SetActive(false);
 
+
+
+            for (int i = 0; i < screenObjectList.Count; i++)
+            {
+                screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
+            }
+
+            for (int i = 0; i < gameObjectList.Count; i++)
+            {
+                gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
+            }
+
         }
         else if (confirmed)
         {
@@ -1517,8 +1569,19 @@ public class Controller : MonoBehaviour
             {
                 builders[i].GetComponent<SpriteRenderer>().enabled = true;
             }
-        }
 
+            
+            for (int i = 0; i < screenObjectList.Count; i++)
+            {
+                screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
+            }
+
+            for (int i = 0; i < gameObjectList.Count; i++)
+            {
+                gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
+            }
+        }
+        
 
     }
 
@@ -1625,7 +1688,7 @@ public class Controller : MonoBehaviour
             GameObject theObject = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity) as GameObject;
             theObject.name = "Element#" + (otherObjects.Count - 1);
             theObject.tag = theTag;
-            theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y;
+            theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y - 1;
 
             gameObjectList.Add(theObject);
 
@@ -1657,6 +1720,15 @@ public class Controller : MonoBehaviour
             builders[i].GetComponent<SpriteRenderer>().enabled = true;
         }
 
+        for (int i = 0; i < screenObjectList.Count; i++)
+        {
+            screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
+        }
+
+        for (int i = 0; i < gameObjectList.Count; i++)
+        {
+            gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
+        }
     }
 
     public void CheckForPath()
@@ -1714,11 +1786,22 @@ public class Controller : MonoBehaviour
     public void ClosePopup()
     {
         popupBox.SetActive(false);
+        statusCode = 0;
     }
 
 
     public void moveScreen()
     {
+        
+        for (int i = 0; i < screenObjectList.Count; i++)
+        {
+            screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
+        }
+        for (int i = 0; i < gameObjectList.Count; i++)
+        {
+            gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.6f);
+        }
+
         // hide staff
         GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
 

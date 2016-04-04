@@ -70,7 +70,7 @@ public class movementScript : MonoBehaviour {
 
                 if (customer.goingToSeats)
                 {
-                    customer.transform.GetComponent<SpriteRenderer>().sortingOrder =  mainController.theTileManager.floor.height - (int)(theY) - 1;
+                    customer.transform.GetComponent<SpriteRenderer>().sortingOrder =  TileManager.floor.height - (int)(theY) - 1;
                 }
 
                 bool checkY1 = theY < customer.getTravellingToY() + 0.3f;

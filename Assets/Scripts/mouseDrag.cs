@@ -204,8 +204,7 @@ public class mouseDrag : MonoBehaviour
     void OnMouseUp()
     {
         GetComponent<SpriteRenderer>().sortingLayerName = "Front";
-
-        GameObject toHideBehind = null;
+        
 
         if (dragging && (mainController.statusCode == 1 || mainController.statusCode == 0 || mainController.statusCode == 6 || mainController.statusCode != 7))
         {
@@ -214,43 +213,8 @@ public class mouseDrag : MonoBehaviour
 
 
             // check if in an invalid place - in middle of screen or object - sort layer accordingly
-            bool hidden = false;
-            for (int i = 0; i < mainController.gameObjectList.Count; i++)
-            {
-
-                Bounds b1 = mainController.gameObjectList[i].GetComponent<Renderer>().bounds;
-               
-
-                if (b1.Contains(mousePos)) { hidden = true; toHideBehind = mainController.gameObjectList[i]; break; }
-
-            }
-
+            GameObject hidden = CheckHiddenBehind(mousePos);
             
-
-            if (!hidden)
-            {
-                for (int i = 0; i < mainController.screenObjectList.Count; i++)
-                {
-
-                    Bounds b1 = mainController.screenObjectList[i].GetComponent<Renderer>().bounds;
-
-                    Bounds bTop = new Bounds(new Vector3(b1.center.x, (b1.center.y + 3.741147f), 0), 2 * new Vector3(b1.extents.x, 2.15883f, 0.1f));
-                    Bounds bBottom = new Bounds(new Vector3(b1.center.x, (b1.center.y - b1.extents.y + 1.352084f), 0), 2 * new Vector3(b1.extents.x, 1.352084f, 0.1f));
-                    // adjust both ^^^ vvv
-
-
-                    if (bTop.Contains(mousePos)) { hidden = true; toHideBehind = mainController.screenObjectList[i]; break; }
-                    if (bBottom.Contains(mousePos)) { hidden = true; toHideBehind = mainController.screenObjectList[i]; break; }
-
-                    if (b1.Contains(mousePos) && Controller.theScreens[i].ConstructionInProgress())
-                    {
-                        hidden = true;
-                        toHideBehind = mainController.screenObjectList[i];
-                        break;
-                    }
-
-                }
-            }
 
 
             for (int i = 0; i < numSlots; i++)
@@ -310,26 +274,7 @@ public class mouseDrag : MonoBehaviour
             }
 
             Camera.main.orthographicSize = prevCameraZoom;
-
-            if (!hidden)
-            {
-                transform.GetComponent<SpriteRenderer>().sortingOrder = (int)(mainController.theTileManager.floor.height);
-            }
-            else
-            {
-                transform.GetComponent<SpriteRenderer>().sortingOrder = toHideBehind.GetComponent<SpriteRenderer>().sortingOrder + 5;
-                transform.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.175f);
-                
-                Transform pi3 = transform.FindChild("hiddenPointer");
-                pi3.GetComponent<SpriteRenderer>().enabled = true;
-                //pi.SetActive(true);
-
-                // check type of object - using tag
-
-
-            }
-
-
+            
 
             // check if overlapping wall
 
@@ -352,6 +297,8 @@ public class mouseDrag : MonoBehaviour
 
             }
 
+
+            SortStaffLayer(hidden);
 
         }
         dragging = false;
@@ -425,6 +372,93 @@ public class mouseDrag : MonoBehaviour
         //tmp.z = -10;
         //tmp.x -= UnityEngine.ScreenObject.width / 2;
         //tmp.y -= UnityEngine.ScreenObject.height / 2;
+    }
+
+    GameObject CheckHiddenBehind(Vector3 mousePos)
+    {
+        GameObject toHideBehind = null;
+
+        for (int i = 0; i < mainController.gameObjectList.Count; i++)
+        {
+
+            Bounds b1 = mainController.gameObjectList[i].GetComponent<Renderer>().bounds;
+
+
+            if (b1.Contains(mousePos)) { toHideBehind = mainController.gameObjectList[i]; break; }
+
+        }
+        
+        if (toHideBehind == null)
+        {
+            for (int i = 0; i < mainController.screenObjectList.Count; i++)
+            {
+
+                Bounds b1 = mainController.screenObjectList[i].GetComponent<Renderer>().bounds;
+
+                Bounds bTop = new Bounds(new Vector3(b1.center.x, (b1.center.y + 3.741147f), 0), 2 * new Vector3(b1.extents.x, 2.15883f, 0.1f));
+                Bounds bBottom = new Bounds(new Vector3(b1.center.x, (b1.center.y - b1.extents.y + 1.352084f), 0), 2 * new Vector3(b1.extents.x, 1.352084f, 0.1f));
+  
+
+                if (bTop.Contains(mousePos)) { toHideBehind = mainController.screenObjectList[i]; break; }
+                if (bBottom.Contains(mousePos)) { toHideBehind = mainController.screenObjectList[i]; break; }
+
+                if (b1.Contains(mousePos) && Controller.theScreens[i].ConstructionInProgress())
+                {
+                    toHideBehind = mainController.screenObjectList[i];
+                    break;
+                }
+
+            }
+        }
+
+        return toHideBehind;
+
+    }
+
+    public void SortStaffLayer(GameObject hidden)
+    {
+        if (hidden == null)
+        {
+            transform.GetComponent<SpriteRenderer>().sortingOrder = TileManager.floor.height;
+            transform.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
+
+            // check bounds with the walls of the screens
+            CheckWallCollision();
+
+        }
+        else
+        {
+            transform.GetComponent<SpriteRenderer>().sortingOrder = hidden.GetComponent<SpriteRenderer>().sortingOrder + 5;
+            transform.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.175f);
+
+            Transform pi3 = transform.FindChild("hiddenPointer");
+            pi3.GetComponent<SpriteRenderer>().enabled = true;
+
+        }
+        
+
+    }
+
+    void CheckWallCollision()
+    {
+        Bounds charBounds = transform.GetComponent<Renderer>().bounds;
+
+        for (int i = 0; i < mainController.screenObjectList.Count; i++)
+        {
+            Bounds screenWallBounds1 = mainController.screenObjectList[i].GetComponent<Renderer>().bounds;
+            Bounds b1 = new Bounds(new Vector3(screenWallBounds1.center.x - screenWallBounds1.extents.x + 0.1f, screenWallBounds1.center.y, screenWallBounds1.center.z), 2 * new Vector3(0.1f, screenWallBounds1.extents.y, screenWallBounds1.extents.z));
+            Bounds b2 = new Bounds(new Vector3(screenWallBounds1.center.x + screenWallBounds1.extents.x - 0.1f, screenWallBounds1.center.y, screenWallBounds1.center.z), 2 * new Vector3(0.1f, screenWallBounds1.extents.y, screenWallBounds1.extents.z));
+
+            if (b1.Intersects(charBounds))
+            {
+                transform.Translate(new Vector3(+2f, 0, 0));
+            }
+            if (b2.Intersects(charBounds))
+            {
+                transform.Translate(new Vector3(-2f, 0, 0));
+            }
+
+        }
     }
 
 }

@@ -41,6 +41,11 @@ namespace Assets.Classes
             attributes = att;
         }
 
+        public void SetTransform(Transform t)
+        {
+            transform = t;
+        }
+
         public int GetTransformID()
         {
             return this.transformID;

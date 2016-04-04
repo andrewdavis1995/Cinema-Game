@@ -502,7 +502,7 @@ public class Controller : MonoBehaviour
 
     public void CreateBuilder(float x, float y, int screenNum)
     {
-        GameObject builder = Instantiate(builderPrefab.gameObject, new Vector2(x + 1.8f, 0.8f * y + 0.5f), Quaternion.identity) as GameObject;
+        GameObject builder = Instantiate(builderPrefab.gameObject, new Vector2(x + 1.8f, 0.8f * y + 0.7f), Quaternion.identity) as GameObject;
         builder.name = "BuilderForScreen#" + screenNum;
     }
 
@@ -775,12 +775,12 @@ public class Controller : MonoBehaviour
         }
     }
 
-    Sprite GetSpriteFromID(int id)
+    Sprite[] GetSpriteFromID(int id)
     {
         switch (id)
         {
-            case 4: isMarbleFloor = true; return marbleBackground;
-            default: isMarbleFloor = false; return ColourBackground;
+            case 4: isMarbleFloor = true; return marbleSquares;
+            default: isMarbleFloor = false; return new Sprite[] { ColourBackground };
         }
     }
 
@@ -788,10 +788,10 @@ public class Controller : MonoBehaviour
     public void colourClicked(int id)
     {
         carpetColour = GetColourFromID(id);
-        Sprite s = GetSpriteFromID(id);
+        Sprite[] s = GetSpriteFromID(id);
 
         //carpetRoll.GetComponent<SpriteRenderer>().color = carpetColour;
-        CarpetRollScript.current.Begin(carpetColour, this);
+        CarpetRollScript.current.Begin(carpetColour, this, s);
 
         //for (int i = 0; i < height; i++)
         //{
@@ -947,7 +947,7 @@ public class Controller : MonoBehaviour
         // find paths to allScreens
         for (int i = 0; i < theScreens.Count; i++)
         {
-            List<Coordinate> points = theTileManager.floor.FindPath(38, 11, theScreens[i].getX() + 5, theScreens[i].getY());
+            List<Coordinate> points = TileManager.floor.FindPath(38, 11, theScreens[i].getX() + 5, theScreens[i].getY());
             screenPaths.Add(points);
         }
 
@@ -958,6 +958,7 @@ public class Controller : MonoBehaviour
         startDayButton.SetActive(false);
         shopButton.gameObject.SetActive(false);
         staffMenuButton.gameObject.SetActive(false);
+        colourPicker.SetActive(false);
 
         Customer.tiles = floorTiles;
 
@@ -1249,7 +1250,7 @@ public class Controller : MonoBehaviour
                 {
                     TimeTuple showTime = getShowTime(j);
 
-                    FilmShowing newFilm = new FilmShowing(filmShowings.Count, i + 1, 0, showTime.hours, showTime.minutes, theTileManager.floor);
+                    FilmShowing newFilm = new FilmShowing(filmShowings.Count, i + 1, 0, showTime.hours, showTime.minutes, TileManager.floor);
                     filmShowings.Add(newFilm);
                 }
             }
@@ -1334,7 +1335,7 @@ public class Controller : MonoBehaviour
         allCustomers[index].SetTravellingTo(x + 0.5f, y);
         allCustomers[index].inQueue = false;
 
-        allCustomers[index].pointsToVisit = theTileManager.floor.FindPath(x, y, 45, 0);
+        allCustomers[index].pointsToVisit = TileManager.floor.FindPath(x, y, 45, 0);
 
         // have to do the dequeue thing - but from middle... may need to change structure
     }
@@ -1417,7 +1418,7 @@ public class Controller : MonoBehaviour
                     {
                         if (builders[i].name.Contains(temp.getScreenNumber().ToString()))
                         {
-                            builders[i].transform.position = new Vector2(temp.getX() + 1.8f, (0.8f * temp.getY()));
+                            builders[i].transform.position = new Vector2(temp.getX() + 1.8f, 0.7f + (0.8f * temp.getY()));
                         }
                     }
                 }

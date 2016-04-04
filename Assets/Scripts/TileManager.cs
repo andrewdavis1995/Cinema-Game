@@ -8,7 +8,7 @@ using System.Collections.Generic;
 public class TileManager : MonoBehaviour
 {
 
-    public Floor floor;
+    public static Floor floor;
     public Sprite carpetSprite;
 
     GameObject movementPanel;
@@ -30,7 +30,7 @@ public class TileManager : MonoBehaviour
     public int fullWidth = -1;
     public int fullHeight = -1;
 
-    Controller mainController;
+    static Controller mainController;
 
     Vector3 currentPosition = new Vector3(0, 0, 0);
     Vector3 previousPosition = new Vector3(0, 0, 0);
@@ -551,6 +551,14 @@ public class TileManager : MonoBehaviour
         mouseDown = false;
     }
 
+    void CheckStaffAfterObjectMove(GameObject go)
+    {
+        GameObject[] staffList = GameObject.FindGameObjectsWithTag("Staff");
 
+        // loop
+
+    }
+
+   
 
 }

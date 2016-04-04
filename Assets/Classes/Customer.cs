@@ -8,18 +8,19 @@ using Random = UnityEngine.Random;
 [System.Serializable]
 public class Customer
 {
-    #region Position Constants
-    const float doorX = -15;
-    const float doorY = -4.65f;
-    const float centreX = 0;
-    const float centreY = 0;
-    //const float ticketsX = 17;
-    //const float ticketsY = -3.5f;
+
+    #region Status Check Variables
+    public bool shouldMoveUp = false;
+    public int moveToServingSlot = -1;
+    public int servingSlot = -1;
+    public bool walkingAway = false;
+    public bool leaving;
+    public bool hasLeftTheBuilding = false;
     #endregion
-    
+
     int index;
     public int currentDirection = 0;     // 1 down, 2 up, 3 left, 4 right, 0 still
-    int patience = 800;
+    int patience = 1200;
     public Transform transform;
     public Controller mainController;
     public Animator animator;
@@ -37,6 +38,16 @@ public class Customer
 
         if (patience < 0) { patience = 0; }
 
+    }
+
+    public void MoveUpInQueue()
+    {
+        transform.Translate(0, 0.8f, 0);
+    }
+
+    public void MoveToServingSlot()
+    {
+        transform.position = new Vector3(38.5f + (3 * moveToServingSlot), 11 * 0.8f, 0);
     }
 
     int hourDue;
@@ -80,23 +91,27 @@ public class Customer
         index = ID;
 
         needsFood = Random.Range(0, 10) >= 4;
-        needsTickets = Random.Range(0, 10) >= 0;      // 3 - changed because it was being a cuntbucketshitebagprickknobadamjohnson
+        needsTickets = Random.Range(0, 10) >= 0;      // 3
         needsToilet = Random.Range(0, 10) >= 6;
 
         int minutesEarly = Random.Range(20, 80);
 
-        int hourStart = fs.timeH;
-        int minuteStart = fs.timeM;
-
-        hourDue = hourStart - (minutesEarly / 60);
-        minuteDue = minuteStart - minutesEarly - ((hourDue-hourStart) * 60);
-
-        if (minuteDue < 0)
+        try
         {
-            minuteDue += 60;
-            hourDue--;
+            int hourStart = fs.timeH;
+            int minuteStart = fs.timeM;
+
+
+            hourDue = hourStart - (minutesEarly / 60);
+            minuteDue = minuteStart - minutesEarly - ((hourDue - hourStart) * 60);
+
+            if (minuteDue < 0)
+            {
+                minuteDue += 60;
+                hourDue--;
+            }
         }
-                
+        catch (Exception) { }
     }
 
     public bool hasArrived(int hours, int minutes)
@@ -112,8 +127,6 @@ public class Customer
 
     public void nextPoint(bool first)
     {
-        //travellingToX = 20;
-        //travellingToY = -4;
 
         try
         {
@@ -123,8 +136,14 @@ public class Customer
 
         if (this.pointsToVisit.Count > 0)
         {
-            travellingToX = tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.x;
-            travellingToY = tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.y;
+            this.travellingToX = pointsToVisit[0].x;
+            this.travellingToY = pointsToVisit[0].y;
+
+            if (goingToSeats || needsTickets)
+            {
+                travellingToY *= 0.8f;
+            }
+
         }
         else
         {
@@ -132,18 +151,14 @@ public class Customer
 
             nextPlace(first);
         }
-
-
-         
+       
 
         try
         {
             // set up the new movement vector
             int x = 0; int y = 0;
 
-
-            // this bit breaks stuff because of cross threading -----------------------------------------------------------
-
+            
             string trigger = "idle";
 
             if (transform.position.x < (tiles[pointsToVisit[0].y, pointsToVisit[0].x].transform.position.x) - 0.3f)
@@ -224,15 +239,15 @@ public class Customer
                 {
                     pointsToVisit.Add(copy[i]);
                 }
-                
-                
+
+
             }
             else
             {
-                pointsToVisit.Add(new Coordinate(0, 45));
+                pointsToVisit.Add(new Coordinate(0, 42));
             }
         }
-        else if (!inQueue)
+        else if (!inQueue && patience > 0)
         {
             // arrived at screen - FINISHED
             transform.gameObject.SetActive(false);
@@ -240,11 +255,15 @@ public class Customer
             // update the speed portion of the Reputation
             mainController.reputation.UpdateSpeedRating(GetPatience());
         }
+        else if (patience < 1)
+        {
+            hasLeftTheBuilding = true;
+        }
     }
     
     public void doneWithQueue() {
         this.inQueue = false;
-        SetTravellingTo(38.5f, 8.5f);
+        SetTravellingTo(38.5f, 11 * 0.8f);
     }
     
     public float getTravellingToX() { return travellingToX; }
@@ -257,5 +276,19 @@ public class Customer
     {
         return this.needsTickets;
     }
-    
+
+    // move to movementScript
+    public void WalkOut()
+    {
+        int x = (int) transform.position.x;
+        int y = (int) (transform.position.y);
+        
+        inQueue = false;
+        goingToSeats = false;
+
+        pointsToVisit = TileManager.floor.FindPath(x, y, 42, 0);
+
+        // have to do the dequeue thing - but from middle... may need to change structure
+    }
+
 }

@@ -76,7 +76,7 @@
     <Compile Include="Assets\Classes\Floor.cs" />
     <Compile Include="Assets\Classes\FloorTile.cs" />
     <Compile Include="Assets\Classes\Node.cs" />
-    <Compile Include="Assets\Classes\Queue.cs" />
+    <Compile Include="Assets\Classes\CustomerQueue.cs" />
     <Compile Include="Assets\Classes\Reputation.cs" />
     <Compile Include="Assets\Classes\SaveableStaff.cs" />
     <Compile Include="Assets\Classes\ScreenObject.cs" />

@@ -27,7 +27,7 @@ public class mouseDrag : MonoBehaviour
     public delegate int getStaffJob(int index);
     public static event getStaffJob getStaffJobById;
 
-    public delegate void updateStaffJob(int index, int job);
+    public delegate void updateStaffJob(int index, int job, int posInPost);
     public static event updateStaffJob changeStaffJob;
 
     public delegate List<StaffMember> getFullStaffList();
@@ -35,10 +35,7 @@ public class mouseDrag : MonoBehaviour
 
     float prevCameraZoom = 10f;
 
-    int numSlots = 2;
-    int numTicketSlots = 1;
-    int numFrontDoorSlots = 1;
-
+    
 
     public float offset;
     private Animator animator;
@@ -147,20 +144,36 @@ public class mouseDrag : MonoBehaviour
 
         if ((mainController.statusCode < 3))
         {
+
+            for (int i = 0; i < mainController.staffSlot.Count; i++)
+            {
+                Bounds b1 = mainController.staffSlot[i].GetComponent<Renderer>().bounds;
+                b1.extents = b1.extents * 1.5f;
+
+                Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                mousePos = new Vector3(mousePos.x, mousePos.y, 0f);
+
+                if (b1.Contains(mousePos))
+                {
+                    mainController.slotState[i] = false;
+                }
+            }
+
             Transform pi3 = transform.FindChild("hiddenPointer");
             pi3.GetComponent<SpriteRenderer>().enabled = false;
 
+            // make the image shake and grow!
             GetComponent<SpriteRenderer>().sortingLayerName = "Staff";
             dragging = true;
             prevCameraZoom = Camera.main.orthographicSize;
             Camera.main.orthographicSize = 9;
             transform.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
             transform.localScale = new Vector3(2f, 2f, 2f);
-            changeStaffJob(staffMember.getIndex(), 0);
+            changeStaffJob(staffMember.getIndex(), 0, 0);
 
-            for (int i = 0; i < numSlots; i++)
+            for (int i = 0; i < mainController.staffSlot.Count; i++)
             {
-                if (validDrop(i))
+                if (!mainController.slotState[i])
                 {
                     mainController.staffSlot[i].GetComponent<Renderer>().enabled = true;
                 }
@@ -170,35 +183,7 @@ public class mouseDrag : MonoBehaviour
 
     bool validDrop(int i)
     {
-        int target = 0;
-        int maxStaff = 0;
-
-        if (i < numTicketSlots)
-        {
-            // a ticket slot
-            target = 1;
-            maxStaff = numTicketSlots;
-        }
-        else
-        {
-            target = 2;
-            maxStaff = numFrontDoorSlots;
-        }
-
-        int staffCount = 0;
-
-        List<StaffMember> staff = new List<StaffMember>();
-
-        if (getStaffList != null)
-        {
-            staff = getStaffList();
-        }
-        for (int j = 0; j < staff.Count; j++)
-        {
-            if (staff[j].getJobID() == target) { staffCount++; }
-        }
-
-        return staffCount < maxStaff;
+        return !mainController.slotState[i];
     }
 
     void OnMouseUp()
@@ -213,11 +198,10 @@ public class mouseDrag : MonoBehaviour
 
 
             // check if in an invalid place - in middle of screen or object - sort layer accordingly
-            GameObject hidden = CheckHiddenBehind(mousePos);
-            
+            GameObject hidden = CheckHiddenBehind(mousePos);           
 
 
-            for (int i = 0; i < numSlots; i++)
+            for (int i = 0; i < mainController.staffSlot.Count; i++)
             {
                 mainController.staffSlot[i].GetComponent<Renderer>().enabled = false;
             }
@@ -233,11 +217,10 @@ public class mouseDrag : MonoBehaviour
             this.staffMember.SetVector(x, y);
 
 
-            for (int i = 0; i < numSlots; i++)
+            for (int i = 0; i < mainController.staffSlot.Count; i++)
             {
                 Bounds b1 = mainController.staffSlot[i].GetComponent<Renderer>().bounds;
                 
-
                 if (b1.Contains(mousePos))
                 {
                     if (validDrop(i))
@@ -247,7 +230,7 @@ public class mouseDrag : MonoBehaviour
                         {
                             int target = 0;
 
-                            if (i < numTicketSlots)
+                            if (mainController.staffSlot[i].tag.Contains("1"))
                             {
                                 // a ticket slot
                                 target = 1;
@@ -257,7 +240,13 @@ public class mouseDrag : MonoBehaviour
                                 target = 2;
                             }
 
-                            changeStaffJob(staffMember.getIndex(), target);
+                            GameObject[] slots = GameObject.FindGameObjectsWithTag("Slot Type " + target);
+
+                            mainController.slotState[i] = true;
+
+                            // TODO: get the actual position in post for the staff slot (get all for that post (in order) into array, use array index
+                            // (this value replaces i)
+                            changeStaffJob(staffMember.getIndex(), target, i);
                         }
                     }
                     else
@@ -268,7 +257,7 @@ public class mouseDrag : MonoBehaviour
                         {
                             transform.position = new Vector3(transform.position.x + 3, transform.position.y, 0);
                         }
-                        changeStaffJob(staffMember.getIndex(), 0);
+                        changeStaffJob(staffMember.getIndex(), 0, 0);
                     }
                 }
             }
@@ -276,8 +265,7 @@ public class mouseDrag : MonoBehaviour
             Camera.main.orthographicSize = prevCameraZoom;
             
 
-            // check if overlapping wall
-
+            // check if overlapping wall at front door
             for (int k = 0; k < mainController.walls.Length; k++)
             {
                 Bounds b = mainController.walls[k].GetComponent<Renderer>().bounds;

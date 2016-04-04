@@ -46,7 +46,7 @@ public class movementScript : MonoBehaviour {
     {
         //int sprite = UnityEngine.Random.Range(0, 3);
 
-        Controller.queueDone += sortQueuePosition;
+        //Controller.queueDone += sortQueuePosition;
 
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
          
@@ -63,20 +63,30 @@ public class movementScript : MonoBehaviour {
         {
             if (!customer.inQueue && customer.pointsToVisit.Count > 0)
             {
-                // TODO: ORDER IN LAYER
+                if (customer.leaving)
+                {
+                    int xPos = (int)transform.position.x;
+                    int yPos = (int)transform.position.y;
+                    
+                    customer.SetTravellingTo(xPos, yPos);
+                    transform.position = new Vector3(xPos, yPos, 0);
+                    customer.leaving = false;
+                }
 
                 float theX = transform.position.x;
                 float theY = transform.position.y;
 
+
                 if (customer.goingToSeats)
                 {
                     customer.transform.GetComponent<SpriteRenderer>().sortingOrder =  TileManager.floor.height - (int)(theY) - 1;
+                    Debug.Log(customer.getTravellingToX() + ", " + customer.getTravellingToY());
                 }
 
-                bool checkY1 = theY < customer.getTravellingToY() + 0.3f;
-                bool checkY2 = theY > customer.getTravellingToY() - 0.3f;
-                bool checkX1 = theX < customer.getTravellingToX() + 0.3f;
-                bool checkX2 = theX > customer.getTravellingToX() - 0.3f;
+                bool checkY1 = theY <= customer.getTravellingToY() + 0.3f;
+                bool checkY2 = theY >= customer.getTravellingToY() - 0.3f;
+                bool checkX1 = theX <= customer.getTravellingToX() + 0.3f;
+                bool checkX2 = theX >= customer.getTravellingToX() - 0.3f;
 
                 if (checkX1 && checkX2 && checkY1 && checkY2)
                 {
@@ -88,7 +98,7 @@ public class movementScript : MonoBehaviour {
                         // this will have to change - TODO          ????????????????????????????????? can't remember why this has to change!
 
                         Vector3 temp = gameObject.transform.position;
-                        temp.y -= queueLength * 0.8f;
+                        temp.y -= 2 + (queueLength * 0.8f);
                         temp.x -= 1.5f;
 
                         gameObject.transform.position = temp;
@@ -96,7 +106,7 @@ public class movementScript : MonoBehaviour {
                         // delay here - QUEUE
                         if (addToQueueTickets != null)
                         {
-                            
+
                             addToQueueTickets(customer);
                             customer.inQueue = true;
                             customer.pointsToVisit.Clear();
@@ -104,18 +114,13 @@ public class movementScript : MonoBehaviour {
                             customer.ticketsDone();
                             customer.animator.SetTrigger("queue");
 
-                            //customer.SetPos(customer.transform.position.x, customer.transform.position.y);
-
-                            //Thread thread = new Thread(() => customer.nextPlace(false));
-                            //thread.Start();
-
-                            //Thread thr = new Thread(new ThreadStart(customer.nextPlace));
-                            customer.nextPlace(false);      // different Thread
+                            customer.nextPlace(false);
                         }
                     }
                     else
                     {
                         customer.nextPoint(false);
+                        //customer.SetTravellingTo(customer.pointsToVisit[0].x, customer.pointsToVisit[0].y);
                     }
                 }
 
@@ -127,6 +132,37 @@ public class movementScript : MonoBehaviour {
                 }
             }
         }
+
+        if (customer.inQueue && customer.shouldMoveUp)
+        {
+            transform.Translate(0, 0.8f, 0);
+            customer.shouldMoveUp = false;
+        }
+        if (customer.moveToServingSlot > -1)
+        {
+            customer.MoveToServingSlot();
+            customer.servingSlot = customer.moveToServingSlot;
+            customer.moveToServingSlot = -1;
+        }
+        if (customer.walkingAway)
+        {
+            customer.WalkOut();
+            customer.walkingAway = false;
+            customer.leaving = true;
+        }
+        if (customer.hasLeftTheBuilding)
+        {
+            Vector2 movementVector = customer.MovementVector * Time.deltaTime * moveSpeed;
+            transform.Translate(movementVector);
+            customer.walkingAway = false;
+            customer.leaving = true;
+        }
+        if (transform.position.y < -20)
+        {
+            // they have left the building!
+            transform.gameObject.SetActive(false);
+        }
+
     }
 
     IEnumerator showPatienceBar()
@@ -141,9 +177,9 @@ public class movementScript : MonoBehaviour {
 
             // this will be affected by the patience level
             imgs[1].fillAmount = val;
-            imgs[1].color = new Color(255 - (float)(255 * val), (float)(255 * val), 0);
+            imgs[1].color = new Color(1 - (float)(val), (float)(val), 0);
 
-            yield return new WaitForSeconds(1.25f);
+            yield return new WaitForSeconds(2.5f);
         
 			customerStatus.SetActive (false);
         }
@@ -193,7 +229,8 @@ public class movementScript : MonoBehaviour {
             //Vector3 tmp = transform.position;
             //tmp.y = customer.getTravellingToY();
             customer.goingToSeats = true;
-            customer.SetTravellingTo(38.5f, (float)(11 * 0.8));
+            customer.SetTravellingTo(38.5f + (3 * customer.servingSlot), (11 * 0.8f));
+            customer.servingSlot = -1;
             customer.pointsToVisit.Clear();
             //customer.nextPoint(false);
             //customer.SetTravellingTo(customer.getTravellingToX(), customer.getTravellingToY() / 0.8f);

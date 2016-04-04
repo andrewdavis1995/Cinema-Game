@@ -55,7 +55,7 @@ namespace Assets.Classes
             numCustomersServed++;
             totalSpeedValues += patience;
 
-            speed = (int)((float)(((float)totalSpeedValues / (float)(numCustomersServed * 800)) * 25));       // 800 ---> max value for patience
+            speed = (int)((float)(((float)totalSpeedValues / (float)(numCustomersServed * 1200)) * 25));       // 1200 ---> max value for patience
         }
 
         public int GetOverall() { return overall; }

@@ -27,6 +27,7 @@ public class Controller : MonoBehaviour
     public static Sprite profilePicture;
 
     public List<Transform> staffSlot = new List<Transform>();
+    public List<bool> slotState = new List<bool>();
     public Transform slotPrefab;
 
     public Transform staffMenu;
@@ -66,8 +67,7 @@ public class Controller : MonoBehaviour
 
     public static List<ScreenObject> theScreens = new List<ScreenObject>();
     List<OtherObject> otherObjects = new List<OtherObject>();
-
-    Queue<Customer> ticketQueue = new Queue<Customer>();
+    
     public List<Customer> allCustomers = new List<Customer>();
 
     public int statusCode = 0;     // 0 = free, 1 = dragging staff, 2 = moving object, 3 = in menu, 4 = moving camera, 5 = shop, 6 = staff menu, 7 = staff member info, 8 = Confirmation page, 9 = popup
@@ -99,14 +99,10 @@ public class Controller : MonoBehaviour
     public List<StaffMember> staffMembers = new List<StaffMember>();
 
     public List<FilmShowing> filmShowings = new List<FilmShowing>();
-
-    List<StaffMember> ticketStaff = new List<StaffMember>();
+    
     public TileManager theTileManager;
     public GameObject confirmPanel;
-
-    public delegate void doneWithQueue();
-    public static event doneWithQueue queueDone;
-
+    
     public delegate void setTileStates(int startX, int startY, int w, int h, int newState, bool complete);
     public static event setTileStates updateTileState;
 
@@ -122,6 +118,8 @@ public class Controller : MonoBehaviour
     public GameObject[,] floorTiles;
 
     //List<GameObject> customerObjects = new List<GameObject>();
+
+    CustomerQueue ticketQueue = new CustomerQueue();
 
     public bool simulationRunning = false;
 
@@ -147,15 +145,12 @@ public class Controller : MonoBehaviour
 
     public void OpenShop()
     {
-        //if (statusCode == 0)
-        //{
-        statusCode = 5;
-        shopCanvas.SetActive(true);
-        //}
-        //else
-        //{ 
-        //    shopCanvas.SetActive(false);
-        //}
+        if (statusCode != 2 && statusCode != 8 && statusCode != 9)
+        {
+            hideObjectInfo();
+            statusCode = 5;
+            shopCanvas.SetActive(true);
+        }
     }
 
     public void OpenStaffMenu()
@@ -223,8 +218,8 @@ public class Controller : MonoBehaviour
         mouseDrag.changeStaffJob += updateStaffJob;
         mouseDrag.getStaffList += getFullStaffList;
         movementScript.addToQueueTickets += addToQueueTickets;
-        movementScript.getQueueTickets += getTicketQueue;
-        movementScript.getQueueTicketsSize += getTicketQueueSize;
+        //movementScript.getQueueTickets += getTicketQueue;
+        movementScript.getQueueTicketsSize += GetTicketQueueSize;
         Screen_Script.showBuildingMenu += ShowBuildingOptions;
         OtherObjectScript.showBuildingMenu += ShowBuildingOptions;
         #endregion
@@ -234,10 +229,15 @@ public class Controller : MonoBehaviour
         // TODO - load slots if load game
         for (int i = 0; i < 2; i++)
         {
-            staffSlot.Add(Instantiate(slotPrefab, new Vector3(40, 12.4f - i * 10, 0), Quaternion.identity) as Transform);
+            staffSlot.Add(Instantiate(slotPrefab, new Vector3(39.3f + (i * 2.5f), 12.5f, 0), Quaternion.identity) as Transform);
             staffSlot[i].GetComponent<SpriteRenderer>().enabled = false;
+            slotState.Add(false);
         }
 
+        // this will change
+        staffSlot[0].tag = "Slot Type 1";
+        staffSlot[1].tag = "Slot Type 1";
+        ticketQueue.Upgrade();
 
         #region Load / New Game
         // get Player data. If not null, load game
@@ -488,6 +488,11 @@ public class Controller : MonoBehaviour
     }
 
 
+    public int GetTicketQueueSize()
+    {
+        return ticketQueue.GetQueueSize();
+    }
+
     public void HidePopup()
     {
         popup.SetActive(false);
@@ -620,7 +625,7 @@ public class Controller : MonoBehaviour
 
         imgs[7 + (index * 4)].fillAmount = 0.25f * attributeEffected;
 
-        NewTicketQueueSpeed();
+        //NewTicketQueueSpeed();
 
 
     }
@@ -820,32 +825,32 @@ public class Controller : MonoBehaviour
 
     }
 
-    void UpdateJobList()
-    {
-        ticketStaff = staffMembers.FindAll(
-            delegate (StaffMember sm)
-            {
-                return sm.getJobID() == 1;
-            }
-            );
+    //void UpdateJobList()
+    //{
+    //    //ticketStaff = staffMembers.FindAll(
+    //    //    delegate (StaffMember sm)
+    //    //    {
+    //    //        return sm.getJobID() == 1;
+    //    //    }
+    //    //    );
 
-        NewTicketQueueSpeed();
+    //    //NewTicketQueueSpeed();
 
-    }
+    //}
 
-    void NewTicketQueueSpeed()
-    {
-        int overallLevel = 0;
+    //void NewTicketQueueSpeed()
+    //{
+    //    int overallLevel = 0;
 
-        for (int i = 0; i < ticketStaff.Count; i++)
-        {
-            overallLevel += ticketStaff[i].GetAttributeByIndex(0);
-        }
+    //    for (int i = 0; i < ticketStaff.Count; i++)
+    //    {
+    //        overallLevel += ticketStaff[i].GetAttributeByIndex(0);
+    //    }
 
-        ticketStaffLevel = 4.5f - (float)(1.125 * overallLevel / ticketStaff.Count);
+    //    ticketStaffLevel = 4.5f - (float)(1.125 * overallLevel / ticketStaff.Count);
 
-        if (ticketStaffLevel < 0.5f) { ticketStaffLevel = 0.5f; }
-    }
+    //    if (ticketStaffLevel < 0.5f) { ticketStaffLevel = 0.5f; }
+    //}
 
     public void ShowColourPicker()
     {
@@ -866,7 +871,7 @@ public class Controller : MonoBehaviour
         {
             count += Time.deltaTime;
 
-            QueueController();
+            //QueueController();
 
             if (count > 0.12)
             {
@@ -954,11 +959,14 @@ public class Controller : MonoBehaviour
 
 
 
-        // hide the button
+        // hide the buttons and menus
+        hideObjectInfo();
         startDayButton.SetActive(false);
         shopButton.gameObject.SetActive(false);
         staffMenuButton.gameObject.SetActive(false);
         colourPicker.SetActive(false);
+        //staffMemberInfo.SetActive(false);
+        //staffMenu.gameObject.SetActive(false);
 
         Customer.tiles = floorTiles;
 
@@ -968,15 +976,22 @@ public class Controller : MonoBehaviour
             simulationRunning = true;
         }
 
+        ticketQueue.Begin();
+
     }
 
     public void nextDay(bool shouldCollect)
     {
 
+        ticketQueue.End();
+
         simulationRunning = false;
 
         queueCount = 0;
+
         ticketQueue.Clear();
+
+        //ticketQueue.Clear();
 
         for (int i = 0; i < allCustomers.Count; i++)
         {
@@ -985,6 +1000,7 @@ public class Controller : MonoBehaviour
                 allCustomers[i].transform.gameObject.SetActive(false);
             }
         }
+
         allCustomers.Clear();
 
         startDayButton.SetActive(true);
@@ -1116,6 +1132,12 @@ public class Controller : MonoBehaviour
 
         }
 
+
+        // reset the state of each slot
+        for (int i = 0; i < slotState.Count; i++)
+        {
+            slotState[i] = false;
+        }
 
         numWalkouts = 0;
 
@@ -1260,85 +1282,70 @@ public class Controller : MonoBehaviour
     float queueCount = 0;
     float ticketStaffLevel = 4.5f;
 
-    void QueueController()
-    {
-        if (ticketQueue.Count > 0)
-        {
-            queueCount += Time.deltaTime;
+    //void QueueController()
+    //{
+    //    if (ticketQueue.Count > 0)
+    //    {
+    //        queueCount += Time.deltaTime;
 
-            if (queueCount > ticketStaffLevel)
-            {
-                queueCount = 0;
+    //        if (queueCount > ticketStaffLevel)
+    //        {
+    //            queueCount = 0;
 
-                for (int i = 0; i < ticketStaff.Count; i++)
-                {
-                    int index = ticketQueue.Peek().getCharIndex();
+    //            for (int i = 0; i < ticketStaff.Count; i++)
+    //            {
+    //                int index = ticketQueue.Peek().getCharIndex();
 
-                    //if (queueDone != null)
-                    //{
-                    //    queueDone();
-                    //    allCustomers[index].nextPoint(false);
-                    //}
-                    allCustomers[index].doneWithQueue();
+    //                //if (queueDone != null)
+    //                //{
+    //                //    queueDone();
+    //                //    allCustomers[index].nextPoint(false);
+    //                //}
+    //                allCustomers[index].doneWithQueue();
 
-                    ticketQueue.Dequeue();
+    //                ticketQueue.Dequeue();
 
-                    for (int j = 0; j < allCustomers.Count; j++)
-                    {
-                        if (allCustomers[j].inQueue && allCustomers[j].GetPatience() > 0)
-                        {
-                            allCustomers[j].transform.position = new Vector2(allCustomers[j].transform.position.x, allCustomers[j].transform.position.y + 0.8f);
-                        }
-                    }
+    //                for (int j = 0; j < allCustomers.Count; j++)
+    //                {
+    //                    if (allCustomers[j].inQueue && allCustomers[j].GetPatience() > 0)
+    //                    {
+    //                        allCustomers[j].transform.position = new Vector2(allCustomers[j].transform.position.x, allCustomers[j].transform.position.y + 0.8f);
+    //                    }
+    //                }
 
-                }
+    //            }
 
-                for (int j = 0; j < allCustomers.Count; j++)
-                {
-                    if (allCustomers[j].inQueue)
-                    {
-                        allCustomers[j].DecreasePatience(50);
+    //            for (int j = 0; j < allCustomers.Count; j++)
+    //            {
+    //                if (allCustomers[j].inQueue)
+    //                {
+    //                    allCustomers[j].DecreasePatience(50);
 
-                        if (allCustomers[j].GetPatience() < 1)
-                        {
-                            WalkAway(j);
-                            numWalkouts++;
+    //                    if (allCustomers[j].GetPatience() < 1)
+    //                    {
+    //                        WalkAway(j);
+    //                        numWalkouts++;
 
-                            // negatively effect rep
-                            reputation.Walkout();
+    //                        // negatively effect rep
+    //                        reputation.Walkout();
 
-                        }
-                        else if (allCustomers[j].GetPatience() == 150)
-                        {
-                            allCustomers[j].animator.SetTrigger("bored");
-                        }
-                    }
-                }
+    //                    }
+    //                    else if (allCustomers[j].GetPatience() == 150)
+    //                    {
+    //                        allCustomers[j].animator.SetTrigger("bored");
+    //                    }
+    //                }
+    //            }
 
-            }
-
-
-        }
-        else {
-            queueCount = 0;
-        }
-    }
+    //        }
 
 
-
-    // move to movementScript
-    void WalkAway(int index)
-    {
-        int x = (int)Math.Round(allCustomers[index].transform.position.x);
-        int y = (int)Math.Round(allCustomers[index].transform.position.y);
-
-        allCustomers[index].SetTravellingTo(x + 0.5f, y);
-        allCustomers[index].inQueue = false;
-
-        allCustomers[index].pointsToVisit = TileManager.floor.FindPath(x, y, 45, 0);
-
-        // have to do the dequeue thing - but from middle... may need to change structure
-    }
+    //    }
+    //    else {
+    //        queueCount = 0;
+    //    }
+    //}
+    
 
     public void objectMoveComplete(bool confirmed)
     {
@@ -1988,6 +1995,8 @@ public class Controller : MonoBehaviour
     {
         staffMembers.Add(staff);
         createStaff(staff, xPos, yPos);
+        Transform t = staffMembers[staffMembers.Count - 1].getTransform();
+        t.FindChild("hiddenPointer").GetComponent<SpriteRenderer>().enabled = false;
     }
 
     public int getStaffSize()
@@ -1995,21 +2004,20 @@ public class Controller : MonoBehaviour
         return staffMembers.Count;
     }
 
-    public void updateStaffJob(int index, int job)
+    public void updateStaffJob(int index, int job, int posInPost)
     {
        
         staffMembers[index].setJob(job);
 
-        // TODO: Update the label in the staff list
-        if (job != 0)
+
+        if (job == 1)
         {
-            //GameObject[] gOs = GameObject.FindGameObjectsWithTag("StaffInfoItem");
-            //staffMenuList[index
+            ticketQueue.StaffMemberAssigned(staffMembers[index], posInPost);
         }
 
         staffMenuList[index].GetComponentsInChildren<Text>()[1].text = "Current Job: " + jobTextFromID(job);
 
-        UpdateJobList();
+        //UpdateJobList();
     }
 
     string jobTextFromID(int index)
@@ -2051,16 +2059,16 @@ public class Controller : MonoBehaviour
     #region Ticket Queue events
     private void addToQueueTickets(Customer customer)
     {
-        ticketQueue.Enqueue(customer);
+        ticketQueue.AddCustomer(customer);
     }
-    private Queue<Customer> getTicketQueue()
-    {
-        return this.ticketQueue;
-    }
-    private int getTicketQueueSize()
-    {
-        return this.ticketQueue.Count;
-    }
+    //private Queue<Customer> getTicketQueue()
+    //{
+    //    return this.ticketQueue;
+    //}
+    //private int getTicketQueueSize()
+    //{
+    //    return this.ticketQueue.Count;
+    //}
     #endregion
 }
 

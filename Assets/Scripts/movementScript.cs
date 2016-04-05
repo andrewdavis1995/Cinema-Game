@@ -94,9 +94,7 @@ public class movementScript : MonoBehaviour {
                     {
                         //customer.nextPoint(false);
                         int queueLength = getQueueTicketsSize();
-
-                        // this will have to change - TODO          ????????????????????????????????? can't remember why this has to change!
-
+                        
                         Vector3 temp = gameObject.transform.position;
                         temp.y -= 2 + (queueLength * 0.8f);
                         temp.x -= 1.5f;
@@ -133,10 +131,10 @@ public class movementScript : MonoBehaviour {
             }
         }
 
-        if (customer.inQueue && customer.shouldMoveUp)
+        if (customer.inQueue && customer.shouldMoveUp > 0)
         {
-            transform.Translate(0, 0.8f, 0);
-            customer.shouldMoveUp = false;
+            transform.Translate(0, customer.shouldMoveUp * 0.8f, 0);
+            customer.shouldMoveUp = 0;
         }
         if (customer.moveToServingSlot > -1)
         {
@@ -157,7 +155,7 @@ public class movementScript : MonoBehaviour {
             customer.walkingAway = false;
             customer.leaving = true;
         }
-        if (transform.position.y < -20)
+        if (transform.position.y < -20 && customer.GetPatience() < 1) 
         {
             // they have left the building!
             transform.gameObject.SetActive(false);
@@ -195,9 +193,12 @@ public class movementScript : MonoBehaviour {
 
 
     // Update is called once per frame
-    void Update ()
+    void Update()
     {
-        moveCustomer();
+        if (!mainController.paused)
+        {
+            moveCustomer();
+        }
     }
 
     public int getQueueTicketSize()

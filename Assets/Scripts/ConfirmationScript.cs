@@ -40,11 +40,23 @@ public class ConfirmationScript : MonoBehaviour {
 
     public void AttributeUpgrade(int index)
     {
-        if (mainController.staffMembers[mainController.selectedStaff].GetAttributeByIndex(index) < 4)
+        int currValue = mainController.staffMembers[mainController.selectedStaff].GetAttributeByIndex(index);
+
+        if (currValue < 4)
         {
+            int cost = 100;
+            int addition = 0;
+
+            for (int i = 1; i < currValue; i++)
+            {
+                addition += (500 * i);
+            }
+
+            cost += addition;
+
             string[] parameters = new string[4];
             parameters[0] = "Upgrade this staff Member's attribute?";
-            parameters[1] = "50"; // TODO - set price based on the current level
+            parameters[1] = cost.ToString();
             parameters[2] = "0";
             parameters[3] = index.ToString();
             OptionSelected(1, parameters);
@@ -134,6 +146,9 @@ public class ConfirmationScript : MonoBehaviour {
                 case 4:
                     mainController.redCarpet.SetActive(true);
                     mainController.hasUnlockedRedCarpet = true;
+                    break;
+                case 5:
+                    OtherObjectScript.UpgradeBoxOffice();
                     break;
             }
         }

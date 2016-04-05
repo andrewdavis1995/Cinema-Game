@@ -2,11 +2,13 @@
 using System.Collections;
 using Assets.Scripts;
 using Assets.Classes;
+using UnityEngine.UI;
 
 public class ShopScript : MonoBehaviour {
 
     Controller mainController;
     GameObject closeBtn;
+    public GameObject[] shopTabs;
 
     void Start()
     {
@@ -96,10 +98,32 @@ public class ShopScript : MonoBehaviour {
         }
     }
 
-    public void PutCloseToTop()
+    void PutCloseToTop()
     {
         closeBtn.GetComponent<RectTransform>().SetAsLastSibling();
         closeBtn.GetComponent<RectTransform>().GetSiblingIndex();
+    }
+
+    public void TabChanged(int index)
+    {
+        Debug.Log(shopTabs[index].name);
+        shopTabs[index].GetComponent<Transform>().SetAsLastSibling();
+
+        for (int i = 0; i < shopTabs.Length; i++)
+        {
+            Image[] images = shopTabs[i].GetComponentsInChildren<Image>();
+
+            if (!shopTabs[i].name.Equals(shopTabs[index].name))
+            {
+                images[1].color = new Color(1, 0.8353f, 0);
+            }
+            else
+            {
+                images[1].color = new Color(1, 0.5176f, 0);
+            }
+        }
+
+        PutCloseToTop();
     }
 
 }

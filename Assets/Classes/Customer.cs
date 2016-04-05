@@ -10,7 +10,7 @@ public class Customer
 {
 
     #region Status Check Variables
-    public bool shouldMoveUp = false;
+    public int shouldMoveUp = 0;
     public int moveToServingSlot = -1;
     public int servingSlot = -1;
     public bool walkingAway = false;
@@ -43,11 +43,13 @@ public class Customer
     public void MoveUpInQueue()
     {
         transform.Translate(0, 0.8f, 0);
+        transform.GetComponent<SpriteRenderer>().sortingOrder++;
     }
 
     public void MoveToServingSlot()
     {
-        transform.position = new Vector3(38.5f + (3 * moveToServingSlot), 11 * 0.8f, 0);
+        transform.position = new Vector3(38.5f + (2.6f * moveToServingSlot), 11 * 0.8f, 0);
+        SetTravellingTo(38.5f + (2.6f * moveToServingSlot), 11 * 0.8f);
     }
 
     int hourDue;
@@ -264,6 +266,8 @@ public class Customer
     public void doneWithQueue() {
         this.inQueue = false;
         SetTravellingTo(38.5f, 11 * 0.8f);
+        transform.GetComponent<SpriteRenderer>().sortingLayerName = "Front";
+        transform.GetComponent<SpriteRenderer>().sortingOrder = 11;
     }
     
     public float getTravellingToX() { return travellingToX; }
@@ -286,9 +290,19 @@ public class Customer
         inQueue = false;
         goingToSeats = false;
 
-        pointsToVisit = TileManager.floor.FindPath(x, y, 42, 0);
+        transform.GetComponent<SpriteRenderer>().sortingLayerName = "Front";
 
-        // have to do the dequeue thing - but from middle... may need to change structure
+        if (y > 0)
+        {
+            pointsToVisit = TileManager.floor.FindPath(x, y, 42, 0);
+        }
+        else
+        {
+            pointsToVisit = new List<Coordinate>();
+        }
+
+        mainController.numWalkouts++;
+        
     }
 
 }

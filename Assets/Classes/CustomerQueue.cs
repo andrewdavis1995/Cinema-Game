@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using UnityEngine;
 
 namespace Assets.Classes
 {
@@ -27,10 +28,9 @@ namespace Assets.Classes
                 Customer c = theQueue[0];
                 theQueue.RemoveAt(0);
 
-
                 for (int i = 0; i < theQueue.Count; i++)
                 {
-                    theQueue[i].shouldMoveUp = true;
+                    theQueue[i].shouldMoveUp++;
                 }
                 c.moveToServingSlot = index;
 
@@ -39,14 +39,12 @@ namespace Assets.Classes
 
             for (int i = 0; i < theQueue.Count; i++)
             {
-                theQueue[i].shouldMoveUp = true;
+                theQueue[i].shouldMoveUp++;
             }
 
             return null;
 
         }
-
-
 
         public void StaffMemberAssigned(StaffMember sm, int pos)
         {
@@ -75,8 +73,38 @@ namespace Assets.Classes
 
         }
 
-        public bool addingInProgress = false;
+        public void StaffMemberRemoved(StaffMember sm, int pos)
+        {
+            // clear the staff list at pos
+            staffList[pos] = null;
 
+            // clear the thread list at pos
+            if (staffThreads[pos] != null && staffThreads[pos].IsAlive)
+            {
+                staffThreads[pos].Abort();
+            }
+
+            staffThreads[pos] = null;
+
+            // possibly put customer back to queue (if someone in serving slots)
+            if (servingSlots[pos] != null)
+            {
+                theQueue.Insert(0, servingSlots[pos]);
+                servingSlots[pos] = new Customer(null, -1, null, null);
+
+                // move customer back into queue
+                theQueue[0].transform.position = new UnityEngine.Vector3(38.5f, 9 * 0.8f, 0);
+
+                // move queue back
+                for (int i = 1; i < theQueue.Count; i++)
+                {
+                    theQueue[i].transform.Translate(0, -0.8f, 0);
+                    theQueue[i].transform.GetComponent<SpriteRenderer>().sortingOrder++;
+                }
+            }
+
+        }
+        
         public void StaffThreadMethod(int index, int speed)
         {
             while (true)
@@ -89,18 +117,18 @@ namespace Assets.Classes
 
                     servingSlots[index].goingToSeats = true;
                     servingSlots[index].inQueue = false;
-                    servingSlots[index].SetTravellingTo(38.5f + (3 * servingSlots[index].servingSlot), 11 * 0.8f);
                 }
 
                 servingSlots[index] = NextCustomerPlease(index);
 
-                    // get someone else from the queue
+                // get someone else from the queue
 
-                Random r = new Random();
-                int rand = r.Next(70, 140);
+                System.Random r = new System.Random();
+                int rand = r.Next(90, 120);
+
                 float multiplier = (float)rand / 100f;
 
-                int sleepTime = (int)(multiplier * (4750 - (1250 * (speed - 1))));
+                int sleepTime = (int)(multiplier * (4400 - (1000 * (speed - 1))));
 
                 Thread.Sleep(sleepTime);
                 
@@ -110,10 +138,9 @@ namespace Assets.Classes
 
         public void AddCustomer(Customer c)
         {
-            //while (addingInProgress) { }
-
-            //addingInProgress = true;
             theQueue.Add(c);
+            c.transform.GetComponent<SpriteRenderer>().sortingLayerName = "Queue";
+            c.transform.GetComponent<SpriteRenderer>().sortingOrder = theQueue.Count;
 
             for (int i = 0; i < servingSlots.Length; i++)
             {
@@ -125,8 +152,6 @@ namespace Assets.Classes
                     break;
                 }
             }
-
-            //addingInProgress = false;
         }
 
         void DecreasePatience()
@@ -136,6 +161,13 @@ namespace Assets.Classes
             {
                 for (int i = 0; i < theQueue.Count; i++)
                 {
+                    int value = 8;
+
+                    if (i < 8)
+                    {
+                        value -= (7 - i);
+                    }
+
                     theQueue[i].DecreasePatience(5);
 
                     // check if < 0
@@ -146,7 +178,7 @@ namespace Assets.Classes
                         theQueue.RemoveAt(i);
                         for (int j = i; j < theQueue.Count; j++)
                         {
-                            theQueue[j].shouldMoveUp = true;
+                            theQueue[j].shouldMoveUp++;
                         }
 
                     }
@@ -210,6 +242,38 @@ namespace Assets.Classes
         public int GetQueueSize()
         {
             return theQueue.Count;
+        }
+
+        public void Pause()
+        {
+            if (patienceThread != null)
+            {
+                patienceThread.Suspend();
+            }
+
+            for (int i = 0; i < staffThreads.Length; i++)
+            {
+                if (staffThreads[i] != null)
+                {
+                    staffThreads[i].Suspend();
+                }
+            }
+        }
+
+        public void Resume()
+        {
+            if (patienceThread != null)
+            {
+                patienceThread.Resume();
+            }
+
+            for (int i = 0; i < staffThreads.Length; i++)
+            {
+                if (staffThreads[i] != null)
+                {
+                    staffThreads[i].Resume();
+                }
+            }
         }
 
     }

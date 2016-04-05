@@ -27,7 +27,7 @@ public class mouseDrag : MonoBehaviour
     public delegate int getStaffJob(int index);
     public static event getStaffJob getStaffJobById;
 
-    public delegate void updateStaffJob(int index, int job, int posInPost);
+    public delegate void updateStaffJob(int index, int job, int posInPost, bool add);
     public static event updateStaffJob changeStaffJob;
 
     public delegate List<StaffMember> getFullStaffList();
@@ -141,9 +141,9 @@ public class mouseDrag : MonoBehaviour
 
     void OnMouseDown()
     {
-
         if ((mainController.statusCode < 3))
         {
+            int posInPost = -1;
 
             for (int i = 0; i < mainController.staffSlot.Count; i++)
             {
@@ -156,20 +156,49 @@ public class mouseDrag : MonoBehaviour
                 if (b1.Contains(mousePos))
                 {
                     mainController.slotState[i] = false;
+
+                    int target = 0;
+
+                    if (mainController.staffSlot[i].tag.Contains("1"))
+                    {
+                        // a ticket slot
+                        target = 1;
+                    }
+                    else
+                    {
+                        target = 2;
+                    }
+
+                    GameObject[] slots = GameObject.FindGameObjectsWithTag("Slot Type " + target);
+
+                    for (int j = 0; j < slots.Length; j++)
+                    {
+                        if (slots[j].name.Equals(mainController.staffSlot[i].name))
+                        {
+                            posInPost = j;
+                            break;
+                        }
+                    }
+
+                    if (posInPost > -1)
+                    {
+                        break;
+                    }
                 }
+
             }
 
             Transform pi3 = transform.FindChild("hiddenPointer");
             pi3.GetComponent<SpriteRenderer>().enabled = false;
 
-            // make the image shake and grow!
+            //make the image shake and grow!
             GetComponent<SpriteRenderer>().sortingLayerName = "Staff";
             dragging = true;
             prevCameraZoom = Camera.main.orthographicSize;
             Camera.main.orthographicSize = 9;
             transform.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
             transform.localScale = new Vector3(2f, 2f, 2f);
-            changeStaffJob(staffMember.getIndex(), 0, 0);
+            changeStaffJob(staffMember.getIndex(), staffMember.getJobID(), posInPost, false);
 
             for (int i = 0; i < mainController.staffSlot.Count; i++)
             {
@@ -240,13 +269,21 @@ public class mouseDrag : MonoBehaviour
                                 target = 2;
                             }
 
-                            GameObject[] slots = GameObject.FindGameObjectsWithTag("Slot Type " + target);
-
                             mainController.slotState[i] = true;
 
-                            // TODO: get the actual position in post for the staff slot (get all for that post (in order) into array, use array index
-                            // (this value replaces i)
-                            changeStaffJob(staffMember.getIndex(), target, i);
+                            GameObject[] slots = GameObject.FindGameObjectsWithTag("Slot Type " + target);
+
+                            int posInPost = -1;
+                            for (int j = 0; j < slots.Length; j++)
+                            {
+                                if (slots[j].name.Equals(mainController.staffSlot[i].name))
+                                {
+                                    posInPost = j;
+                                    break;
+                                }
+                            }
+                            
+                            changeStaffJob(staffMember.getIndex(), target, posInPost, true);
                         }
                     }
                     else
@@ -257,7 +294,7 @@ public class mouseDrag : MonoBehaviour
                         {
                             transform.position = new Vector3(transform.position.x + 3, transform.position.y, 0);
                         }
-                        changeStaffJob(staffMember.getIndex(), 0, 0);
+                        changeStaffJob(staffMember.getIndex(), 0, 0, false);
                     }
                 }
             }
@@ -302,7 +339,6 @@ public class mouseDrag : MonoBehaviour
     void doDragging()
     {
 
-
         transform.position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         transform.position = new Vector3(transform.position.x + 0.75f, transform.position.y - 1f, 0);
 
@@ -313,7 +349,7 @@ public class mouseDrag : MonoBehaviour
             triggerSet = true;
         }
 
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < mainController.staffSlot.Count; i++)
         {
             Bounds b1 = mainController.staffSlot[i].GetComponent<Renderer>().bounds;
 

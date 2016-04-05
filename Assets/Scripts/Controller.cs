@@ -13,7 +13,10 @@ public class Controller : MonoBehaviour
     public int selectedStaff = -1;
     
 
-    int numWalkouts = 0;
+    public int numWalkouts = 0;
+
+    public Sprite[] boxOfficeImages;
+    public int boxOfficeLevel = 1;
 
     public GameObject[] walls;
 
@@ -119,7 +122,7 @@ public class Controller : MonoBehaviour
 
     //List<GameObject> customerObjects = new List<GameObject>();
 
-    CustomerQueue ticketQueue = new CustomerQueue();
+    public CustomerQueue ticketQueue = new CustomerQueue();
 
     public bool simulationRunning = false;
 
@@ -162,6 +165,28 @@ public class Controller : MonoBehaviour
         }
     }
 
+    public bool paused = false;
+
+
+    void OnApplicationQuit()
+    {
+        // close off all open threads - memory issues
+        ticketQueue.End();
+    }
+
+    void OnApplicationPause(bool pauseStatus)
+    {
+        paused = pauseStatus;
+
+        if (pauseStatus)
+        {
+            ticketQueue.Pause();
+        }
+        else
+        {
+            ticketQueue.Resume();
+        }
+    }
 
 
     // Use this for initialization
@@ -225,19 +250,10 @@ public class Controller : MonoBehaviour
         #endregion
 
 
-        
-        // TODO - load slots if load game
-        for (int i = 0; i < 2; i++)
-        {
-            staffSlot.Add(Instantiate(slotPrefab, new Vector3(39.3f + (i * 2.5f), 12.5f, 0), Quaternion.identity) as Transform);
-            staffSlot[i].GetComponent<SpriteRenderer>().enabled = false;
-            slotState.Add(false);
-        }
+        Vector3 location = new Vector3(37.8f, 12.5f, 0);
+        OtherObjectScript.CreateStaffSlot(1, location);
 
-        // this will change
-        staffSlot[0].tag = "Slot Type 1";
-        staffSlot[1].tag = "Slot Type 1";
-        ticketQueue.Upgrade();
+        // this will change depending on starting upgrade levels and other queues etc
 
         #region Load / New Game
         // get Player data. If not null, load game
@@ -613,14 +629,11 @@ public class Controller : MonoBehaviour
 
     public void UpgradeStaffAttribute(int index)
     {
-        //TODO: check if less than 4
-        //TODO: check if enough money
 
         staffMembers[selectedStaff].Upgrade(index);
 
         Image[] imgs = staffMemberInfo.GetComponentsInChildren<Image>();
-
-        //TODO: remove money
+        
         int attributeEffected = staffMembers[selectedStaff].GetAttributes()[index];
 
         imgs[7 + (index * 4)].fillAmount = 0.25f * attributeEffected;
@@ -644,18 +657,34 @@ public class Controller : MonoBehaviour
 
     public void Upgrade()
     {
-        for (int i = 0; i < screenObjectList.Count; i++)
+        if (objectSelected.Equals("Box Office"))
         {
-            if (screenObjectList[i].name.Equals(objectSelected))
+            if (boxOfficeLevel < 3)
             {
-                ScreenObject theScreen = screenObjectList[i].GetComponent<Screen_Script>().theScreen;
+                ConfirmationScript.OptionSelected(5, new string[] { "upgrade the box office?", "1200", "0", "0" });
+            }
+            else
+            {
+                Text[] texts = popup.gameObject.GetComponentsInChildren<Text>();
+                texts[1].text = "The Box Office is already fully upgraded!";
+                popup.SetActive(true);
+            }
+        }
+        else {
 
-                if (theScreen.getUpgradeLevel() < 4 && !theScreen.ConstructionInProgress())
+            for (int i = 0; i < screenObjectList.Count; i++)
+            {
+                if (screenObjectList[i].name.Equals(objectSelected))
                 {
+                    ScreenObject theScreen = screenObjectList[i].GetComponent<Screen_Script>().theScreen;
 
-                    ConfirmationScript.OptionSelected(3, new string[] { "upgrade Screen " + theScreen.getScreenNumber(), (theScreen.calculateUpgradeCost()).ToString(), "0", i.ToString() });
+                    if (theScreen.getUpgradeLevel() < 4 && !theScreen.ConstructionInProgress())
+                    {
 
-                    break;
+                        ConfirmationScript.OptionSelected(3, new string[] { "upgrade Screen " + theScreen.getScreenNumber(), (theScreen.calculateUpgradeCost()).ToString(), "0", i.ToString() });
+
+                        break;
+                    }
                 }
             }
         }
@@ -763,8 +792,7 @@ public class Controller : MonoBehaviour
         newColourButton(0, 2, true);
 
     }
-
-
+    
     Color GetColourFromID(int id)
     {
         switch (id)
@@ -788,8 +816,7 @@ public class Controller : MonoBehaviour
             default: isMarbleFloor = false; return new Sprite[] { ColourBackground };
         }
     }
-
-
+    
     public void colourClicked(int id)
     {
         carpetColour = GetColourFromID(id);
@@ -797,32 +824,6 @@ public class Controller : MonoBehaviour
 
         //carpetRoll.GetComponent<SpriteRenderer>().color = carpetColour;
         CarpetRollScript.current.Begin(carpetColour, this, s);
-
-        //for (int i = 0; i < height; i++)
-        //{
-        //    for (int j = 0; j < width; j++)
-        //    {
-        //        floorTiles[i, j].GetComponent<SpriteRenderer>().color = carpetColour;
-
-        //        if (!s.Equals(marbleBackground))
-        //        {
-        //            floorTiles[i, j].GetComponent<SpriteRenderer>().sprite = ColourBackground;
-        //        }
-        //        else
-        //        {
-        //            int index = UnityEngine.Random.Range(0, 3);
-
-
-        //            floorTiles[i, j].GetComponent<SpriteRenderer>().sprite = marbleSquares[index];
-
-        //        }
-        //    }
-        //}
-
-
-        // change step colours
-        //steps.GetComponent<SpriteRenderer>().color = carpetColour;
-
     }
 
     //void UpdateJobList()
@@ -939,13 +940,37 @@ public class Controller : MonoBehaviour
 
     }
 
+    void ResetStaff()
+    {
+        GameObject[] staffObjects = GameObject.FindGameObjectsWithTag("Staff");
+
+        for (int i = 0; i < staffObjects.Length; i++)
+        {
+
+            int x = 35 + (2 * (i % 6));
+            int y = (2 * (i / 6));
+
+            Transform t = staffObjects[i].transform;
+            t.position = new Vector3(x, y, 0);
+            
+            updateStaffJob(i, 0, 0, false);
+
+            staffObjects[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+
+            try
+            {
+                Transform pi3 = transform.FindChild("hiddenPointer");
+                pi3.GetComponent<SpriteRenderer>().enabled = true;
+            }
+            catch (Exception) { }
+            //t.Translate(new Vector3(10, o0, 0));
+
+        }
+    }
+
     public void startDay()
     {
 
-        //for (int i = 0; i < screenObjectList.Count; i++)
-        //{
-        //    screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.55f);
-        //}
 
         screenPaths.Clear();
 
@@ -985,6 +1010,26 @@ public class Controller : MonoBehaviour
 
         ticketQueue.End();
 
+        if (shouldCollect)
+        {
+            int money = getTodaysMoney();
+            
+            totalCoins += money;
+            reputation.AddCoins(money);
+            // output coins
+            coinLabel.text = totalCoins.ToString();
+            //lblCoins.Text = totalCoins.ToString();
+                        
+            int oldOverall = reputation.GetOverall();
+            reputation.SetOverall();
+
+            int newOverall = reputation.GetOverall();
+
+            int repChange = newOverall - oldOverall;
+
+            ShowEndOfDayPopup(money, numWalkouts, repChange, allCustomers.Count);
+        }
+
         simulationRunning = false;
 
         queueCount = 0;
@@ -1008,16 +1053,7 @@ public class Controller : MonoBehaviour
         staffMenuButton.gameObject.SetActive(true);
 
 
-        int money = getTodaysMoney();
-
-        if (shouldCollect)
-        {
-            totalCoins += money;
-            reputation.AddCoins(money);
-            // output coins
-            coinLabel.text = totalCoins.ToString();
-            //lblCoins.Text = totalCoins.ToString();
-        }
+        
 
         currDay++;
 
@@ -1096,41 +1132,9 @@ public class Controller : MonoBehaviour
 
         statusCode = 0;
 
-        if (shouldCollect)
-        {
-            int oldOverall = reputation.GetOverall();
-            reputation.SetOverall();
-
-            int newOverall = reputation.GetOverall();
-
-            int repChange = newOverall - oldOverall;
-
-            ShowEndOfDayPopup(money, numWalkouts, repChange, allCustomers.Count);
-        }
 
 
-        GameObject[] staffObjects = GameObject.FindGameObjectsWithTag("Staff");
-
-        for (int i = 0; i < staffObjects.Length; i++)
-        {
-
-            int x = 35 + (2 * (i % 6));
-            int y = (2 * (i / 6));
-
-            Transform t = staffObjects[i].transform;
-            t.position = new Vector3(x, y, 0);
-
-            staffObjects[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
-
-            try
-            {
-                Transform pi3 = transform.FindChild("hiddenPointer");
-                pi3.GetComponent<SpriteRenderer>().enabled = true;
-            }
-            catch (Exception) { }
-            //t.Translate(new Vector3(10, o0, 0));
-
-        }
+        ResetStaff();
 
 
         // reset the state of each slot
@@ -1212,9 +1216,29 @@ public class Controller : MonoBehaviour
                 int upgradeLevel = theScreens[screenNum].getUpgradeLevel();
                 int numCustomers = filmShowings[i].getTicketsSold();
 
-                totalIntake += (2 + (1 * upgradeLevel)) * numCustomers;
+                int screenIncome = (int)(1.5 + (1.5 * upgradeLevel)) * numCustomers;
+
+                #region 3D glasses income!
+                int random = UnityEngine.Random.Range(0, numCustomers);
+
+                if (upgradeLevel == 4)
+                {
+                    screenIncome += 2 * random;  
+                }
+                #endregion
+
+                totalIntake += screenIncome;
             }
         }
+
+        GameObject[] vendingMachines = GameObject.FindGameObjectsWithTag("Vending Machine");
+
+        // each vending machine will generate between 10 and 50 coins each day
+        int vendingAmount = UnityEngine.Random.Range(10, 50);
+
+        int vendingMachineIncome = vendingAmount * vendingMachines.Length;
+
+        totalIntake += vendingMachineIncome;
 
         return totalIntake;
     }
@@ -1784,7 +1808,7 @@ public class Controller : MonoBehaviour
         txts[3].text = totalCoins.ToString();
         txts[4].text = todaysMoney.ToString();
         txts[6].text = repChange.ToString() + "%";
-        txts[7].text = numCustomers.ToString();
+        txts[7].text = (numCustomers - walkouts).ToString();
         txts[8].text = walkouts.ToString();
 
         statusCode = 9;
@@ -2004,18 +2028,32 @@ public class Controller : MonoBehaviour
         return staffMembers.Count;
     }
 
-    public void updateStaffJob(int index, int job, int posInPost)
+    public void updateStaffJob(int index, int job, int posInPost, bool add)
     {
-       
+        
         staffMembers[index].setJob(job);
 
-
-        if (job == 1)
+        if (add)
         {
-            ticketQueue.StaffMemberAssigned(staffMembers[index], posInPost);
+            // set new job
+            if (job == 1)
+            {
+                ticketQueue.StaffMemberAssigned(staffMembers[index], posInPost);
+            }
+        }
+        else
+        {
+
+            // remove from previous job
+            if (job == 1)
+            {
+                ticketQueue.StaffMemberRemoved(staffMembers[index], posInPost);
+                staffMembers[index].setJob(0);
+            }
         }
 
-        staffMenuList[index].GetComponentsInChildren<Text>()[1].text = "Current Job: " + jobTextFromID(job);
+
+        staffMenuList[index].GetComponentsInChildren<Text>()[1].text = "Current Job: " + jobTextFromID(staffMembers[index].getJobID());
 
         //UpdateJobList();
     }
@@ -2045,7 +2083,24 @@ public class Controller : MonoBehaviour
         labels[1].text = line2;
         Image[] images = objectInfo.gameObject.GetComponentsInChildren<Image>();
 
-        if (line1.ToUpper().Contains("SCREEN")) { images[1].gameObject.GetComponent<Image>().color = Color.white; } else { images[1].gameObject.GetComponent<Image>().color = new Color(0.06f, 0.06f, 0.06f); }
+        if (line1.ToUpper().Contains("SCREEN"))
+        {
+            images[2].gameObject.GetComponent<Image>().color = Color.white;
+            images[2].gameObject.GetComponent<Button>().enabled = true;
+            images[1].gameObject.GetComponent<Image>().color = Color.white;
+        }
+        else if (line1.ToUpper().Contains("BOX"))
+        {
+            images[2].gameObject.GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f);
+            images[2].gameObject.GetComponent<Button>().enabled = false;
+            images[1].gameObject.GetComponent<Image>().color = Color.white;
+        }
+        else 
+        {
+            images[2].gameObject.GetComponent<Image>().color = Color.white;
+            images[2].gameObject.GetComponent<Button>().enabled = true;
+            images[1].gameObject.GetComponent<Image>().color = new Color(0.06f, 0.06f, 0.06f);
+        }
 
         images[3].sprite = theImage;
     }

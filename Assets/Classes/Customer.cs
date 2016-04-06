@@ -294,7 +294,7 @@ public class Customer
 
         if (y > 0)
         {
-            pointsToVisit = TileManager.floor.FindPath(x, y, 42, 0);
+            pointsToVisit = TileManager.floor.FindPath(x, y, 42, y-1);
         }
         else
         {
@@ -302,6 +302,7 @@ public class Customer
         }
 
         mainController.numWalkouts++;
+        mainController.allCustomers.RemoveAt(index);
         
     }
 

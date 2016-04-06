@@ -55,7 +55,7 @@ public class ConfirmationScript : MonoBehaviour {
             cost += addition;
 
             string[] parameters = new string[4];
-            parameters[0] = "Upgrade this staff Member's attribute?";
+            parameters[0] = "Upgrade " + mainController.staffMembers[mainController.selectedStaff].GetStaffname() + "'s " + GetAttributeName(index) + " attribute?";
             parameters[1] = cost.ToString();
             parameters[2] = "0";
             parameters[3] = index.ToString();
@@ -67,6 +67,24 @@ public class ConfirmationScript : MonoBehaviour {
             Text[] texts = mainController.popup.gameObject.GetComponentsInChildren<Text>();
             texts[1].text = "This attribute is already fully upgraded!";
         }
+    }
+
+    public string GetAttributeName(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                return "Ticket Speed";
+            case 1:
+                return "Food Speed";
+            case 2:
+                return "Friendliness";
+            case 3:
+                return "Clarity";
+        }
+
+        return "";
+
     }
 
     public void Cancel() { mainController.confirmationPanel.SetActive(false); }

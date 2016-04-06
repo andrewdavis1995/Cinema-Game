@@ -18,6 +18,8 @@ using Assets.Classes;
 public class mouseDrag : MonoBehaviour
 {
 
+    public static GameObject staffAttributePanel;
+
     public delegate void addStaffMember(StaffMember staff, int x, int y);
     public static event addStaffMember addStaff;
 
@@ -31,6 +33,10 @@ public class mouseDrag : MonoBehaviour
     public static event updateStaffJob changeStaffJob;
 
     public delegate List<StaffMember> getFullStaffList();
+
+    Text[] attributeTexts;
+    Image[] attributeImages;
+
     public static event getFullStaffList getStaffList;
 
     float prevCameraZoom = 10f;
@@ -56,8 +62,12 @@ public class mouseDrag : MonoBehaviour
     {
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
 
-
         animator = GetComponent<Animator>();
+
+        attributeImages = staffAttributePanel.GetComponentsInChildren<Image>();
+        attributeTexts = staffAttributePanel.GetComponentsInChildren<Text>();
+
+        Debug.Log("DONE");
 
     }
 
@@ -141,8 +151,19 @@ public class mouseDrag : MonoBehaviour
 
     void OnMouseDown()
     {
+        attributeTexts[0].text = staffMember.GetStaffname();
+
+        int[] values = staffMember.GetAttributes();
+
+        for (int i = 1; i < 5; i++)
+        {
+            attributeTexts[i].text = values[i - 1].ToString();
+        }
+
         if ((mainController.statusCode < 3))
         {
+            staffAttributePanel.SetActive(true);
+
             int posInPost = -1;
 
             for (int i = 0; i < mainController.staffSlot.Count; i++)
@@ -219,9 +240,10 @@ public class mouseDrag : MonoBehaviour
     {
         GetComponent<SpriteRenderer>().sortingLayerName = "Front";
         
-
         if (dragging && (mainController.statusCode == 1 || mainController.statusCode == 0 || mainController.statusCode == 6 || mainController.statusCode != 7))
         {
+            staffAttributePanel.SetActive(false);
+
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             mousePos = new Vector3(mousePos.x, mousePos.y, 0f);
 
@@ -325,13 +347,14 @@ public class mouseDrag : MonoBehaviour
 
             SortStaffLayer(hidden);
 
+            if (mainController.statusCode < 3)
+            {
+                mainController.statusCode = 0;
+            }
+
         }
         dragging = false;
 
-        if (mainController.statusCode < 3)
-        {
-            mainController.statusCode = 0;
-        }
 
 
     }

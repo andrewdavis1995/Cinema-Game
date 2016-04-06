@@ -117,6 +117,8 @@ namespace Assets.Classes
 
                     servingSlots[index].goingToSeats = true;
                     servingSlots[index].inQueue = false;
+                    
+                    //servingSlots[index].doneWithQueue();
                 }
 
                 servingSlots[index] = NextCustomerPlease(index);
@@ -161,26 +163,25 @@ namespace Assets.Classes
             {
                 for (int i = 0; i < theQueue.Count; i++)
                 {
-                    int value = 8;
+                    int value = 6;
 
-                    if (i < 8)
+                    if (i < 6)
                     {
-                        value -= (7 - i);
+                        value -= (5 - i);
                     }
 
-                    theQueue[i].DecreasePatience(5);
+                    theQueue[i].DecreasePatience(value);
 
                     // check if < 0
                     if (theQueue[i].GetPatience() < 1)
                     {
                         // walk out
                         theQueue[i].walkingAway = true;
-                        theQueue.RemoveAt(i);
-                        for (int j = i; j < theQueue.Count; j++)
+                        for (int j = i + 1; j < theQueue.Count; j++)
                         {
                             theQueue[j].shouldMoveUp++;
                         }
-
+                        theQueue.RemoveAt(i);
                     }
                 }
 
@@ -246,14 +247,14 @@ namespace Assets.Classes
 
         public void Pause()
         {
-            if (patienceThread != null)
+            if (patienceThread != null && patienceThread.IsAlive)
             {
                 patienceThread.Suspend();
             }
 
             for (int i = 0; i < staffThreads.Length; i++)
             {
-                if (staffThreads[i] != null)
+                if (staffThreads[i] != null && staffThreads[i].IsAlive)
                 {
                     staffThreads[i].Suspend();
                 }

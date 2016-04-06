@@ -178,13 +178,16 @@ public class Controller : MonoBehaviour
     {
         paused = pauseStatus;
 
-        if (pauseStatus)
+        if (simulationRunning)
         {
-            ticketQueue.Pause();
-        }
-        else
-        {
-            ticketQueue.Resume();
+            if (pauseStatus)
+            {
+                ticketQueue.Pause();
+            }
+            else
+            {
+                ticketQueue.Resume();
+            }
         }
     }
 
@@ -213,6 +216,7 @@ public class Controller : MonoBehaviour
         GameObject[] tmpArray = GameObject.FindGameObjectsWithTag("Floor Tile");
         //closeInfo = GameObject.Find("Close Info");
         steps = GameObject.Find("Steps");
+        mouseDrag.staffAttributePanel = GameObject.Find("Staff Attributes");
         #endregion
 
         Customer.tiles = floorTiles;
@@ -234,6 +238,7 @@ public class Controller : MonoBehaviour
         popup.SetActive(false);
         redCarpet.SetActive(false);
         reputationPage.SetActive(false);
+        mouseDrag.staffAttributePanel.SetActive(false);
         #endregion
 
         #region Add Delegate references
@@ -661,7 +666,10 @@ public class Controller : MonoBehaviour
         {
             if (boxOfficeLevel < 3)
             {
-                ConfirmationScript.OptionSelected(5, new string[] { "upgrade the box office?", "1200", "0", "0" });
+                int cost = 3500;
+                cost += (boxOfficeLevel - 1) * 5500;
+
+                ConfirmationScript.OptionSelected(5, new string[] { "upgrade the box office?", cost.ToString(), "0", "0" });
             }
             else
             {
@@ -684,6 +692,13 @@ public class Controller : MonoBehaviour
                         ConfirmationScript.OptionSelected(3, new string[] { "upgrade Screen " + theScreen.getScreenNumber(), (theScreen.calculateUpgradeCost()).ToString(), "0", i.ToString() });
 
                         break;
+                    }
+                    else if (theScreen.ConstructionInProgress())
+                    {
+                        // TODO: maybe change the image to a cross or something
+                        Text[] texts = popup.gameObject.GetComponentsInChildren<Text>();
+                        texts[1].text = "Construction is already in progress!";
+                        popup.SetActive(true);
                     }
                 }
             }
@@ -874,7 +889,7 @@ public class Controller : MonoBehaviour
 
             //QueueController();
 
-            if (count > 0.12)
+            if (count > 0.15)
             {
 
                 count = 0;
@@ -971,6 +986,12 @@ public class Controller : MonoBehaviour
     public void startDay()
     {
 
+     
+        // check if any screens available
+        // if none, 
+        // nextDay(false);
+        // may need to alter the way the coins earnt are output
+           
 
         screenPaths.Clear();
 
@@ -980,8 +1001,6 @@ public class Controller : MonoBehaviour
             List<Coordinate> points = TileManager.floor.FindPath(38, 11, theScreens[i].getX() + 5, theScreens[i].getY());
             screenPaths.Add(points);
         }
-
-
 
 
         // hide the buttons and menus
@@ -1130,7 +1149,7 @@ public class Controller : MonoBehaviour
 
         movementScript.customerStatus.SetActive(false);
 
-        statusCode = 0;
+        //statusCode = 0;
 
 
 
@@ -1157,6 +1176,7 @@ public class Controller : MonoBehaviour
 
     public void ViewReputation()
     {
+        statusCode = 9;
         popupBox.SetActive(false);
         reputationPage.SetActive(true);
 
@@ -1808,7 +1828,7 @@ public class Controller : MonoBehaviour
         txts[3].text = totalCoins.ToString();
         txts[4].text = todaysMoney.ToString();
         txts[6].text = repChange.ToString() + "%";
-        txts[7].text = (numCustomers - walkouts).ToString();
+        txts[7].text = numCustomers.ToString();
         txts[8].text = walkouts.ToString();
 
         statusCode = 9;

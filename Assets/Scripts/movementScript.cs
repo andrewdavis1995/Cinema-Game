@@ -141,6 +141,7 @@ public class movementScript : MonoBehaviour {
             customer.MoveToServingSlot();
             customer.servingSlot = customer.moveToServingSlot;
             customer.moveToServingSlot = -1;
+            GetComponent<SpriteRenderer>().sortingLayerName = "Front";
         }
         if (customer.walkingAway)
         {

@@ -16,6 +16,7 @@ public class Customer
     public bool walkingAway = false;
     public bool leaving;
     public bool hasLeftTheBuilding = false;
+    public bool isBored = false;
     #endregion
 
     int index;
@@ -37,6 +38,10 @@ public class Customer
         patience -= val;
 
         if (patience < 0) { patience = 0; }
+        else if (patience < 152 && patience > 145)
+        {
+            isBored = true;
+        }
 
     }
 
@@ -252,6 +257,7 @@ public class Customer
         else if (!inQueue && patience > 0)
         {
             // arrived at screen - FINISHED
+            mainController.servedCustomers++;
             transform.gameObject.SetActive(false);
 
             // update the speed portion of the Reputation
@@ -284,26 +290,28 @@ public class Customer
     // move to movementScript
     public void WalkOut()
     {
-        int x = (int) transform.position.x;
-        int y = (int) (transform.position.y);
-        
+        int x = (int)transform.position.x;
+        int y = (int)(transform.position.y);
+
         inQueue = false;
         goingToSeats = false;
 
         transform.GetComponent<SpriteRenderer>().sortingLayerName = "Front";
+        transform.GetComponent<SpriteRenderer>().sortingOrder = 70;
 
-        if (y > 0)
+        if (y > 1)
         {
-            pointsToVisit = TileManager.floor.FindPath(x, y, 42, y-1);
+            pointsToVisit = TileManager.floor.FindPath(x, y, 42, y - 1);
         }
         else
         {
+            transform.Translate(2.5f, 0, 0);
             pointsToVisit = new List<Coordinate>();
         }
 
         mainController.numWalkouts++;
-        mainController.allCustomers.RemoveAt(index);
-        
+        //mainController.allCustomers.RemoveAt(ind);
+       
     }
 
 }

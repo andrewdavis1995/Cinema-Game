@@ -16,8 +16,9 @@ namespace Assets.Classes
         Thread[] staffThreads = new Thread[1];         // one thread per staff member on the post
         Thread patienceThread;        // the first parameter is the slot, the second is the speed
 
+        bool running = false;         // whether or not the day is running
 
-        bool running = false;                          // whether or not the day is running
+
 
         Customer NextCustomerPlease(int index)
         {
@@ -165,9 +166,14 @@ namespace Assets.Classes
                 {
                     int value = 6;
 
-                    if (i < 6)
+                    if (i < 3)
                     {
-                        value -= (5 - i);
+                        value -= (5 - (2 * i));
+                    }
+
+                    if (i == 0)
+                    {
+                        value += 2;
                     }
 
                     theQueue[i].DecreasePatience(value);

@@ -9,7 +9,7 @@ public class Screen_Script : MonoBehaviour {
 
     public ScreenObject theScreen;
     
-    public delegate void showBuildingOptions(string screen, string upgrade, Sprite s);
+    public delegate void showBuildingOptions(string screen, string upgrade, Sprite s, int constrDone, int constrTotal);
     public static event showBuildingOptions showBuildingMenu;
 
     Controller theController;
@@ -56,9 +56,40 @@ public class Screen_Script : MonoBehaviour {
 
             Sprite s = transform.GetComponent<SpriteRenderer>().sprite;
 
-            showBuildingMenu(screenNum, level, s);
+            // calculate days done / needed
+            int done = -1;
+            int total = -1;
+
+            if (theScreen.ConstructionInProgress())
+            {
+                total = GetUpgradeTime(theScreen.getUpgradeLevel());
+                done = total - theScreen.GetDaysOfConstruction();
+            }
+
+            showBuildingMenu(screenNum, level, s, done, total);
             theController.statusCode = 3;
             theController.objectSelected = name;
         }
     }
+
+    public int GetUpgradeTime(int level)
+    {
+        if (level == 1)
+        {
+            return 3;
+        }
+        else if (level == 2)
+        {
+            return 2;
+        }
+        else if (level == 3)
+        {
+            return 4;
+        }
+        else
+        {
+            return 7;
+        }
+    }
+
 }

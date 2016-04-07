@@ -63,6 +63,7 @@ public class ConfirmationScript : MonoBehaviour {
         }
         else
         {
+            mainController.newStatusCode = 7;
             mainController.popup.SetActive(true);
             Text[] texts = mainController.popup.gameObject.GetComponentsInChildren<Text>();
             texts[1].text = "This attribute is already fully upgraded!";
@@ -172,6 +173,7 @@ public class ConfirmationScript : MonoBehaviour {
         }
         else
         {
+            mainController.statusCode = 5;
             mainController.popup.SetActive(true);
             Text[] texts = mainController.popup.gameObject.GetComponentsInChildren<Text>();
             texts[1].text = "You do not have enough money for this purchase";

@@ -11,12 +11,14 @@ using System.IO;
 public class Controller : MonoBehaviour
 {
     public int selectedStaff = -1;
-    
+    public int newStatusCode = 0;
+
 
     public int numWalkouts = 0;
+    public int servedCustomers = 0;
 
     public Sprite[] boxOfficeImages;
-    public int boxOfficeLevel = 1;
+    public int boxOfficeLevel = 0;
 
     public GameObject[] walls;
 
@@ -255,9 +257,6 @@ public class Controller : MonoBehaviour
         #endregion
 
 
-        Vector3 location = new Vector3(37.8f, 12.5f, 0);
-        OtherObjectScript.CreateStaffSlot(1, location);
-
         // this will change depending on starting upgrade levels and other queues etc
 
         #region Load / New Game
@@ -267,6 +266,8 @@ public class Controller : MonoBehaviour
             carpetColour = GetColourFromID(1);
             reputation = new Reputation();
             reputation.Initialise();
+
+            OtherObjectScript.CreateStaffSlot(1, new Vector3(37.8f, 12.5f, 0));
 
             #region Floor Tiles
             // initialise the floor tiles
@@ -324,6 +325,15 @@ public class Controller : MonoBehaviour
 
             isMarbleFloor = data.marbleFloor;
             reputation = data.reputation;
+
+
+            int boxLevel = data.boxOfficeLevel;
+            OtherObjectScript.CreateStaffSlot(1, new Vector3(37.8f, 12.5f, 0));
+
+            for (int i = 0; i < boxLevel - 1; i++)
+            {
+                OtherObjectScript.UpgradeBoxOffice();
+            }
 
             #region Floor Tiles
             // initialise the floor tiles
@@ -389,11 +399,7 @@ public class Controller : MonoBehaviour
                 Vector3 pos = new Vector3(theScreens[i].getX(), theScreens[i].getY(), 0);
                 theScreens[i].setPosition((int)pos.x, (int)(pos.y));
             }
-
-            dayLabel.text = "DAY: " + currDay.ToString();
-            popcornLabel.text = numPopcorn.ToString();
-
-
+            
         }
         #endregion
 
@@ -504,7 +510,10 @@ public class Controller : MonoBehaviour
         {
             pointers[i].GetComponent<Transform>().GetComponent<SpriteRenderer>().enabled = false;
         }
-        
+
+
+        dayLabel.text = "DAY: " + currDay.ToString();
+        popcornLabel.text = numPopcorn.ToString();
 
     }
 
@@ -518,7 +527,7 @@ public class Controller : MonoBehaviour
     {
         popup.SetActive(false);
         confirmationPanel.SetActive(false);
-        statusCode = 5;
+        statusCode = newStatusCode;
     }
 
     public List<Coordinate> GetScreenPath(int index)
@@ -675,6 +684,7 @@ public class Controller : MonoBehaviour
             {
                 Text[] texts = popup.gameObject.GetComponentsInChildren<Text>();
                 texts[1].text = "The Box Office is already fully upgraded!";
+                newStatusCode = 0;
                 popup.SetActive(true);
             }
         }
@@ -698,6 +708,7 @@ public class Controller : MonoBehaviour
                         // TODO: maybe change the image to a cross or something
                         Text[] texts = popup.gameObject.GetComponentsInChildren<Text>();
                         texts[1].text = "Construction is already in progress!";
+                        newStatusCode = 3;
                         popup.SetActive(true);
                     }
                 }
@@ -986,12 +997,32 @@ public class Controller : MonoBehaviour
     public void startDay()
     {
 
-     
+
         // check if any screens available
+        bool screensAvailable = false;
+
+        for (int i = 0; i < theScreens.Count; i++)
+        {
+            if (!theScreens[i].ConstructionInProgress())
+            {
+                screensAvailable = true;
+                break;
+            }
+        }
+
         // if none, 
-        // nextDay(false);
-        // may need to alter the way the coins earnt are output
-           
+        if (!screensAvailable)
+        {
+
+            Text[] texts = popup.gameObject.GetComponentsInChildren<Text>();
+            texts[1].text = "None of your screens are available today - they are all under construction. No customers will arrive and you will receive 0 coins for this day";
+            popup.SetActive(true);
+            newStatusCode = 0;
+
+            nextDay(false);
+            return;
+        }
+
 
         screenPaths.Clear();
 
@@ -1046,7 +1077,7 @@ public class Controller : MonoBehaviour
 
             int repChange = newOverall - oldOverall;
 
-            ShowEndOfDayPopup(money, numWalkouts, repChange, allCustomers.Count);
+            ShowEndOfDayPopup(money, numWalkouts, repChange, servedCustomers);
         }
 
         simulationRunning = false;
@@ -1082,7 +1113,7 @@ public class Controller : MonoBehaviour
             nextWeek();
         }
 
-        if (shouldCollect) {
+        //if (shouldCollect) {
             for (int i = 0; i < theScreens.Count; i++)
             {
                 int prevDays = theScreens[i].GetDaysOfConstruction();
@@ -1119,7 +1150,7 @@ public class Controller : MonoBehaviour
                     }
                 }
             }
-        }
+        //}
 
         for (int i = 0; i < filmShowings.Count; i++)       // filmShowings.Count
         {
@@ -1163,6 +1194,7 @@ public class Controller : MonoBehaviour
         }
 
         numWalkouts = 0;
+        servedCustomers = 0;
 
         Save();
 
@@ -2027,7 +2059,7 @@ public class Controller : MonoBehaviour
         BinaryFormatter formatter = new BinaryFormatter();
         FileStream file = File.Create(Application.persistentDataPath + "/saveState.gd");
 
-        PlayerData data = new PlayerData(theScreens, carpetColour, staffMembers, filmShowings, totalCoins, currDay, numPopcorn, otherObjects, hasUnlockedRedCarpet, isMarbleFloor, reputation);
+        PlayerData data = new PlayerData(theScreens, carpetColour, staffMembers, filmShowings, totalCoins, currDay, numPopcorn, otherObjects, hasUnlockedRedCarpet, isMarbleFloor, reputation, boxOfficeLevel);
 
 
         formatter.Serialize(file, data);
@@ -2094,7 +2126,7 @@ public class Controller : MonoBehaviour
 
     public int getStaffJobById(int index) { return staffMembers[index].getJobID(); }
 
-    void ShowBuildingOptions(string line1, string line2, Sprite theImage)
+    void ShowBuildingOptions(string line1, string line2, Sprite theImage, int constrDone, int constrTotal)
     {
         objectInfo.SetActive(true);
         closeInfo.SetActive(true);
@@ -2123,6 +2155,35 @@ public class Controller : MonoBehaviour
         }
 
         images[3].sprite = theImage;
+
+
+
+        // construction in progress section
+        if (constrDone > -1)
+        {
+            // do the green bar
+            images[4].enabled = true;
+            images[5].enabled = true;
+            labels[3].enabled = true;
+            labels[2].enabled = true;
+
+            float percent = (float)constrDone / (float)constrTotal;
+
+            images[5].fillAmount = percent;
+
+            labels[2].text = constrDone + "/" + constrTotal;
+
+        }
+        else
+        {
+            //hide the bar and label
+            images[4].enabled = false;
+            images[5].enabled = false;
+            labels[3].enabled = false;
+            labels[2].enabled = false;
+        }
+
+
     }
 
     public List<StaffMember> getFullStaffList()
@@ -2162,9 +2223,10 @@ public class PlayerData
     public bool hasRedCarpet;
     public bool marbleFloor;
     public Reputation reputation;
+    public int boxOfficeLevel;
     
 
-    public PlayerData(List<ScreenObject> screens, Color col, List<StaffMember> staff, List<FilmShowing> films, int coins, int day, int popcorn, List<OtherObject> others, bool redCarpet, bool marble, Reputation rep)
+    public PlayerData(List<ScreenObject> screens, Color col, List<StaffMember> staff, List<FilmShowing> films, int coins, int day, int popcorn, List<OtherObject> others, bool redCarpet, bool marble, Reputation rep, int boxOffice)
     {
         //gameObjectList = sO.ToArray();
         theScreens = screens.ToArray();
@@ -2186,7 +2248,8 @@ public class PlayerData
         otherObjects = others.ToArray();
         hasRedCarpet = redCarpet;
         marbleFloor = marble;
-        this.reputation = rep;
+        reputation = rep;
+        boxOfficeLevel = boxOffice;
     }
 
 }

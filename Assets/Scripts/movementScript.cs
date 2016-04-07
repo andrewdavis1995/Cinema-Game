@@ -133,8 +133,9 @@ public class movementScript : MonoBehaviour {
 
         if (customer.inQueue && customer.shouldMoveUp > 0)
         {
-            transform.Translate(0, customer.shouldMoveUp * 0.8f, 0);
+            int move = customer.shouldMoveUp;
             customer.shouldMoveUp = 0;
+            transform.Translate(0, move * 0.8f, 0);
         }
         if (customer.moveToServingSlot > -1)
         {
@@ -145,6 +146,7 @@ public class movementScript : MonoBehaviour {
         }
         if (customer.walkingAway)
         {
+            transform.GetComponent<Animator>().SetTrigger("right");
             customer.WalkOut();
             customer.walkingAway = false;
             customer.leaving = true;
@@ -154,7 +156,11 @@ public class movementScript : MonoBehaviour {
             Vector2 movementVector = customer.MovementVector * Time.deltaTime * moveSpeed;
             transform.Translate(movementVector);
             customer.walkingAway = false;
-            customer.leaving = true;
+        }
+        if (customer.isBored)
+        {
+            transform.GetComponent<Animator>().SetTrigger("bored");
+            customer.isBored = false;
         }
         if (transform.position.y < -20 && customer.GetPatience() < 1) 
         {

@@ -4,7 +4,7 @@ using System.Collections;
 public class OtherObjectScript : MonoBehaviour {
 
     static Controller mainController;
-    public delegate void showBuildingOptions(string screen, string upgrade, Sprite s);
+    public delegate void showBuildingOptions(string screen, string upgrade, Sprite s, int constrDone, int constrTotal);
     public static event showBuildingOptions showBuildingMenu;
     Transform transform;
 
@@ -75,7 +75,7 @@ public class OtherObjectScript : MonoBehaviour {
         {
             Sprite s = transform.GetComponent<SpriteRenderer>().sprite;
 
-            showBuildingMenu(tag, message, s);
+            showBuildingMenu(tag, message, s, -1, -1);
             mainController.statusCode = 3;
             mainController.objectSelected = name;
         }

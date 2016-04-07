@@ -126,6 +126,28 @@ public class ShopScript : MonoBehaviour {
         PutCloseToTop();
     }
 
+    public void ViewItemBenefits(int index)
+    {
+
+        string benefit = GetBenefitString(index);
+        
+        mainController.newStatusCode = 5;
+        mainController.popup.SetActive(true);
+        Text[] texts = mainController.popup.gameObject.GetComponentsInChildren<Text>();
+        texts[1].text = benefit;
+
+    }
+
+    public string GetBenefitString(int index)
+    {
+        switch (index)
+        {
+            case 0: return "Buying more screens will entice more customers to come to your cinema";
+            case 1: return "Hiring more staff will allow you to carry out more tasks at a time";
+            case 2: return "Vending machines will bring in a small amount of income each day";
+            default: return "No information available";
+        }
+    }
 }
 
 

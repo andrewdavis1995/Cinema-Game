@@ -12,7 +12,7 @@ namespace Assets.Scripts
 
         bool willGrow = true;   // whether or not a new item should be added if the pool is empty
         public GameObject[] objectsToPool;     // the type of object to pull. i.e. Customer prefab
-        List<GameObject> pooledObjects;     // the list of objects that are stored in the pool
+        public List<GameObject> pooledObjects;     // the list of objects that are stored in the pool
         int poolSize = 25;      // the size of the pool
 
 

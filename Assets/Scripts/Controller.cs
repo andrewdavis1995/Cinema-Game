@@ -66,6 +66,8 @@ public class Controller : MonoBehaviour
     const string warning2 = "\nYou have built objects which block the path to these Screens. If you do not move them, the customers for these screens will leave and you will not get money from them! Plus, your reputation will be ruined!";
 
     public string objectSelected = "";
+    public string tagSelected = "";
+    public int upgradeLevelSelected = 0;
 
     public List<GameObject> gameObjectList = new List<GameObject>();
     public List<GameObject> screenObjectList = new List<GameObject>();
@@ -406,14 +408,14 @@ public class Controller : MonoBehaviour
         // create some test screens
         for (int i = 0; i < theScreens.Count; i++)
         {
-            Vector3 pos = new Vector3(theScreens[i].getX() + 0.05f, theScreens[i].getY() * 0.8f, 0);
+            Vector3 pos = new Vector3(theScreens[i].getX(), theScreens[i].getY() * 0.8f, 0);
 
-            // align to grid - +/- 1 to move by one tile horizontally, 0.8 for vertical movement
-            pos.x += 4.6f;
-            pos.y += 6.05f;
+            //// align to grid - +/- 1 to move by one tile horizontally, 0.8 for vertical movement
+            //pos.x += 4.6f;
+            //pos.y += 6.05f;
 
-            // change pos and element here
-
+            //// change pos and element here
+            pos.y += 0.8f;
 
             GameObject instance = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity);
             instance.GetComponent<Screen_Script>().theScreen = theScreens[i];
@@ -438,10 +440,10 @@ public class Controller : MonoBehaviour
         // do same for other objects
         for (int i = 0; i < otherObjects.Count; i++)
         {
-            Vector3 pos = new Vector3(otherObjects[i].xPos + 0.05f, otherObjects[i].yPos * 0.8f, 0);
+            Vector3 pos = new Vector3(otherObjects[i].xPos, otherObjects[i].yPos * 0.8f, 0);
 
-            float xCorrection = 0;
-            float yCorrection = 0;
+            //float xCorrection = 0;
+            //float yCorrection = 0;
 
             Transform newItem = null;
 
@@ -454,31 +456,31 @@ public class Controller : MonoBehaviour
             if (itemToAddID == 2)
             {
                 newItem = plant;
-                xCorrection = 0.1f;
-                yCorrection = 0.35f;
+                //xCorrection = 0.1f;
+                //yCorrection = 0.35f;
                 w = 1; h = 1;
                 tag = "Plant";
             }
             else if (itemToAddID == 3)
             {
                 newItem = bust;
-                xCorrection = 0.65f;
-                yCorrection = 1.5f;
+                //xCorrection = 0.65f;
+                //yCorrection = 1.5f;
                 w = 2; h = 2;
                 tag = "Bust of Game Creator";
             }
             else if (itemToAddID == 5)
             {
                 newItem = vendingMachine;
-                xCorrection = 1.07f;
-                yCorrection = 1.62f;
+                //xCorrection = 1.07f;
+                //yCorrection = 1.62f;
                 w = 3; h = 3;
                 tag = "Vending Machine";
             }
 
             // align to grid - +/- 1 to move by one tile horizontally, 0.8 for vertical movement
-            pos.x += xCorrection;
-            pos.y += yCorrection;
+            //pos.x += xCorrection;
+            //pos.y += yCorrection;
 
             // change pos and element here
             GameObject instance = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity);
@@ -669,6 +671,104 @@ public class Controller : MonoBehaviour
         }
     }
 
+    public void SellItem()
+    {
+        if (theScreens.Count > 1 || !objectSelected.Contains("Screen"))
+        {
+            int xPos = (int)(GetPositionOfObject().x);
+
+            float tempY = GetPositionOfObject().y / 0.8f;
+
+            int yPos = (int)(tempY);
+
+            int width = GetWidthOfObject();
+            int height = GetHeightOfObject();
+
+            if (objectSelected.Contains("Screen") && yPos == 1)
+            {
+                yPos -= 1;
+            }
+
+            int moneyToReturn = GetReturnedCoins();
+            ConfirmationScript.OptionSelected(6, new string[] { "sell this item?", moneyToReturn.ToString(), "0", xPos.ToString(), yPos.ToString(), width.ToString(), height.ToString() });
+        }
+        else
+        {
+            ShowPopup(3, "Uh-oh!\nYou can't sell this Screen because your cinema must have at least 1 screen!");
+        }
+    }
+    
+    public int GetWidthOfObject()
+    {
+        switch (tagSelected)
+        {
+            case "Screen":
+                return 11;
+            case "Vending Machine":
+                return 3;
+            case "Plant":
+                return 1;
+            default: return 0;
+        }
+    }
+    public int GetHeightOfObject()
+    {
+        switch (tagSelected)
+        {
+            case "Screen":
+                return 15;
+            case "Vending Machine":
+                return 3;
+            case "Plant":
+                return 1;
+            default: return 0;
+        }
+    }
+    public Vector2 GetPositionOfObject()
+    {
+        return GameObject.Find(objectSelected).transform.position;
+    }
+
+    public int GetReturnedCoins()
+    {
+        int paidMoney = 0;
+
+        #region Get the money that was paid for this object
+        switch (tagSelected)
+        {
+            case "Screen":
+                paidMoney = 500;
+                break;
+            case "Vending Machine":
+                paidMoney = 90;
+                break;
+            case "Plant":
+                paidMoney = 80;
+                break;
+        }
+        #endregion
+
+        int coinsReturned = (int)(Math.Round(0.6f * (float)paidMoney, 0));
+
+        #region Calculate upgrade costs
+        int upgradeCosts = 0;
+
+        if (tagSelected.Equals("Screen"))
+        {
+            switch (upgradeLevelSelected)
+            {
+                case 2: upgradeCosts = 180; break;
+                case 3: upgradeCosts = 720; break;
+                case 4: upgradeCosts = 2800; break;
+            }
+        }
+
+        coinsReturned += upgradeCosts;
+        #endregion
+
+        return coinsReturned;
+    }
+
     public void Upgrade()
     {
         if (objectSelected.Equals("Box Office"))
@@ -682,10 +782,7 @@ public class Controller : MonoBehaviour
             }
             else
             {
-                Text[] texts = popup.gameObject.GetComponentsInChildren<Text>();
-                texts[1].text = "The Box Office is already fully upgraded!";
-                newStatusCode = 0;
-                popup.SetActive(true);
+                ShowPopup(0, "The Box Office is already fully upgraded!");
             }
         }
         else {
@@ -705,11 +802,7 @@ public class Controller : MonoBehaviour
                     }
                     else if (theScreen.ConstructionInProgress())
                     {
-                        // TODO: maybe change the image to a cross or something
-                        Text[] texts = popup.gameObject.GetComponentsInChildren<Text>();
-                        texts[1].text = "Construction is already in progress!";
-                        newStatusCode = 3;
-                        popup.SetActive(true);
+                        ShowPopup(3, "Construction on this Screen is already in progress!");
                     }
                 }
             }
@@ -735,6 +828,14 @@ public class Controller : MonoBehaviour
         updateTiles(x, y, width, height, newState);
     }
 
+    public void ShowPopup(int status, string theString)
+    {
+        newStatusCode = status;
+        popup.SetActive(true);
+        Text[] texts = popup.gameObject.GetComponentsInChildren<Text>();
+        texts[1].text = theString;
+    }
+
     public void hideObjectInfo()
     {
         shopCanvas.SetActive(false);
@@ -745,6 +846,9 @@ public class Controller : MonoBehaviour
         staffMemberInfo.SetActive(false);
 
         statusCode = 0;
+        objectSelected = "";
+        tagSelected = "";
+        upgradeLevelSelected = 0;
     }
 
     void newColourButton(int row, int column, bool texture)
@@ -1013,12 +1117,8 @@ public class Controller : MonoBehaviour
         // if none, 
         if (!screensAvailable)
         {
-
-            Text[] texts = popup.gameObject.GetComponentsInChildren<Text>();
-            texts[1].text = "None of your screens are available today - they are all under construction. No customers will arrive and you will receive 0 coins for this day";
-            popup.SetActive(true);
-            newStatusCode = 0;
-
+            ShowPopup(0, "None of your screens are available today - they are all under construction. No customers will arrive and you will receive 0 coins for this day");
+            
             nextDay(false);
             return;
         }
@@ -1095,6 +1195,17 @@ public class Controller : MonoBehaviour
                 allCustomers[i].transform.gameObject.SetActive(false);
             }
         }
+
+
+        // reset the layer of each customer transform 
+        for (int i = 0; i < ObjectPool.current.pooledObjects.Count; i++)
+        {
+            SpriteRenderer sr = ObjectPool.current.pooledObjects[i].GetComponent<SpriteRenderer>();
+
+            sr.sortingLayerName = "Front";
+            sr.sortingOrder = 70;
+        }
+
 
         allCustomers.Clear();
 
@@ -1473,12 +1584,13 @@ public class Controller : MonoBehaviour
             {
                 id -= 1;
 
-                Vector3 pos = new Vector3(x + 0.05f, y * 0.8f, 0);
+                Vector3 pos = new Vector3(x, y * 0.8f, 0);
 
                 theScreens[id].setPosition(x, y);
 
-                pos.x = pos.x += 4.6f;
-                pos.y += 6.05f;
+                //pos.x = pos.x += 4.6f;
+                //pos.y += 6.05f;
+                pos.y += 0.8f;
 
                 ScreenObject temp = null;
 
@@ -1515,32 +1627,32 @@ public class Controller : MonoBehaviour
             else {
 
 
-                Vector3 pos = new Vector3(x + 0.05f, y * 0.8f, 0);
+                Vector3 pos = new Vector3(x, y * 0.8f, 0);
 
                 otherObjects[id].xPos = x;
                 otherObjects[id].yPos = y;
 
-                float xCorrection = 0;
-                float yCorrection = 0;
+                //float xCorrection = 0;
+                //float yCorrection = 0;
 
                 if (itemToAddID == 2)
                 {
-                    xCorrection = 0.1f;
-                    yCorrection = 0.35f;
+                    //xCorrection = 0.1f;
+                    //yCorrection = 0.35f;
                 }
                 else if (itemToAddID == 3)
                 {
-                    xCorrection = 0.65f;
-                    yCorrection = 1.5f;
+                    //xCorrection = 0.65f;
+                    //yCorrection = 1.5f;
                 }
                 else if (itemToAddID == 5)
                 {
-                    xCorrection = 1.07f;
-                    yCorrection = 1.62f;
+                    //xCorrection = 1.07f;
+                    //yCorrection = 1.62f;
                 }
 
-                pos.x += xCorrection;
-                pos.y += yCorrection;
+                //pos.x += xCorrection;
+                //pos.y += yCorrection;
 
                 string theTag = "";
 
@@ -1672,7 +1784,7 @@ public class Controller : MonoBehaviour
 
     int getCost()
     {
-        switch (objectSelected)
+        switch (objectSelected.ToUpper())
         {
             case "NEW SCREEN": return 500;
             case "NEW PLANT": return 80;
@@ -1681,6 +1793,9 @@ public class Controller : MonoBehaviour
             default: return 0;
         }
     }
+
+
+
     String getCurrency()
     {
         // 0 = coins, 1 = popcorn
@@ -1700,18 +1815,18 @@ public class Controller : MonoBehaviour
         confirmMovePanel.SetActive(false);
         moveButtons.SetActive(false);
 
-        Vector3 pos = new Vector3(x + 0.05f, y * 0.8f, 0);
+        Vector3 pos = new Vector3(x, y * 0.8f, 0);
 
 
         Transform newItem = null;
-        float xCorrection = 0;
-        float yCorrection = 0;
+        //float xCorrection = 0;
+        //float yCorrection = 0;
 
         if (itemToAddID == 0)
         {
             newItem = screen;
-            xCorrection = 4.6f;
-            yCorrection = 6.05f;
+            //xCorrection = 4.6f;
+            //yCorrection = 6.05f;
 
             int newID = theScreens.Count;
             ScreenObject aScreen = new ScreenObject(newID + 1, 0);
@@ -1719,8 +1834,9 @@ public class Controller : MonoBehaviour
             aScreen.upgrade();
             theScreens.Add(aScreen);
 
-            pos.x += xCorrection;
-            pos.y += yCorrection;
+            //pos.x += xCorrection;
+            //pos.y += yCorrection;
+            pos.y += 0.8f; // gap at bottom
 
             GameObject screenThing = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity) as GameObject;
             screenThing.GetComponent<Screen_Script>().theScreen = theScreens[newID];
@@ -1742,31 +1858,31 @@ public class Controller : MonoBehaviour
             if (itemToAddID == 2)
             {
                 newItem = plant;
-                xCorrection = 0.1f;
-                yCorrection = 0.35f;
+                //xCorrection = 0.1f;
+                //yCorrection = 0.35f;
                 otherObjects.Add(new OtherObject(x, y, 2, otherObjects.Count));
                 theTag = "Plant";
             }
             else if (itemToAddID == 3)
             {
                 newItem = bust;
-                xCorrection = 0.65f;
-                yCorrection = 1.5f;
+                //xCorrection = 0.65f;
+                //yCorrection = 1.5f;
                 otherObjects.Add(new OtherObject(x, y, 3, otherObjects.Count));
                 theTag = "Bust of Game Creator";
             }
             else if (itemToAddID == 5)
             {
                 newItem = vendingMachine;
-                xCorrection = 1.07f;
-                yCorrection = 1.62f;
+                //xCorrection = 1.07f;
+                //yCorrection = 1.62f;
                 otherObjects.Add(new OtherObject(x, y, 5, otherObjects.Count));
                 theTag = "Vending Machine";
             }
 
 
-            pos.x += xCorrection;
-            pos.y += yCorrection;
+            //pos.x += xCorrection;
+            //pos.y += yCorrection;
 
 
             GameObject theObject = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity) as GameObject;
@@ -1972,7 +2088,7 @@ public class Controller : MonoBehaviour
                 else if (gameObjectList[i].tag.Equals("Vending Machine"))
                 {
                     itemToAddID = 5;
-                    w = 3; h = 5;
+                    w = 3; h = 3;
                 }
 
                 theTileManager.toMoveX = x;
@@ -1993,7 +2109,6 @@ public class Controller : MonoBehaviour
         }
 
     }
-
 
     public void placeObject(int width, int height)
     {
@@ -2052,6 +2167,80 @@ public class Controller : MonoBehaviour
         theTileManager.fullHeight = height;
 
         theTileManager.NewItemAdded(startX, startY);
+        
+    }
+
+    public void RemoveObject(int x, int y, int w, int h)
+    {
+        // RODO: remove builder
+
+        GameObject go = GameObject.Find(objectSelected);
+        if (objectSelected.Contains("Screen"))
+        {
+
+            int foundPos = -1;
+
+            for (int i = 0; i < screenObjectList.Count; i++)
+            {
+                if (objectSelected.Equals(screenObjectList[i].name))
+                {
+                    DestroyBuilderByScreenID(theScreens[i].getScreenNumber());
+                    screenObjectList.RemoveAt(i);
+                    theScreens.RemoveAt(i);
+                    foundPos = i;
+                    break;
+                }
+            }
+
+            if (foundPos > -1)
+            {
+                for (int i = foundPos; i < theScreens.Count; i++)
+                {
+                    theScreens[i].DecreaseScreenNumber();
+                    screenObjectList[i].name = "Screen#" + theScreens[i].getScreenNumber();
+                    GameObject.Find("BuilderForScreen#" + (theScreens[i].getScreenNumber() + 1)).name = "BuilderForScreen#" + theScreens[i].getScreenNumber();
+                }
+            }
+
+        }
+        else
+        {
+            int foundPos = -1;
+
+            for (int i = 0; i < gameObjectList.Count; i++)
+            {
+                if (objectSelected.Equals(gameObjectList[i].name))
+                {
+                    gameObjectList.RemoveAt(i);
+                    otherObjects.RemoveAt(i);
+                    foundPos = i;
+                }
+            }
+
+            if (foundPos > -1)
+            {
+                for (int i = foundPos; i < otherObjects.Count; i++)
+                {
+                    otherObjects[i].id -= 1;
+                    gameObjectList[i].name = "Element#" + otherObjects[i].id;
+                }
+            }
+
+        }
+
+        GameObject.Destroy(go);
+        theTileManager.fullHeight = h;
+        theTileManager.fullWidth = w;
+        hideObjectInfo();
+        setTiles(0, x, y, w, h);
+        theTileManager.colourAllTiles(x, y, carpetColour);
+        theTileManager.fullHeight = -1;
+        theTileManager.fullHeight = -1;
+
+        theTileManager.showOutput();
+
+        Debug.Log(x + ", " + y + ", " + w + ", " + h);
+
     }
 
     void Save()
@@ -2135,6 +2324,10 @@ public class Controller : MonoBehaviour
         labels[1].text = line2;
         Image[] images = objectInfo.gameObject.GetComponentsInChildren<Image>();
 
+
+        images[6].gameObject.GetComponent<Image>().color = Color.white;
+        images[6].gameObject.GetComponent<Button>().enabled = true;
+
         if (line1.ToUpper().Contains("SCREEN"))
         {
             images[2].gameObject.GetComponent<Image>().color = Color.white;
@@ -2146,6 +2339,8 @@ public class Controller : MonoBehaviour
             images[2].gameObject.GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f);
             images[2].gameObject.GetComponent<Button>().enabled = false;
             images[1].gameObject.GetComponent<Image>().color = Color.white;
+            images[6].gameObject.GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f);
+            images[6].gameObject.GetComponent<Button>().enabled = false;
         }
         else 
         {
@@ -2153,6 +2348,13 @@ public class Controller : MonoBehaviour
             images[2].gameObject.GetComponent<Button>().enabled = true;
             images[1].gameObject.GetComponent<Image>().color = new Color(0.06f, 0.06f, 0.06f);
         }
+
+        if (line1.ToUpper().Contains("BUST"))
+        {
+            images[6].gameObject.GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f);
+            images[6].gameObject.GetComponent<Button>().enabled = false;
+        }
+
 
         images[3].sprite = theImage;
 

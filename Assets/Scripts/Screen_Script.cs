@@ -69,6 +69,8 @@ public class Screen_Script : MonoBehaviour {
             showBuildingMenu(screenNum, level, s, done, total);
             theController.statusCode = 3;
             theController.objectSelected = name;
+            theController.tagSelected = tag;
+            theController.upgradeLevelSelected = theScreen.getUpgradeLevel();
         }
     }
 

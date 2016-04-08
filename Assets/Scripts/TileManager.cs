@@ -56,17 +56,18 @@ public class TileManager : MonoBehaviour
                 SpriteRenderer tilesRenderer = newTile.AddComponent<SpriteRenderer>();
                 FloorTile currentTile = floor.getTileByCoord(x, y);
 
-                RectTransform rectTransform = newTile.AddComponent<RectTransform>();
-                rectTransform.localScale = rectTransform.localScale + new Vector3(0, -0.2f, 0);
+                //rectTransform.localScale = rectTransform.localScale - new Vector3(0, 0.2f, 0);
 
                 newTile.name = "FloorPanel~" + x + "~" + y;
                 newTile.tag = "Floor Tile";
 
-                newTile.transform.position = new Vector3(currentTile.yCoord, currentTile.xCoord - (0.2f * x), 0);
+                newTile.transform.position = new Vector3(currentTile.yCoord, currentTile.xCoord * 0.8f, 0);
 
                 tilesRenderer.sprite = carpetSprite;
 
                 newTile.transform.SetParent(this.transform, true);
+                RectTransform rectTransform = newTile.AddComponent<RectTransform>();
+                rectTransform.rect.Set(rectTransform.rect.xMin, rectTransform.rect.xMax, 1, 2.8f);
             }
         }
     }
@@ -378,7 +379,7 @@ public class TileManager : MonoBehaviour
 
     }
 
-    void colourAllTiles(int startX, int startY, Color col)
+    public void colourAllTiles(int startX, int startY, Color col)
     {
         for (int i = startY; i < startY + fullHeight; i++)
         {
@@ -518,7 +519,7 @@ public class TileManager : MonoBehaviour
 
     }
 
-    void showOutput()
+    public void showOutput()
     {
         System.IO.StreamWriter file = new System.IO.StreamWriter("C:/Users/asuth/Documents/banana.txt", true);
 

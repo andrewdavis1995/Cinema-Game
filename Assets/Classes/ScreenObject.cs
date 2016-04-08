@@ -16,6 +16,11 @@ public class ScreenObject
     int pointX = 0;
     int pointY = 0;
 
+    public void DecreaseScreenNumber()
+    {
+        screenNumber--;
+    }
+
     public void setPosition(int x, int y)
     {
         pointX = x;
@@ -34,8 +39,7 @@ public class ScreenObject
 
     public int getScreenNumber() { return screenNumber; }
     public int getNumSeats() { return capacity; }
-
-        
+            
     public void upgrade()
     {
         constructionInProgress = true;
@@ -69,23 +73,22 @@ public class ScreenObject
         }
     }
 
-
     public int calculateUpgradeCost()
     {
         if (upgradeLevel == 1)
         {
             constructionTimeRemaining = 3;
-            return 350;
+            return 450;
         }
         else if (upgradeLevel == 2)
         {
             constructionTimeRemaining = 2;
-            return 450;
+            return 1800;
         }
         else if (upgradeLevel == 3)
         {
             constructionTimeRemaining = 4;
-            return 1500;
+            return 7000;
         }
         else
         {

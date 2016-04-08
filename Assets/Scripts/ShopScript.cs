@@ -16,7 +16,6 @@ public class ShopScript : MonoBehaviour {
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
     }
 
-
     public void Purchase(int id)
     {
         mainController.itemToAddID = id;
@@ -128,16 +127,11 @@ public class ShopScript : MonoBehaviour {
 
     public void ViewItemBenefits(int index)
     {
-
         string benefit = GetBenefitString(index);
-        
-        mainController.newStatusCode = 5;
-        mainController.popup.SetActive(true);
-        Text[] texts = mainController.popup.gameObject.GetComponentsInChildren<Text>();
-        texts[1].text = benefit;
 
+        mainController.ShowPopup(5, benefit);
     }
-
+    
     public string GetBenefitString(int index)
     {
         switch (index)

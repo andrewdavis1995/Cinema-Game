@@ -405,7 +405,7 @@ public class mouseDrag : MonoBehaviour
         {
             Camera.main.transform.position = Camera.main.transform.position + new Vector3(-0.20f, 0, 0);
         }
-        if (Camera.main.WorldToScreenPoint(transform.position).y > UnityEngine.Screen.height)
+        if (Camera.main.WorldToScreenPoint(transform.position).y > UnityEngine.Screen.height - 100)
         {
             Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, 0.20f, 0);
         }

@@ -292,7 +292,7 @@ public class Customer
     {
         int x = (int)transform.position.x;
         int y = (int)(transform.position.y);
-
+        
         inQueue = false;
         goingToSeats = false;
 

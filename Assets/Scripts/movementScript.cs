@@ -168,6 +168,8 @@ public class movementScript : MonoBehaviour {
             transform.gameObject.SetActive(false);
         }
 
+
+
     }
 
     IEnumerator showPatienceBar()
@@ -188,6 +190,7 @@ public class movementScript : MonoBehaviour {
         
 			customerStatus.SetActive (false);
         }
+
     }
 
 

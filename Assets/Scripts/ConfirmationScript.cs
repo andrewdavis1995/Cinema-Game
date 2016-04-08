@@ -63,10 +63,7 @@ public class ConfirmationScript : MonoBehaviour {
         }
         else
         {
-            mainController.newStatusCode = 7;
-            mainController.popup.SetActive(true);
-            Text[] texts = mainController.popup.gameObject.GetComponentsInChildren<Text>();
-            texts[1].text = "This attribute is already fully upgraded!";
+            mainController.ShowPopup(7, "This attribute is already fully upgraded!");
         }
     }
 
@@ -100,7 +97,14 @@ public class ConfirmationScript : MonoBehaviour {
             mainController.confirmationPanel.SetActive(false);
             if (parameters[2].Equals("0"))
             {
-                mainController.totalCoins -= cost;
+                if (actionCode != 6)
+                {
+                    mainController.totalCoins -= cost;;
+                }
+                else
+                {
+                    mainController.totalCoins += cost;
+                }
                 mainController.coinLabel.text = mainController.totalCoins.ToString();
             }
             else
@@ -169,14 +173,20 @@ public class ConfirmationScript : MonoBehaviour {
                 case 5:
                     OtherObjectScript.UpgradeBoxOffice();
                     break;
+                case 6:
+
+                    int xPos = int.Parse(parameters[3]);
+                    int yPos = int.Parse(parameters[4]);
+                    int width = int.Parse(parameters[5]);
+                    int height = int.Parse(parameters[6]);
+
+                    mainController.RemoveObject(xPos, yPos, width, height);
+                    break;
             }
         }
         else
         {
-            mainController.statusCode = 5;
-            mainController.popup.SetActive(true);
-            Text[] texts = mainController.popup.gameObject.GetComponentsInChildren<Text>();
-            texts[1].text = "You do not have enough money for this purchase";
+            mainController.ShowPopup(5, "You do not have enough money for this purchase");
         }
     }
 

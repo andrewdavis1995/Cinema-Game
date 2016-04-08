@@ -78,6 +78,7 @@ public class OtherObjectScript : MonoBehaviour {
             showBuildingMenu(tag, message, s, -1, -1);
             mainController.statusCode = 3;
             mainController.objectSelected = name;
+            mainController.tagSelected = tag;
         }
     }
 

@@ -28,28 +28,14 @@ namespace Assets.Classes
             }
         }
 
-        public FloorTile getTileByCoord(int x, int y)
+        public FloorTile GetTileByCoord(int x, int y)
         {
             return floorTiles[x, y];
         }
 
         public List<Coordinate> FindPath(int startX, int startY, int goalX, int goalY)
         {
-            // OutputStates();
-
             List<FloorTile> tiles = new List<FloorTile>();
-
-            //for (int i = 0; i < 40; i++)
-            //{
-            //    for (int j = 0; j < 80; j++)
-            //    {
-            //        if (floorTiles[i, j].inUse != 0)
-            //        {
-            //            tiles.Add(new FloorTile(i, j));
-            //            Console.WriteLine(i + ", " + j);
-            //        }
-            //    }
-            //}
 
             Node head = new Node(new Coordinate(startX, startY));
 
@@ -65,7 +51,7 @@ namespace Assets.Classes
                 List<Node> tmp = new List<Node>();
                 while (openNodes.Count > 0)
                 {
-                    if (openNodes[0].matchesGoal(new Coordinate(goalX, goalY)))
+                    if (openNodes[0].MatchesGoal(new Coordinate(goalX, goalY)))
                     {
                         found = true;
                         head = openNodes[0];

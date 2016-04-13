@@ -28,7 +28,7 @@ public class FilmShowing
         //mainController = c;
     }
 
-    public List<Customer> createCustomerList(int currentCount, Controller c)
+    public List<Customer> CreateCustomerList(int currentCount, Controller c)
     {
         List<Customer> customers = new List<Customer>();
 
@@ -40,11 +40,11 @@ public class FilmShowing
         return customers;
     }
 
-    int getTimeH() { return this.timeH; }
-    int getTimeM() { return this.timeM; }
+    int GetTimeH() { return this.timeH; }
+    int GetTimeM() { return this.timeM; }
     
 
-    public int getScreenNumber() { return this.screenNum; }
-    public int getTicketsSold() { return this.ticketsSold; }
-    public void setTicketsSold(int numTickets) { ticketsSold = numTickets; }
+    public int GetScreenNumber() { return this.screenNum; }
+    public int GetTicketsSold() { return this.ticketsSold; }
+    public void SetTicketsSold(int numTickets) { ticketsSold = numTickets; }
 }

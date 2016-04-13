@@ -12,6 +12,7 @@ public class ScreenObject
     int upgradeLevel = 0;
     bool constructionInProgress = false;
     int constructionTimeRemaining = 0;
+    int projectorClicksRemaining = 0;
 
     int pointX = 0;
     int pointY = 0;
@@ -21,14 +22,14 @@ public class ScreenObject
         screenNumber--;
     }
 
-    public void setPosition(int x, int y)
+    public void SetPosition(int x, int y)
     {
         pointX = x;
         pointY = y;
     }
 
-    public int getX() { return this.pointX; }
-    public int getY() { return this.pointY; }
+    public int GetX() { return this.pointX; }
+    public int GetY() { return this.pointY; }
 
     public ScreenObject(int screenID, int numSeats)
     {
@@ -37,23 +38,48 @@ public class ScreenObject
     }
 
 
-    public int getScreenNumber() { return screenNumber; }
-    public int getNumSeats() { return capacity; }
+    public int GetScreenNumber() { return screenNumber; }
+    public int GetNumSeats() { return capacity; }
             
-    public void upgrade()
+    public void Upgrade()
     {
         constructionInProgress = true;
         upgradeLevel++;
 
-        calculateUpgradeCost();
+        CalculateUpgradeCost();
 
         if (constructionTimeRemaining < 1)
         {
-            upgradeComplete();
+            UpgradeComplete();
             // NYAH
         }
 
-        capacity = getNewCapacity();
+        capacity = GetNewCapacity();
+    }
+
+    public void ProjectorBroke()
+    {
+        projectorClicksRemaining = 20 * upgradeLevel;
+    }
+
+    public void ResetClicks()
+    {
+        projectorClicksRemaining = 0;
+    }
+
+    public int ProjectorClicked()
+    {
+        if (projectorClicksRemaining > 0)
+        {
+            projectorClicksRemaining--;
+        }
+
+        return projectorClicksRemaining;
+    }
+
+    public int GetClicksRemaining()
+    {
+        return this.projectorClicksRemaining;
     }
 
     public int GetDaysOfConstruction()
@@ -61,7 +87,7 @@ public class ScreenObject
         return this.constructionTimeRemaining;
     }
 
-    public void progressOneDay()
+    public void ProgressOneDay()
     {
         if (constructionTimeRemaining > 1)
         {
@@ -69,11 +95,11 @@ public class ScreenObject
         }
         else if (constructionTimeRemaining == 1)
         {
-            upgradeComplete();
+            UpgradeComplete();
         }
     }
 
-    public int calculateUpgradeCost()
+    public int CalculateUpgradeCost()
     {
         if (upgradeLevel == 1)
         {
@@ -97,7 +123,7 @@ public class ScreenObject
         }
     }        
 
-    private int getNewCapacity()
+    private int GetNewCapacity()
     {
         if (upgradeLevel == 1)
         {
@@ -116,9 +142,9 @@ public class ScreenObject
             return 70;
         }
     }
-    public int getUpgradeLevel(){ return this.upgradeLevel; }
+    public int GetUpgradeLevel(){ return this.upgradeLevel; }
 
-    public void upgradeComplete()
+    public void UpgradeComplete()
     {
         // upgrade complete
         this.constructionInProgress = false;

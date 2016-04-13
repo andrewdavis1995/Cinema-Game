@@ -8,14 +8,14 @@ using System.Threading;
 
 public class movementScript : MonoBehaviour {
 
-    public delegate void addToTicketQueue(Customer customer);
-    public static event addToTicketQueue addToQueueTickets;
+    public delegate void AddToTicketQueue(Customer customer);
+    public static event AddToTicketQueue addToQueueTickets;
 
-    public delegate Queue<Customer> getTicketQueue();
-    public static event getTicketQueue getQueueTickets;
+    public delegate Queue<Customer> GetTicketQueue();
+    public static event GetTicketQueue getQueueTickets;
 
-    public delegate int getTicketQueueSize();
-    public static event getTicketQueueSize getQueueTicketsSize;
+    public delegate int GetTicketQueueSize();
+    public static event GetTicketQueueSize getQueueTicketsSize;
 
     Controller mainController;
 
@@ -35,8 +35,11 @@ public class movementScript : MonoBehaviour {
 
     int timeInQueue;
 
+    int patienceCount = 0;
+    bool showPatience = false;
 
-    public void setCustomer(Customer cust)
+
+    public void SetCustomer(Customer cust)
     {
         this.customer = cust;
     }
@@ -56,7 +59,7 @@ public class movementScript : MonoBehaviour {
         
     }
 
-    private void moveCustomer()
+    private void MoveCustomer()
     {
 
         if (customer != null && customer.pointsToVisit != null)
@@ -80,13 +83,12 @@ public class movementScript : MonoBehaviour {
                 if (customer.goingToSeats)
                 {
                     customer.transform.GetComponent<SpriteRenderer>().sortingOrder =  TileManager.floor.height - (int)(theY) - 1;
-                    Debug.Log(customer.getTravellingToX() + ", " + customer.getTravellingToY());
                 }
 
-                bool checkY1 = theY <= customer.getTravellingToY() + 0.3f;
-                bool checkY2 = theY >= customer.getTravellingToY() - 0.3f;
-                bool checkX1 = theX <= customer.getTravellingToX() + 0.3f;
-                bool checkX2 = theX >= customer.getTravellingToX() - 0.3f;
+                bool checkY1 = theY <= customer.GetTravellingToY() + 0.3f;
+                bool checkY2 = theY >= customer.GetTravellingToY() - 0.3f;
+                bool checkX1 = theX <= customer.GetTravellingToX() + 0.3f;
+                bool checkX2 = theX >= customer.GetTravellingToX() - 0.3f;
 
                 if (checkX1 && checkX2 && checkY1 && checkY2)
                 {
@@ -109,15 +111,15 @@ public class movementScript : MonoBehaviour {
                             customer.inQueue = true;
                             customer.pointsToVisit.Clear();
 
-                            customer.ticketsDone();
+                            customer.TicketsDone();
                             customer.animator.SetTrigger("queue");
 
-                            customer.nextPlace(false);
+                            customer.NextPlace(false);
                         }
                     }
                     else
                     {
-                        customer.nextPoint(false);
+                        customer.NextPoint(false);
                         //customer.SetTravellingTo(customer.pointsToVisit[0].x, customer.pointsToVisit[0].y);
                     }
                 }
@@ -148,6 +150,7 @@ public class movementScript : MonoBehaviour {
         {
             transform.GetComponent<Animator>().SetTrigger("right");
             customer.WalkOut();
+            mainController.reputation.Walkout();
             customer.walkingAway = false;
             customer.leaving = true;
         }
@@ -198,7 +201,18 @@ public class movementScript : MonoBehaviour {
     {
 		customerStatus.SetActive(true);
 
-        StartCoroutine(showPatienceBar());       
+        int patienceVal = customer.GetPatience();
+
+        float val = (float)patienceVal / 1000;
+
+        if (val > 1) { val = 1; }
+
+        // this will be affected by the patience level
+        imgs[1].fillAmount = val;
+        imgs[1].color = new Color(1 - (float)(val), (float)(val), 0);
+
+        patienceCount = 0;
+        showPatience = true;
     }
 
 
@@ -207,11 +221,25 @@ public class movementScript : MonoBehaviour {
     {
         if (!mainController.paused)
         {
-            moveCustomer();
+            MoveCustomer();
         }
+
+
+
+        if (showPatience)
+        {
+            patienceCount++;
+            if (patienceCount > 180)
+            {
+                patienceCount = 0;
+                showPatience = false;
+                customerStatus.SetActive(false);
+            }
+        }
+
     }
 
-    public int getQueueTicketSize()
+    public int GetQueueTicketSize()
     {
         if (getQueueTicketsSize != null)
         {
@@ -227,7 +255,7 @@ public class movementScript : MonoBehaviour {
     }
 
 
-    public void sortQueuePosition()
+    public void SortQueuePosition()
     {
         if (customer.inQueue)
         {

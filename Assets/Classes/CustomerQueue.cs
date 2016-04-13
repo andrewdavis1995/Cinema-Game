@@ -12,13 +12,17 @@ namespace Assets.Classes
         StaffMember[] staffList = new StaffMember[1];  // the list of staff allocated to the post
         Customer[] servingSlots = new Customer[1];              // the customers currently being served
         List<Customer> theQueue = new List<Customer>();         // the actual queue of customers
+        int sortingOrderOnFinish = 11;
 
         Thread[] staffThreads = new Thread[1];         // one thread per staff member on the post
         Thread patienceThread;        // the first parameter is the slot, the second is the speed
 
         bool running = false;         // whether or not the day is running
 
-
+        public CustomerQueue(int sO)
+        {
+            sortingOrderOnFinish = sO;
+        }
 
         Customer NextCustomerPlease(int index)
         {
@@ -76,34 +80,37 @@ namespace Assets.Classes
 
         public void StaffMemberRemoved(StaffMember sm, int pos)
         {
-            // clear the staff list at pos
-            staffList[pos] = null;
-
-            // clear the thread list at pos
-            if (staffThreads[pos] != null && staffThreads[pos].IsAlive)
+            try
             {
-                staffThreads[pos].Abort();
-            }
+                // clear the staff list at pos
+                staffList[pos] = null;
 
-            staffThreads[pos] = null;
-
-            // possibly put customer back to queue (if someone in serving slots)
-            if (servingSlots[pos] != null)
-            {
-                theQueue.Insert(0, servingSlots[pos]);
-                servingSlots[pos] = new Customer(null, -1, null, null);
-
-                // move customer back into queue
-                theQueue[0].transform.position = new UnityEngine.Vector3(38.5f, 9 * 0.8f, 0);
-
-                // move queue back
-                for (int i = 1; i < theQueue.Count; i++)
+                // clear the thread list at pos
+                if (staffThreads[pos] != null && staffThreads[pos].IsAlive)
                 {
-                    theQueue[i].transform.Translate(0, -0.8f, 0);
-                    theQueue[i].transform.GetComponent<SpriteRenderer>().sortingOrder++;
+                    staffThreads[pos].Abort();
+                }
+
+                staffThreads[pos] = null;
+
+                // possibly put customer back to queue (if someone in serving slots)
+                if (servingSlots[pos] != null)
+                {
+                    theQueue.Insert(0, servingSlots[pos]);
+                    servingSlots[pos] = new Customer(null, -1, null, null);
+
+                    // move customer back into queue
+                    theQueue[0].transform.position = new UnityEngine.Vector3(38.5f, 9 * 0.8f, 0);
+
+                    // move queue back
+                    for (int i = 1; i < theQueue.Count; i++)
+                    {
+                        theQueue[i].transform.Translate(0, -0.8f, 0);
+                        theQueue[i].transform.GetComponent<SpriteRenderer>().sortingOrder++;
+                    }
                 }
             }
-
+            catch (Exception) { }
         }
         
         public void StaffThreadMethod(int index, int speed)
@@ -114,13 +121,16 @@ namespace Assets.Classes
                 // release the person from the holding block
                 if (servingSlots[index] != null)
                 {
-                    // Console.WriteLine("CUSTOMER " + servingSlots[index].GetIndex() + " has been served by server " + staffList[index].GetStaffname());
+
+                    // Console.WriteLine("CUSTOMER " + servingSlots[index].GetIndex() + " has been served by server " + staffList[index].GetStaffname());                 
+                    //servingSlots[index].doneWithQueue(sortingOrderOnFinish);
 
                     servingSlots[index].goingToSeats = true;
                     servingSlots[index].inQueue = false;
-                    
-                    //servingSlots[index].doneWithQueue();
+                    servingSlots[index].AddPatience(150);
+
                 }
+
 
                 servingSlots[index] = NextCustomerPlease(index);
 

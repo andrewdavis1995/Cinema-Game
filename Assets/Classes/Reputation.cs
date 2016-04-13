@@ -32,7 +32,7 @@ namespace Assets.Classes
 
             for (int i = 0; i < numScreens; i++)
             {
-                totalRating += screens[i].getUpgradeLevel();
+                totalRating += screens[i].GetUpgradeLevel();
             }
 
             float averageRating = totalRating / numScreens;

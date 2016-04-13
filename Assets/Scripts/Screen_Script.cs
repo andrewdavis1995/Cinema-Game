@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 using System.Threading;
+using UnityEngine.EventSystems;
 
 public class Screen_Script : MonoBehaviour {
 
@@ -9,8 +10,8 @@ public class Screen_Script : MonoBehaviour {
 
     public ScreenObject theScreen;
     
-    public delegate void showBuildingOptions(string screen, string upgrade, Sprite s, int constrDone, int constrTotal);
-    public static event showBuildingOptions showBuildingMenu;
+    public delegate void ShowBuildingOptions(string screen, string upgrade, Sprite s, int constrDone, int constrTotal);
+    public static event ShowBuildingOptions showBuildingMenu;
 
     Controller theController;
 
@@ -24,7 +25,7 @@ public class Screen_Script : MonoBehaviour {
 
     void OnMouseDown()
     {
-        if (GetComponent<Renderer>().enabled && theController.statusCode == 0 && !theController.simulationRunning)
+        if (GetComponent<Renderer>().enabled && theController.statusCode == 0 && !theController.simulationRunning && !EventSystem.current.IsPointerOverGameObject())
         {
             ShowMenu();
         }
@@ -35,23 +36,16 @@ public class Screen_Script : MonoBehaviour {
     {
         if (showBuildingMenu != null)
         {
-            string screenNum = "Screen " + theScreen.getScreenNumber();
+            string screenNum = "Screen " + theScreen.GetScreenNumber();
             string level;
 
             if (!theScreen.ConstructionInProgress())
             {
-                level = "Level " + theScreen.getUpgradeLevel();
+                level = "Level " + theScreen.GetUpgradeLevel();
             }
             else
             {
-                if (theScreen.getUpgradeLevel() > 1)
-                {
-                    level = "Upgrading: " + theScreen.GetDaysOfConstruction() + " day(s) remaining";
-                }
-                else
-                {
-                    level = "Constructing: " + theScreen.GetDaysOfConstruction() + " day(s) remaining";
-                }
+                level = "(Level " + (theScreen.GetUpgradeLevel() - 1) + " >>> Level " + theScreen.GetUpgradeLevel() + ")";
             }
 
             Sprite s = transform.GetComponent<SpriteRenderer>().sprite;
@@ -62,7 +56,7 @@ public class Screen_Script : MonoBehaviour {
 
             if (theScreen.ConstructionInProgress())
             {
-                total = GetUpgradeTime(theScreen.getUpgradeLevel());
+                total = GetUpgradeTime(theScreen.GetUpgradeLevel());
                 done = total - theScreen.GetDaysOfConstruction();
             }
 
@@ -70,7 +64,7 @@ public class Screen_Script : MonoBehaviour {
             theController.statusCode = 3;
             theController.objectSelected = name;
             theController.tagSelected = tag;
-            theController.upgradeLevelSelected = theScreen.getUpgradeLevel();
+            theController.upgradeLevelSelected = theScreen.GetUpgradeLevel();
         }
     }
 

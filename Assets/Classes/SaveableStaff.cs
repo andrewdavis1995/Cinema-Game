@@ -21,8 +21,8 @@ namespace Assets.Classes
 
         public SaveableStaff(StaffMember s)
         {
-            this.index = s.getIndex();
-            this.currentJob = s.getJobID();
+            this.index = s.GetIndex();
+            this.currentJob = s.GetJobID();
             this.dayHired = s.GetStartDay();
             this.name = s.GetStaffname();
             this.attributes = s.GetAttributes();

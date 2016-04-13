@@ -121,7 +121,7 @@ public class Customer
         catch (Exception) { }
     }
 
-    public bool hasArrived(int hours, int minutes)
+    public bool HasArrived(int hours, int minutes)
     {
         if (hours >= hourDue && minutes >= minuteDue)
         {
@@ -132,9 +132,8 @@ public class Customer
         return false;
     }
 
-    public void nextPoint(bool first)
+    public void NextPoint(bool first)
     {
-
         try
         {
             this.pointsToVisit.RemoveAt(0);
@@ -156,7 +155,7 @@ public class Customer
         {
             if (goingToSeats) { goingToSeats = false; }
 
-            nextPlace(first);
+            NextPlace(first);
         }
        
 
@@ -204,7 +203,7 @@ public class Customer
 
     }
 
-    public void nextPlace(bool first)
+    public void NextPlace(bool first)
     {
         pointsToVisit.Clear();
 
@@ -224,7 +223,7 @@ public class Customer
                 needsTickets = false;
             }
             else {
-                nextPoint(false);
+                NextPoint(false);
             }
         }
 
@@ -234,7 +233,7 @@ public class Customer
         {
             if (patience > 0)
             {
-                int targetScreen = filmShowing.getScreenNumber();
+                int targetScreen = filmShowing.GetScreenNumber();
 
 
 
@@ -257,7 +256,11 @@ public class Customer
         else if (!inQueue && patience > 0)
         {
             // arrived at screen - FINISHED
-            mainController.servedCustomers++;
+
+            int price = (int)(1.5 + (1.5 * Controller.theScreens[0].GetUpgradeLevel()));
+            mainController.customerMoney += price;
+            mainController.customersServed++;
+
             transform.gameObject.SetActive(false);
 
             // update the speed portion of the Reputation
@@ -269,18 +272,18 @@ public class Customer
         }
     }
     
-    public void doneWithQueue() {
-        this.inQueue = false;
-        SetTravellingTo(38.5f, 11 * 0.8f);
-        transform.GetComponent<SpriteRenderer>().sortingLayerName = "Front";
-        transform.GetComponent<SpriteRenderer>().sortingOrder = 11;
+
+    public void AddPatience(int val)
+    {
+        patience += val;
     }
-    
-    public float getTravellingToX() { return travellingToX; }
-    public float getTravellingToY() { return travellingToY; }
-    public void ticketsDone() { this.needsTickets = false; goingToSeats = true; }
-    public bool isGoingToSeat() { return this.goingToSeats; }
-    public int getCharIndex() { return this.index; }
+
+    public int GetFilmScreen() { return filmShowing.GetScreenNumber(); }
+    public float GetTravellingToX() { return travellingToX; }
+    public float GetTravellingToY() { return travellingToY; }
+    public void TicketsDone() { this.needsTickets = false; goingToSeats = true; }
+    public bool IsGoingToSeat() { return this.goingToSeats; }
+    public int GetCharIndex() { return this.index; }
 
     public bool NeedsTickets()
     {

@@ -4,6 +4,8 @@ using UnityEngine.UI;
 using Assets.Scripts;
 using System.Collections.Generic;
 using Assets.Classes;
+using System.Threading;
+using System;
 
 [RequireComponent(typeof(BoxCollider2D))]
 
@@ -20,17 +22,17 @@ public class mouseDrag : MonoBehaviour
 
     public static GameObject staffAttributePanel;
 
-    public delegate void addStaffMember(StaffMember staff, int x, int y);
-    public static event addStaffMember addStaff;
+    public delegate void AddStaffMember(StaffMember staff, int x, int y);
+    public static event AddStaffMember addStaff;
 
-    public delegate int getStaffSize();
-    public static event getStaffSize getStaffListSize;
+    public delegate int GetStaffSize();
+    public static event GetStaffSize getStaffListSize;
 
-    public delegate int getStaffJob(int index);
-    public static event getStaffJob getStaffJobById;
+    public delegate int GetStaffJob(int index);
+    public static event GetStaffJob getStaffJobById;
 
-    public delegate void updateStaffJob(int index, int job, int posInPost, bool add);
-    public static event updateStaffJob changeStaffJob;
+    public delegate void UpdateStaffJob(int index, int job, int posInPost, bool add);
+    public static event UpdateStaffJob changeStaffJob;
 
     public delegate List<StaffMember> getFullStaffList();
 
@@ -66,16 +68,13 @@ public class mouseDrag : MonoBehaviour
 
         attributeImages = staffAttributePanel.GetComponentsInChildren<Image>();
         attributeTexts = staffAttributePanel.GetComponentsInChildren<Text>();
-
-        Debug.Log("DONE");
-
     }
 
-    void addToStaffList(StaffMember staff)
+    void AddToStaffList(StaffMember staff)
     {
 
-        int x = 35 + (2 * staff.getIndex() % 6);
-        int y = 3 * (staff.getIndex() / 6);
+        int x = 35 + (2 * staff.GetIndex() % 6);
+        int y = 3 * (staff.GetIndex() / 6);
 
 
         if (addStaff != null)
@@ -101,9 +100,9 @@ public class mouseDrag : MonoBehaviour
         //Debug.Log("StW: " + Camera.main.ScreenToWorldPoint(Input.mousePosition).x); // this one
         ////Debug.Log("StV: " + Camera.main.ScreenToViewportPoint(Input.mousePosition).x);
 
-        if (dragging && (mainController.statusCode == 1 || mainController.statusCode == 0 || mainController.statusCode == 6 || mainController.statusCode != 7))
+        if (dragging && (mainController.statusCode < 2 || mainController.statusCode == 6))
         {
-            doDragging();
+            DoDragging();
             mainController.statusCode = 1;
         }
 
@@ -112,7 +111,7 @@ public class mouseDrag : MonoBehaviour
     }
 
     // dodgy function
-    void checkForOutOfBounds()
+    void CheckForOutOfBounds()
     {
         // between - 40 and - 10
         //Debug.Log("StW: " + Camera.main.ScreenToWorldPoint(transform.position).x); // this one
@@ -151,17 +150,17 @@ public class mouseDrag : MonoBehaviour
 
     void OnMouseDown()
     {
-        attributeTexts[0].text = staffMember.GetStaffname();
-
-        int[] values = staffMember.GetAttributes();
-
-        for (int i = 1; i < 5; i++)
+        if ((mainController.statusCode < 2) || mainController.statusCode == 6)
         {
-            attributeTexts[i].text = values[i - 1].ToString();
-        }
+            attributeTexts[0].text = staffMember.GetStaffname();
+            
+            int[] values = staffMember.GetAttributes();
 
-        if ((mainController.statusCode < 3))
-        {
+            for (int i = 1; i < 5; i++)
+            {
+                attributeTexts[i].text = values[i - 1].ToString();
+            }
+
             staffAttributePanel.SetActive(true);
 
             int posInPost = -1;
@@ -206,7 +205,6 @@ public class mouseDrag : MonoBehaviour
                         break;
                     }
                 }
-
             }
 
             Transform pi3 = transform.FindChild("hiddenPointer");
@@ -216,10 +214,10 @@ public class mouseDrag : MonoBehaviour
             GetComponent<SpriteRenderer>().sortingLayerName = "Staff";
             dragging = true;
             prevCameraZoom = Camera.main.orthographicSize;
-            Camera.main.orthographicSize = 9;
+            Camera.main.orthographicSize = 6.5f;
             transform.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
             transform.localScale = new Vector3(2f, 2f, 2f);
-            changeStaffJob(staffMember.getIndex(), staffMember.getJobID(), posInPost, false);
+            changeStaffJob(staffMember.GetIndex(), staffMember.GetJobID(), posInPost, false);
 
             for (int i = 0; i < mainController.staffSlot.Count; i++)
             {
@@ -228,10 +226,11 @@ public class mouseDrag : MonoBehaviour
                     mainController.staffSlot[i].GetComponent<Renderer>().enabled = true;
                 }
             }
+
         }
     }
 
-    bool validDrop(int i)
+    bool ValidDrop(int i)
     {
         return !mainController.slotState[i];
     }
@@ -244,12 +243,31 @@ public class mouseDrag : MonoBehaviour
         {
             staffAttributePanel.SetActive(false);
 
-            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            mousePos = new Vector3(mousePos.x, mousePos.y, 0f);
 
+            Bounds staffBounds = new Bounds(transform.position, new Vector3(1, 1, 1));
+
+
+            Bounds b = GameObject.Find("Box Office").GetComponent<Renderer>().bounds;
+
+            Bounds newStaffBounds = new Bounds(staffBounds.center + new Vector3(0, 0.5f, 0), staffBounds.extents - new Vector3(0, 0.25f, 0));
+
+            if (b.Intersects(newStaffBounds))
+            {
+                float xPos = transform.position.x;
+                transform.position = new Vector2(xPos, 8f);
+            }
+            staffBounds = new Bounds(transform.position, new Vector3(1, 1, 1));
+
+            //Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            //mousePos = new Vector3(mousePos.x, mousePos.y, 0f);
+
+
+            this.transform.localScale = new Vector3(1, 1, 1);
+            animator.SetTrigger("land");
+            
 
             // check if in an invalid place - in middle of screen or object - sort layer accordingly
-            GameObject hidden = CheckHiddenBehind(mousePos);           
+            GameObject hidden = CheckHiddenBehind(staffBounds, mainController.gameObjectList, mainController.screenObjectList);           
 
 
             for (int i = 0; i < mainController.staffSlot.Count; i++)
@@ -257,10 +275,8 @@ public class mouseDrag : MonoBehaviour
                 mainController.staffSlot[i].GetComponent<Renderer>().enabled = false;
             }
 
-            this.transform.localScale = new Vector3(1, 1, 1);
-            animator.SetTrigger("land");
             triggerSet = false;
-            this.transform.position = new Vector3(transform.position.x, transform.position.y + 1f, 0);
+            this.transform.position = new Vector3(transform.position.x, transform.position.y + 0.2f, 0);
 
             float x = this.transform.position.x;
             float y = this.transform.position.y;
@@ -271,10 +287,12 @@ public class mouseDrag : MonoBehaviour
             for (int i = 0; i < mainController.staffSlot.Count; i++)
             {
                 Bounds b1 = mainController.staffSlot[i].GetComponent<Renderer>().bounds;
-                
-                if (b1.Contains(mousePos))
+
+                Bounds newStaff = new Bounds(staffBounds.center + new Vector3(0, 1.25f, 0), staffBounds.extents);
+
+                if (b1.Intersects(newStaff))
                 {
-                    if (validDrop(i))
+                    if (ValidDrop(i))
                     {
                         // add to list of staff at ticket booth
                         if (changeStaffJob != null)
@@ -305,41 +323,36 @@ public class mouseDrag : MonoBehaviour
                                 }
                             }
                             
-                            changeStaffJob(staffMember.getIndex(), target, posInPost, true);
+                            changeStaffJob(staffMember.GetIndex(), target, posInPost, true);
                         }
                     }
                     else
                     {
-                        Bounds b2 = new Bounds(mousePos, new Vector3(2, 2, 0));
-
-                        if (b1.Intersects(b2))
+                        if (b1.Intersects(newStaff))
                         {
-                            transform.position = new Vector3(transform.position.x + 3, transform.position.y, 0);
+                            transform.position = new Vector3(transform.position.x, transform.position.y + 2, 0);
                         }
-                        changeStaffJob(staffMember.getIndex(), 0, 0, false);
+                        changeStaffJob(staffMember.GetIndex(), 0, 0, false);
                     }
                 }
             }
 
             Camera.main.orthographicSize = prevCameraZoom;
+
             
 
             // check if overlapping wall at front door
             for (int k = 0; k < mainController.walls.Length; k++)
             {
-                Bounds b = mainController.walls[k].GetComponent<Renderer>().bounds;
+                Bounds b2 = mainController.walls[k].GetComponent<Renderer>().bounds;
 
-                if (b.Contains(mousePos))
+                Bounds newStaffBounds2 = new Bounds(staffBounds.center - new Vector3(0, 0.5f, 0), staffBounds.extents - new Vector3(0, 0.5f, 0));
+
+                if (b2.Intersects(newStaffBounds2))
                 {
 
                     float xPos = transform.position.x;
-
-                    if (xPos > 73)
-                    {
-                        xPos = 73;
-                    }
-
-                    transform.position = new Vector2(xPos, 0.8f);
+                    transform.position = new Vector2(xPos, 0f);
                 }
 
             }
@@ -354,12 +367,22 @@ public class mouseDrag : MonoBehaviour
 
         }
         dragging = false;
+        
 
+        if (transform.position.x > 79f)
+        {
+            transform.position = new Vector3(78, transform.position.y, 1);
+        }
+        if (transform.position.y > (39f * 0.8f))
+        {
+            transform.position = new Vector3(transform.position.x, 38 * 0.8f, 1);
+        }
 
+        staffMember.SetTransform(transform);
 
     }
 
-    void doDragging()
+    void DoDragging()
     {
 
         transform.position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -421,37 +444,58 @@ public class mouseDrag : MonoBehaviour
         //tmp.y -= UnityEngine.ScreenObject.height / 2;
     }
 
-    GameObject CheckHiddenBehind(Vector3 mousePos)
+
+    public static Bounds GetObjectHiddenBounds(GameObject go)
+    {
+        Bounds toReturn = new Bounds();
+        Bounds overallBounds = go.GetComponent<Renderer>().bounds; 
+
+        if (go.tag.Equals("Vending Machine"))
+        {            
+            toReturn = new Bounds(new Vector3(overallBounds.center.x, (overallBounds.center.y - 0.35f), 0), 2 * new Vector3(overallBounds.extents.x, 1.5f, 0.1f));
+        }
+        else if (go.tag.Equals("Bust"))
+        {
+            toReturn = new Bounds(new Vector3(overallBounds.center.x, (overallBounds.center.y - 0.65f), 0), 2 * new Vector3(overallBounds.extents.x, 1.24f, 0.1f));
+        }
+        else if (go.tag.Equals("Plant"))
+        {
+            toReturn = new Bounds(new Vector3(overallBounds.center.x, (overallBounds.center.y - 0.135f), 0), 2 * new Vector3(overallBounds.extents.x, 0.35f, 0.1f));
+        }
+
+        return toReturn;
+    }
+
+
+    public static GameObject CheckHiddenBehind(Bounds staffBounds, List<GameObject> gameObjectList, List<GameObject> screenObjectList)
     {
         GameObject toHideBehind = null;
 
-        for (int i = 0; i < mainController.gameObjectList.Count; i++)
+        for (int i = 0; i < gameObjectList.Count; i++)
         {
+            Bounds bTop = GetObjectHiddenBounds(gameObjectList[i]);
 
-            Bounds b1 = mainController.gameObjectList[i].GetComponent<Renderer>().bounds;
-
-
-            if (b1.Contains(mousePos)) { toHideBehind = mainController.gameObjectList[i]; break; }
+            if (bTop.Intersects(staffBounds)) { toHideBehind = gameObjectList[i]; break; }
 
         }
         
         if (toHideBehind == null)
         {
-            for (int i = 0; i < mainController.screenObjectList.Count; i++)
+            for (int i = 0; i < screenObjectList.Count; i++)
             {
 
-                Bounds b1 = mainController.screenObjectList[i].GetComponent<Renderer>().bounds;
+                Bounds b1 = screenObjectList[i].GetComponent<Renderer>().bounds;
 
-                Bounds bTop = new Bounds(new Vector3(b1.center.x, (b1.center.y + 3.741147f), 0), 2 * new Vector3(b1.extents.x, 2.15883f, 0.1f));
-                Bounds bBottom = new Bounds(new Vector3(b1.center.x, (b1.center.y - b1.extents.y + 1.352084f), 0), 2 * new Vector3(b1.extents.x, 1.352084f, 0.1f));
+                Bounds bTop = new Bounds(new Vector3(b1.center.x, (b1.center.y - b1.extents.y + 8.8f), 0), 2 * new Vector3(b1.extents.x, 1.8f, 0.125f));
+                Bounds bBottom = new Bounds(new Vector3(b1.center.x, (b1.center.y - b1.extents.y + 0.9f), 0), 2 * new Vector3(b1.extents.x, 0.65f, 0.1f));
   
 
-                if (bTop.Contains(mousePos)) { toHideBehind = mainController.screenObjectList[i]; break; }
-                if (bBottom.Contains(mousePos)) { toHideBehind = mainController.screenObjectList[i]; break; }
+                if (bTop.Intersects(staffBounds)) { toHideBehind = screenObjectList[i]; break; }
+                if (bBottom.Intersects(staffBounds)) { toHideBehind = screenObjectList[i]; break; }
 
-                if (b1.Contains(mousePos) && Controller.theScreens[i].ConstructionInProgress())
+                if (b1.Intersects(staffBounds) && Controller.theScreens[i].ConstructionInProgress())
                 {
-                    toHideBehind = mainController.screenObjectList[i];
+                    toHideBehind = screenObjectList[i];
                     break;
                 }
 

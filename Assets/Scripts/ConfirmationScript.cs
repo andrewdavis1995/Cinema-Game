@@ -25,7 +25,7 @@ public class ConfirmationScript : MonoBehaviour {
         imageElements = theConfirmPanel.GetComponentsInChildren<Image>();
     }
 
-    public static void OptionSelected(int code, string[] p)
+    public static void OptionSelected(int code, string[] p, string inOrOut)
     {
         mainController.statusCode = 8;
         mainController.confirmationPanel.SetActive(true);
@@ -35,6 +35,7 @@ public class ConfirmationScript : MonoBehaviour {
 
         textElements[4].text = "Are you sure you wish to " + p[0];
         textElements[3].text = p[1];
+        textElements[2].text = inOrOut;
         imageElements[4].sprite = mainController.confirmationPanel.GetComponentInChildren<ConfirmationScript>().currencyImages[int.Parse(p[2])];
     }
 
@@ -59,7 +60,7 @@ public class ConfirmationScript : MonoBehaviour {
             parameters[1] = cost.ToString();
             parameters[2] = "0";
             parameters[3] = index.ToString();
-            OptionSelected(1, parameters);
+            OptionSelected(1, parameters, "This will cost: ");
         }
         else
         {
@@ -117,10 +118,12 @@ public class ConfirmationScript : MonoBehaviour {
             {
                 case 0:
                     mainController.AddNewObject(int.Parse(parameters[3]), int.Parse(parameters[4]));
+                    mainController.statusCode = 0;
                     break;
                 case 1:
                     int index = int.Parse(parameters[3]);
                     mainController.UpgradeStaffAttribute(index);
+                    mainController.statusCode = 7;
                     break;
                 case 2:
                     // hire new staff
@@ -128,40 +131,42 @@ public class ConfirmationScript : MonoBehaviour {
                     int index2 = UnityEngine.Random.Range(0, 5);
                     StaffMember sm = new StaffMember(mainController.staffMembers.Count, "New", mainController.staffPrefabs[index2], mainController.currDay, index2);
 
-                    int x = 35 + 2 * (sm.getIndex() % 6);
-                    int y = 2 * (sm.getIndex() / 6);
+                    int x = 35 + 2 * (sm.GetIndex() % 6);
+                    int y = 2 * (sm.GetIndex() / 6);
 
-                    mainController.addStaffMember(sm, x, y);
+                    mainController.AddStaffMember(sm, x, y);
+                    mainController.HideObjectInfo();
+                    mainController.statusCode = 0;
                     break;
                 case 3:
                     // upgrade screen
                     int screenIndex = int.Parse(parameters[3]);
                     ScreenObject theScreen = mainController.screenObjectList[screenIndex].GetComponent<Screen_Script>().theScreen;
-                    theScreen.upgrade();
+                    theScreen.Upgrade();
                     mainController.screenObjectList[screenIndex].GetComponent<SpriteRenderer>().sprite = mainController.screenImages[0];
 
                     mainController.objectInfo.SetActive(false);
                     mainController.closeInfo.SetActive(false);
 
-                    mainController.newShowTimes();
+                    mainController.NewShowTimes();
                     mainController.statusCode = 0;
 
-                    mainController.CreateBuilder(theScreen.getX(), theScreen.getY(), theScreen.getScreenNumber());
+                    mainController.CreateBuilder(theScreen.GetX(), theScreen.GetY(), theScreen.GetScreenNumber());
 
                     for (int k = 0; k < mainController.filmShowings.Count; k++)       // filmShowings.Count
                     {
-                        int index3 = mainController.filmShowings[k].getScreenNumber();
-                        int ticketsSold = mainController.getTicketsSoldValue(Controller.theScreens[index3 - 1]);
-                        mainController.filmShowings[k].setTicketsSold(ticketsSold);
+                        int index3 = mainController.filmShowings[k].GetScreenNumber();
+                        int ticketsSold = mainController.GetTicketsSoldValue(Controller.theScreens[index3 - 1]);
+                        mainController.filmShowings[k].SetTicketsSold(ticketsSold);
 
                         int currentCount = 0;
 
                         for (int j = 0; j < k; j++)
                         {
-                            currentCount += mainController.filmShowings[j].getTicketsSold();
+                            currentCount += mainController.filmShowings[j].GetTicketsSold();
                         }
 
-                        List<Customer> tmp = mainController.filmShowings[k].createCustomerList(currentCount, mainController);
+                        List<Customer> tmp = mainController.filmShowings[k].CreateCustomerList(currentCount, mainController);
                         mainController.allCustomers.AddRange(tmp);
                     }
 
@@ -169,9 +174,11 @@ public class ConfirmationScript : MonoBehaviour {
                 case 4:
                     mainController.redCarpet.SetActive(true);
                     mainController.hasUnlockedRedCarpet = true;
+                    mainController.statusCode = 5;
                     break;
                 case 5:
                     OtherObjectScript.UpgradeBoxOffice();
+                    mainController.statusCode = 0;
                     break;
                 case 6:
 
@@ -181,6 +188,11 @@ public class ConfirmationScript : MonoBehaviour {
                     int height = int.Parse(parameters[6]);
 
                     mainController.RemoveObject(xPos, yPos, width, height);
+                    mainController.statusCode = 0;
+                    break;
+                case 7:
+                    mainController.ClearAllProjectors();
+                    mainController.statusCode = 0;
                     break;
             }
         }

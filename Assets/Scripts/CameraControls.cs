@@ -45,9 +45,9 @@ public class CameraControls : MonoBehaviour
         bottomBarHeight = vertExtent / bottomBar.transform.localScale.y;
         
         minX = horizExtent;
-        maxX = 72.2f - ((Camera.main.orthographicSize - 4) * 1.81429f);
+        maxX = 80f - (Camera.main.orthographicSize * 1.5f);
         minY = vertExtent;
-        maxY = 27.6f - ((Camera.main.orthographicSize - 4));
+        maxY = (40f - (Camera.main.orthographicSize * 1.25f)) * 0.8f;
 
         if (transform.position != endPos)
         {
@@ -68,9 +68,9 @@ public class CameraControls : MonoBehaviour
             Camera.main.orthographicSize = 4f;
         }
 
-        if (Camera.main.orthographicSize > 18f)
+        if (Camera.main.orthographicSize > 15f)
         {
-            Camera.main.orthographicSize = 18f;
+            Camera.main.orthographicSize = 15f;
         }
 
 

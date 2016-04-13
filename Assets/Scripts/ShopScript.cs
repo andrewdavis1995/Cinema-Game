@@ -23,75 +23,93 @@ public class ShopScript : MonoBehaviour {
         switch (id)
         { 
             case 0: // ScreenObject
-                mainController.objectSelected = "NEW SCREEN";
-                mainController.placeObject(11, 15);
-                
-                for (int i = 0; i < mainController.screenObjectList.Count; i++)
-                {
-                    mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.8f);
-                }
-                for (int i = 0; i < mainController.gameObjectList.Count; i++)
-                {
-                    mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
-                }
 
+                if (Controller.theScreens.Count < 8)
+                {
+
+                    mainController.objectSelected = "NEW SCREEN";
+                    mainController.PlaceObject(11, 15);
+
+                    for (int i = 0; i < mainController.screenObjectList.Count; i++)
+                    {
+                        mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
+                    }
+                    for (int i = 0; i < mainController.gameObjectList.Count; i++)
+                    {
+                        mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.6f);
+                    }
+
+                    mainController.redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.3f);
+                }
+                else
+                {
+                    mainController.ShowPopup(5, "Sorry, you have reached the maximum number of Screens permitted (8)");
+                }
                 break;
             case 1:
-                ConfirmationScript.OptionSelected(2, new string[] { "hire a new Staff Member?", "800", "0" });
+                if (mainController.staffMembers.Count < 18)
+                {
+                    ConfirmationScript.OptionSelected(2, new string[] { "hire a new Staff Member?", "800", "0" }, "This will cost: ");
+                }
+                else
+                {
+                    mainController.ShowPopup(5, "Sorry. You are only allowed to have 18 Staff Members hired.");
+                }
                 break;
             case 2: // Plant
                 mainController.objectSelected = "NEW PLANT";
-                mainController.placeObject(1, 1);
+                mainController.PlaceObject(1, 1);
                 
                 for (int i = 0; i < mainController.screenObjectList.Count; i++)
                 {
-                    mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.8f);
+                    mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
                 }
                 for (int i = 0; i < mainController.gameObjectList.Count; i++)
                 {
-                    mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
+                    mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.6f);
                 }
-
+                mainController.redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.3f);
                 break;
             case 3: // Bust
                 mainController.objectSelected = "NEW BUST";
-                mainController.placeObject(2, 3);
+                mainController.PlaceObject(2, 3);
                 
                 for (int i = 0; i < mainController.screenObjectList.Count; i++)
                 {
-                    mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.8f);
+                    mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
                 }
                 for (int i = 0; i < mainController.gameObjectList.Count; i++)
                 {
-                    mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
+                    mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.6f);
                 }
-
+                mainController.redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.3f);
                 break;
             case 4: // 5 Popcorns
                 // micro-transactions - MONEY!
                 break;
             case 5: // Vending Machine
                 mainController.objectSelected = "NEW VENDING MACHINE";
-                mainController.placeObject(3, 3);
+                mainController.PlaceObject(3, 3);
 
                 for (int i = 0; i < mainController.screenObjectList.Count; i++)
                 {
-                    mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.8f);
+                    mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
                 }
                 for (int i = 0; i < mainController.gameObjectList.Count; i++)
                 {
-                    mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
+                    mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.8f);
                 }
-
+                mainController.redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.3f);
                 break;
             case 6: // Red Carpet
                 if (!mainController.hasUnlockedRedCarpet)
                 {
-                    ConfirmationScript.OptionSelected(4, new string[] { " unlock the Red Carpet?", "800", "0" });
+                    ConfirmationScript.OptionSelected(4, new string[] { " unlock the Red Carpet?", "800", "0" }, "This will cost: ");
                 }
                 else
                 {
                     Debug.Log("Already Got it you silly sausage!");
+                    mainController.ShowPopup(5, "You already own this object!");
                 }
                 break;
         }
@@ -105,7 +123,6 @@ public class ShopScript : MonoBehaviour {
 
     public void TabChanged(int index)
     {
-        Debug.Log(shopTabs[index].name);
         shopTabs[index].GetComponent<Transform>().SetAsLastSibling();
 
         for (int i = 0; i < shopTabs.Length; i++)

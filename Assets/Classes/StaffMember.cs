@@ -84,20 +84,22 @@ namespace Assets.Classes
             this.name = newName;
         }
 
-        public Transform getTransform()
+        public Transform GetTransform()
         {
             return transform;
         }
        
-        public int getIndex() { return this.index; }
+        public int GetIndex() { return this.index; }
 
-        public void setJob(int jobID)
+        public void SetJob(int jobID)
         {
             currentJob = jobID;
         }
-        public int getJobID()
+        public int GetJobID()
         {
             return currentJob;
         }
+       
+
     }
 }

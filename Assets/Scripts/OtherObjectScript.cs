@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 public class OtherObjectScript : MonoBehaviour {
 
     static Controller mainController;
-    public delegate void showBuildingOptions(string screen, string upgrade, Sprite s, int constrDone, int constrTotal);
-    public static event showBuildingOptions showBuildingMenu;
+    public delegate void ShowBuildingOptions(string screen, string upgrade, Sprite s, int constrDone, int constrTotal);
+    public static event ShowBuildingOptions showBuildingMenu;
     Transform transform;
 
     // Use this for initialization
@@ -18,7 +19,6 @@ public class OtherObjectScript : MonoBehaviour {
 	void Update () {
 	
 	}
-
 
     public static void CreateStaffSlot(int type, Vector3 pos)
     {
@@ -46,14 +46,14 @@ public class OtherObjectScript : MonoBehaviour {
         sr.sprite = mainController.boxOfficeImages[mainController.boxOfficeLevel - 1];
 
         // hide the object info menu
-        mainController.hideObjectInfo();
+        mainController.HideObjectInfo();
 
 
     }
 
     void OnMouseDown()
     {
-        if (GetComponent<Renderer>().enabled && mainController.statusCode == 0 && !mainController.simulationRunning)
+        if (GetComponent<Renderer>().enabled && mainController.statusCode == 0 && !mainController.simulationRunning && !EventSystem.current.IsPointerOverGameObject())
         {
             ShowMenu();
         }

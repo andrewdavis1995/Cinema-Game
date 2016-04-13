@@ -12,16 +12,17 @@ public class Controller : MonoBehaviour
 {
     public int selectedStaff = -1;
     public int newStatusCode = 0;
-
-
+    
     public int numWalkouts = 0;
-    public int servedCustomers = 0;
+    public int customersServed = 0;
+    public int customerMoney = 0;
 
     public Sprite[] boxOfficeImages;
     public int boxOfficeLevel = 0;
 
     public GameObject[] walls;
 
+    public GameObject pnlClearProjectors;
     public Transform builderPrefab;
 
     public Reputation reputation;
@@ -110,8 +111,8 @@ public class Controller : MonoBehaviour
     public TileManager theTileManager;
     public GameObject confirmPanel;
     
-    public delegate void setTileStates(int startX, int startY, int w, int h, int newState, bool complete);
-    public static event setTileStates updateTileState;
+    public delegate void SetTileStates(int startX, int startY, int w, int h, int newState, bool complete);
+    public static event SetTileStates updateTileState;
 
     public Sprite ColourBackground;
     public Sprite colourCircle;
@@ -126,7 +127,7 @@ public class Controller : MonoBehaviour
 
     //List<GameObject> customerObjects = new List<GameObject>();
 
-    public CustomerQueue ticketQueue = new CustomerQueue();
+    public CustomerQueue ticketQueue = new CustomerQueue(11);
 
     public bool simulationRunning = false;
 
@@ -138,23 +139,18 @@ public class Controller : MonoBehaviour
     List<List<Coordinate>> screenPaths = new List<List<Coordinate>>();
     List<Coordinate> exitPath = new List<Coordinate>();
 
-    public int totalCoins = 1000;
+    public int totalCoins = 40000;
     public int numPopcorn = 15;
 
     public int currDay = 0;
 
     int numScreens = 1;
-
-    float count = 0;
-
-    public int minutes = 0;
-    public int hours = 9;
-
+    
     public void OpenShop()
     {
         if (statusCode != 2 && statusCode != 8 && statusCode != 9)
         {
-            hideObjectInfo();
+            HideObjectInfo();
             statusCode = 5;
             shopCanvas.SetActive(true);
         }
@@ -194,12 +190,10 @@ public class Controller : MonoBehaviour
             }
         }
     }
-
-
+    
     // Use this for initialization
     void Start()
     {
-
         picProfile.GetComponent<SpriteRenderer>().sprite = profilePicture;
 
         #region Find Objects
@@ -246,12 +240,12 @@ public class Controller : MonoBehaviour
         #endregion
 
         #region Add Delegate references
-        mouseDrag.addStaff += addStaffMember;
-        mouseDrag.getStaffListSize += getStaffSize;
-        mouseDrag.getStaffJobById += getStaffJobById;
-        mouseDrag.changeStaffJob += updateStaffJob;
-        mouseDrag.getStaffList += getFullStaffList;
-        movementScript.addToQueueTickets += addToQueueTickets;
+        mouseDrag.addStaff += AddStaffMember;
+        mouseDrag.getStaffListSize += GetStaffSize;
+        mouseDrag.getStaffJobById += GetStaffJobById;
+        mouseDrag.changeStaffJob += UpdateStaffJob;
+        mouseDrag.getStaffList += GetFullStaffList;
+        movementScript.addToQueueTickets += AddToQueueTickets;
         //movementScript.getQueueTickets += getTicketQueue;
         movementScript.getQueueTicketsSize += GetTicketQueueSize;
         Screen_Script.showBuildingMenu += ShowBuildingOptions;
@@ -265,6 +259,9 @@ public class Controller : MonoBehaviour
         // get Player data. If not null, load game
         if (ButtonScript.loadGame == null)
         {
+            numPopcorn = 15;
+            totalCoins = 40000;
+
             carpetColour = GetColourFromID(1);
             reputation = new Reputation();
             reputation.Initialise();
@@ -293,13 +290,13 @@ public class Controller : MonoBehaviour
             {
                 Vector3 pos = floorTiles[i * 11, 0].transform.position;
                 theScreens.Add(new ScreenObject((i + 1), 0));
-                theScreens[i].setPosition((int)pos.x, (int)pos.y);
+                theScreens[i].SetPosition((int)pos.x, (int)pos.y);
             }
-            theScreens[0].upgrade();
-            theScreens[0].upgradeComplete();
+            theScreens[0].Upgrade();
+            theScreens[0].UpgradeComplete();
             // NYAH
 
-            nextDay(false);
+            NextDay(false);
 
             for (int i = 0; i < 2; i++)
             {
@@ -308,7 +305,7 @@ public class Controller : MonoBehaviour
                 int x = 35 + (2 * (i % 6));
                 int y = (2 * (i / 6));
 
-                addStaffMember(new StaffMember(i, "Andrew", staffPrefabs[index], currDay, index), x, y);
+                AddStaffMember(new StaffMember(i, "Andrew", staffPrefabs[index], currDay, index), x, y);
             }
 
         }
@@ -377,10 +374,10 @@ public class Controller : MonoBehaviour
 
                 newStaff.SetAttributes(attributes);
 
-                int x = 35 + (2 * (newStaff.getIndex() % 6)); ;
-                int y = 2 * (newStaff.getIndex() / 6);
+                int x = 35 + (2 * (newStaff.GetIndex() % 6)); ;
+                int y = 2 * (newStaff.GetIndex() / 6);
 
-                addStaffMember(newStaff, x, y);
+                AddStaffMember(newStaff, x, y);
             }
 
             filmShowings = new List<FilmShowing>(data.filmShowings);
@@ -391,15 +388,15 @@ public class Controller : MonoBehaviour
             otherObjects = new List<OtherObject>(data.otherObjects);
 
 
-            nextDay(false);
+            NextDay(false);
             currDay--; // needed for some reason
 
 
             // hopefully un-fucks things
             for (int i = 0; i < theScreens.Count; i++)
             {
-                Vector3 pos = new Vector3(theScreens[i].getX(), theScreens[i].getY(), 0);
-                theScreens[i].setPosition((int)pos.x, (int)(pos.y));
+                Vector3 pos = new Vector3(theScreens[i].GetX(), theScreens[i].GetY(), 0);
+                theScreens[i].SetPosition((int)pos.x, (int)(pos.y));
             }
             
         }
@@ -408,7 +405,7 @@ public class Controller : MonoBehaviour
         // create some test screens
         for (int i = 0; i < theScreens.Count; i++)
         {
-            Vector3 pos = new Vector3(theScreens[i].getX(), theScreens[i].getY() * 0.8f, 0);
+            Vector3 pos = new Vector3(theScreens[i].GetX(), theScreens[i].GetY() * 0.8f, 0);
 
             //// align to grid - +/- 1 to move by one tile horizontally, 0.8 for vertical movement
             //pos.x += 4.6f;
@@ -419,22 +416,22 @@ public class Controller : MonoBehaviour
 
             GameObject instance = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity);
             instance.GetComponent<Screen_Script>().theScreen = theScreens[i];
-            instance.name = "Screen#" + theScreens[i].getScreenNumber();
+            instance.name = "Screen#" + theScreens[i].GetScreenNumber();
             instance.tag = "Screen";
-            instance.GetComponent<SpriteRenderer>().sortingOrder = height - theScreens[i].getY() - 1;
+            instance.GetComponent<SpriteRenderer>().sortingOrder = height - theScreens[i].GetY() - 1;
             if (!theScreens[i].ConstructionInProgress())
             {
-                instance.GetComponent<SpriteRenderer>().sprite = screenImages[theScreens[i].getUpgradeLevel()];
+                instance.GetComponent<SpriteRenderer>().sprite = screenImages[theScreens[i].GetUpgradeLevel()];
             }
             else
             {
                 instance.GetComponent<SpriteRenderer>().sprite = screenImages[0];
-                CreateBuilder(theScreens[i].getX(), theScreens[i].getY(), theScreens[i].getScreenNumber());
+                CreateBuilder(theScreens[i].GetX(), theScreens[i].GetY(), theScreens[i].GetScreenNumber());
             }
 
             screenObjectList.Add(instance);
 
-            setTiles(2, (int)(theScreens[i].getX()), (int)(theScreens[i].getY()), 11, 15);
+            SetTiles(2, (int)(theScreens[i].GetX()), (int)(theScreens[i].GetY()), 11, 15);
         }
 
         // do same for other objects
@@ -490,15 +487,15 @@ public class Controller : MonoBehaviour
 
             gameObjectList.Add(instance);
 
-            setTiles(2, (int)(otherObjects[i].xPos), (int)(otherObjects[i].yPos), w, h);
+            SetTiles(2, (int)(otherObjects[i].xPos), (int)(otherObjects[i].yPos), w, h);
         }
 
         //createColourPicker();
 
         if (updateTileState != null)
         {
-            updateTileState(34, 0, 13, 16, 1, true);
-            updateTileState(34, 16, 13, 4, 2, true);
+            updateTileState(33, 0, 13, 16, 1, true);
+            updateTileState(33, 16, 13, 4, 2, true);
         }
 
 
@@ -517,8 +514,9 @@ public class Controller : MonoBehaviour
         dayLabel.text = "DAY: " + currDay.ToString();
         popcornLabel.text = numPopcorn.ToString();
 
+        Save();
+        
     }
-
 
     public int GetTicketQueueSize()
     {
@@ -545,14 +543,14 @@ public class Controller : MonoBehaviour
 
     List<GameObject> staffMenuList = new List<GameObject>();
 
-    void createStaff(StaffMember staff, int xPos, int yPos)
+    void CreateStaff(StaffMember staff, int xPos, int yPos)
     {
         Vector3 pos = new Vector3(xPos, yPos);
 
-        Transform t = staff.getTransform();
+        Transform t = staff.GetTransform();
         
         GameObject goStaff = (GameObject)Instantiate(t.gameObject, pos, Quaternion.identity);
-        goStaff.name = "Staff#" + staff.getIndex();
+        goStaff.name = "Staff#" + staff.GetIndex();
         goStaff.tag = "Staff";
         goStaff.GetComponent<mouseDrag>().staffMember = staff;
 
@@ -560,23 +558,21 @@ public class Controller : MonoBehaviour
         float y = pos.y;
 
         goStaff.GetComponent<mouseDrag>().staffMember.SetVector(x, y);
-
+        
         GameObject go = (GameObject)Instantiate(staffInfoObject.gameObject, new Vector3(0, 0, 0), Quaternion.identity);
         go.transform.SetParent(staffList, false);
-
-        go.transform.localPosition = new Vector3(0, 280 - (32 * staffMembers.Count), 0);
-
+        
         Image[] imgs = go.GetComponentsInChildren<Image>();
         Text[] txts = go.GetComponentsInChildren<Text>();
 
-        imgs[1].sprite = staff.getTransform().GetComponent<SpriteRenderer>().sprite;
+        imgs[1].sprite = staff.GetTransform().GetComponent<SpriteRenderer>().sprite;
         txts[0].text = staff.GetStaffname();
 
         Button b = imgs[2].GetComponent<Button>();
-        b.onClick.AddListener(() => MoveToStaffLocation(staff.getIndex()));
+        b.onClick.AddListener(() => MoveToStaffLocation(staff.GetIndex()));
 
         Button b2 = imgs[3].GetComponent<Button>();
-        b2.onClick.AddListener(() => ViewStaffMemberInfo(staff.getIndex()));
+        b2.onClick.AddListener(() => ViewStaffMemberInfo(staff.GetIndex()));
 
         staffMenuList.Add(go);
 
@@ -595,7 +591,7 @@ public class Controller : MonoBehaviour
         int[] attributes = s.GetAttributes();
         string name = s.GetStaffname();
         int dayHired = s.GetStartDay();
-        Sprite sprite = s.getTransform().GetComponent<SpriteRenderer>().sprite;
+        Sprite sprite = s.GetTransform().GetComponent<SpriteRenderer>().sprite;
 
         // find the elements of the form
         Image[] imgs = staffMemberInfo.GetComponentsInChildren<Image>();
@@ -690,7 +686,7 @@ public class Controller : MonoBehaviour
             }
 
             int moneyToReturn = GetReturnedCoins();
-            ConfirmationScript.OptionSelected(6, new string[] { "sell this item?", moneyToReturn.ToString(), "0", xPos.ToString(), yPos.ToString(), width.ToString(), height.ToString() });
+            ConfirmationScript.OptionSelected(6, new string[] { "sell this item?", moneyToReturn.ToString(), "0", xPos.ToString(), yPos.ToString(), width.ToString(), height.ToString() }, "You will receive: ");
         }
         else
         {
@@ -778,7 +774,7 @@ public class Controller : MonoBehaviour
                 int cost = 3500;
                 cost += (boxOfficeLevel - 1) * 5500;
 
-                ConfirmationScript.OptionSelected(5, new string[] { "upgrade the box office?", cost.ToString(), "0", "0" });
+                ConfirmationScript.OptionSelected(5, new string[] { "upgrade the box office?", cost.ToString(), "0", "0" }, "This will cost: ");
             }
             else
             {
@@ -793,10 +789,10 @@ public class Controller : MonoBehaviour
                 {
                     ScreenObject theScreen = screenObjectList[i].GetComponent<Screen_Script>().theScreen;
 
-                    if (theScreen.getUpgradeLevel() < 4 && !theScreen.ConstructionInProgress())
+                    if (theScreen.GetUpgradeLevel() < 4 && !theScreen.ConstructionInProgress())
                     {
 
-                        ConfirmationScript.OptionSelected(3, new string[] { "upgrade Screen " + theScreen.getScreenNumber(), (theScreen.calculateUpgradeCost()).ToString(), "0", i.ToString() });
+                        ConfirmationScript.OptionSelected(3, new string[] { "upgrade Screen " + theScreen.GetScreenNumber(), (theScreen.CalculateUpgradeCost()).ToString(), "0", i.ToString() }, "This will cost: ");
 
                         break;
                     }
@@ -809,7 +805,7 @@ public class Controller : MonoBehaviour
         }
     }
 
-    public void updateTiles(int x, int y, int w, int h, int newState)
+    public void UpdateTiles(int x, int y, int w, int h, int newState)
     {
         if (updateTileState != null)
         {
@@ -817,7 +813,7 @@ public class Controller : MonoBehaviour
         }
     }
 
-    void setTiles(int newState, int x, int y, int width, int height)
+    void SetTiles(int newState, int x, int y, int width, int height)
     {
         Color newColour;
 
@@ -825,7 +821,7 @@ public class Controller : MonoBehaviour
 
         ChangeColour(newColour, x, y, width, height);
 
-        updateTiles(x, y, width, height, newState);
+        UpdateTiles(x, y, width, height, newState);
     }
 
     public void ShowPopup(int status, string theString)
@@ -836,7 +832,7 @@ public class Controller : MonoBehaviour
         texts[1].text = theString;
     }
 
-    public void hideObjectInfo()
+    public void HideObjectInfo()
     {
         shopCanvas.SetActive(false);
         objectInfo.SetActive(false);
@@ -851,7 +847,7 @@ public class Controller : MonoBehaviour
         upgradeLevelSelected = 0;
     }
 
-    void newColourButton(int row, int column, bool texture)
+    void NewColourButton(int row, int column, bool texture)
     {
         GameObject gO = new GameObject();
         gO.name = "ColorCircle~" + row + "~" + column;
@@ -907,7 +903,7 @@ public class Controller : MonoBehaviour
         // btn.onClick.AddListener(() => colourClicked(gO.GetComponent<Image>().color, gO.GetComponent<Image>().sprite));
     }
 
-    void createColourPicker()
+    void CreateColourPicker()
     {
         Image[,] colours = new Image[3, 6];
 
@@ -915,11 +911,11 @@ public class Controller : MonoBehaviour
         {
             for (int column = 0; column < 2; column++)
             {
-                newColourButton(row, column, false);
+                NewColourButton(row, column, false);
             }
         }
 
-        newColourButton(0, 2, true);
+        NewColourButton(0, 2, true);
 
     }
     
@@ -956,118 +952,10 @@ public class Controller : MonoBehaviour
         CarpetRollScript.current.Begin(carpetColour, this, s);
     }
 
-    //void UpdateJobList()
-    //{
-    //    //ticketStaff = staffMembers.FindAll(
-    //    //    delegate (StaffMember sm)
-    //    //    {
-    //    //        return sm.getJobID() == 1;
-    //    //    }
-    //    //    );
-
-    //    //NewTicketQueueSpeed();
-
-    //}
-
-    //void NewTicketQueueSpeed()
-    //{
-    //    int overallLevel = 0;
-
-    //    for (int i = 0; i < ticketStaff.Count; i++)
-    //    {
-    //        overallLevel += ticketStaff[i].GetAttributeByIndex(0);
-    //    }
-
-    //    ticketStaffLevel = 4.5f - (float)(1.125 * overallLevel / ticketStaff.Count);
-
-    //    if (ticketStaffLevel < 0.5f) { ticketStaffLevel = 0.5f; }
-    //}
-
     public void ShowColourPicker()
     {
         colourPicker.SetActive(!colourPicker.active);
         shopCanvas.SetActive(false);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            Save();
-        }
-
-        if (simulationRunning)
-        {
-            count += Time.deltaTime;
-
-            //QueueController();
-
-            if (count > 0.15)
-            {
-
-                count = 0;
-                minutes++;
-
-                if (minutes > 59)
-                {
-                    hours++;
-                    minutes = 0;
-                }
-
-                // checks for if hour > 11 - end day
-                if (hours > 22)
-                {
-                    nextDay(true);
-                }
-
-            }
-
-            string minString = minutes.ToString();
-            string hourString = hours.ToString();
-
-            if (minutes < 10)
-            {
-                minString = "0" + minString;
-            }
-            if (hours < 10)
-            {
-                hourString = "0" + hourString;
-            }
-
-            timeLabel.text = hourString + ":" + minString;
-
-        }
-
-        for (int i = 0; i < allCustomers.Count; i++)
-        {
-            if (!allCustomers[i].arrived)
-            {
-                if (allCustomers[i].hasArrived(hours, minutes) && simulationRunning)        // second simulationRunningCheck needed because of delays at the end
-                {
-                    allCustomers[i].pointsToVisit = new List<Coordinate>();
-
-                    allCustomers[i].transform = ObjectPool.current.GetGameObject().transform;
-
-                    allCustomers[i].transform.position = new Vector3(40, -10);
-
-                    allCustomers[i].transform.GetComponent<movementScript>().setCustomer(allCustomers[i]);
-
-                    allCustomers[i].transform.gameObject.SetActive(true);
-
-                    allCustomers[i].animator = allCustomers[i].transform.GetComponent<Animator>();
-
-                    allCustomers[i].nextPoint(true);
-
-                    float left = allCustomers[i].getTravellingToX();
-
-                    allCustomers[i].transform.position = new Vector3(left, -15, 0); // y = -11
-
-                }
-            }
-        }
-
     }
 
     void ResetStaff()
@@ -1083,25 +971,24 @@ public class Controller : MonoBehaviour
             Transform t = staffObjects[i].transform;
             t.position = new Vector3(x, y, 0);
             
-            updateStaffJob(i, 0, 0, false);
+            UpdateStaffJob(i, 0, 0, false);
 
             staffObjects[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
 
-            try
-            {
-                Transform pi3 = transform.FindChild("hiddenPointer");
-                pi3.GetComponent<SpriteRenderer>().enabled = true;
-            }
-            catch (Exception) { }
+            //try
+            //{
+                Transform pi3 = staffObjects[i].transform.FindChild("hiddenPointer");
+                pi3.GetComponent<SpriteRenderer>().enabled = false;
+            //}
+            //catch (Exception) { }
             //t.Translate(new Vector3(10, o0, 0));
 
         }
     }
 
-    public void startDay()
+    public void StartDay()
     {
-
-
+        
         // check if any screens available
         bool screensAvailable = false;
 
@@ -1118,9 +1005,20 @@ public class Controller : MonoBehaviour
         if (!screensAvailable)
         {
             ShowPopup(0, "None of your screens are available today - they are all under construction. No customers will arrive and you will receive 0 coins for this day");
-            
-            nextDay(false);
+
+            NextDay(false);
             return;
+        }
+        else
+        {
+
+            if (!simulationRunning)
+            {
+                // start the running of the 'day'
+                simulationRunning = true;
+            }
+
+            ticketQueue.Begin();
         }
 
 
@@ -1129,13 +1027,13 @@ public class Controller : MonoBehaviour
         // find paths to allScreens
         for (int i = 0; i < theScreens.Count; i++)
         {
-            List<Coordinate> points = TileManager.floor.FindPath(38, 11, theScreens[i].getX() + 5, theScreens[i].getY());
+            List<Coordinate> points = TileManager.floor.FindPath(38, 11, theScreens[i].GetX() + 5, theScreens[i].GetY());
             screenPaths.Add(points);
         }
 
 
         // hide the buttons and menus
-        hideObjectInfo();
+        HideObjectInfo();
         startDayButton.SetActive(false);
         shopButton.gameObject.SetActive(false);
         staffMenuButton.gameObject.SetActive(false);
@@ -1144,25 +1042,52 @@ public class Controller : MonoBehaviour
         //staffMenu.gameObject.SetActive(false);
 
         Customer.tiles = floorTiles;
-
-        if (!simulationRunning)
-        {
-            // start the running of the 'day'
-            simulationRunning = true;
-        }
-
-        ticketQueue.Begin();
-
+        
     }
 
-    public void nextDay(bool shouldCollect)
+    public void ClearAllProjectors()
+    {
+        GameObject[] projectors = GameObject.FindGameObjectsWithTag("Projector");
+
+        for (int i = 0; i < projectors.Length; i++)
+        {
+            Destroy(projectors[i]);
+        }
+
+        for (int i = 0; i < theScreens.Count; i++)
+        {
+            theScreens[i].ResetClicks();
+        }
+
+        // clear the panel
+        pnlClearProjectors.SetActive(false);
+    }
+
+    public void NextDay(bool shouldCollect)
     {
 
+        for (int i = 0; i < theScreens.Count; i++)
+        {
+            int prevDays = theScreens[i].GetDaysOfConstruction();
+
+            theScreens[i].ProgressOneDay();
+            int days = theScreens[i].GetDaysOfConstruction();
+
+            if (prevDays == 1 && days == 0 && screenObjectList.Count > 0)
+            {
+
+                reputation.SetFacilities(theScreens, redCarpet);
+            }
+
+            theScreens[i].ResetClicks();
+
+        }
+        
         ticketQueue.End();
 
         if (shouldCollect)
         {
-            int money = getTodaysMoney();
+            int money = GetTodaysMoney();
             
             totalCoins += money;
             reputation.AddCoins(money);
@@ -1177,7 +1102,7 @@ public class Controller : MonoBehaviour
 
             int repChange = newOverall - oldOverall;
 
-            ShowEndOfDayPopup(money, numWalkouts, repChange, servedCustomers);
+            ShowEndOfDayPopup(money, numWalkouts, repChange, customersServed);
         }
 
         simulationRunning = false;
@@ -1193,6 +1118,9 @@ public class Controller : MonoBehaviour
             if (allCustomers[i].transform != null)
             {
                 allCustomers[i].transform.gameObject.SetActive(false);
+
+                allCustomers[i].transform.GetComponent<SpriteRenderer>().sortingLayerName = "Front";
+                allCustomers[i].transform.GetComponent<SpriteRenderer>().sortingOrder = 70;
             }
         }
 
@@ -1221,42 +1149,36 @@ public class Controller : MonoBehaviour
 
         if (currDay % 7 == 1)
         {
-            nextWeek();
+            NextWeek();
         }
 
         //if (shouldCollect) {
             for (int i = 0; i < theScreens.Count; i++)
-            {
-                int prevDays = theScreens[i].GetDaysOfConstruction();
+            {                
 
-                theScreens[i].progressOneDay();
-                int days = theScreens[i].GetDaysOfConstruction();
-
-                if (prevDays == 1 && days == 0 && screenObjectList.Count > 0)
+                if (theScreens[i].GetDaysOfConstruction() + 1 == 1 && theScreens[i].GetDaysOfConstruction() == 0 && screenObjectList.Count > 0)
                 {
-
-                    reputation.SetFacilities(theScreens, redCarpet);
-
-                    screenObjectList[i].GetComponent<SpriteRenderer>().sprite = screenImages[theScreens[i].getUpgradeLevel()];
-                    newShowTimes();
+                
+                    screenObjectList[i].GetComponent<SpriteRenderer>().sprite = screenImages[theScreens[i].GetUpgradeLevel()];
+                    NewShowTimes();
 
                     for (int k = 0; k < filmShowings.Count; k++)       // filmShowings.Count
                     {
-                        int index = filmShowings[k].getScreenNumber();
-                        int ticketsSold = getTicketsSoldValue(theScreens[index - 1]);
-                        filmShowings[k].setTicketsSold(ticketsSold);
+                        int index = filmShowings[k].GetScreenNumber();
+                        int ticketsSold = GetTicketsSoldValue(theScreens[index - 1]);
+                        filmShowings[k].SetTicketsSold(ticketsSold);
 
                         int currentCount = 0;
 
                         for (int j = 0; j < k; j++)
                         {
-                            currentCount += filmShowings[j].getTicketsSold();
+                            currentCount += filmShowings[j].GetTicketsSold();
                         }
 
-                        List<Customer> tmp = filmShowings[k].createCustomerList(currentCount, this);
+                        List<Customer> tmp = filmShowings[k].CreateCustomerList(currentCount, this);
                         allCustomers.AddRange(tmp);
 
-                        DestroyBuilderByScreenID(filmShowings[k].getScreenNumber());
+                        DestroyBuilderByScreenID(filmShowings[k].GetScreenNumber());
 
                     }
                 }
@@ -1265,30 +1187,24 @@ public class Controller : MonoBehaviour
 
         for (int i = 0; i < filmShowings.Count; i++)       // filmShowings.Count
         {
-            int index = filmShowings[i].getScreenNumber();
-            int ticketsSold = getTicketsSoldValue(theScreens[index - 1]);
-            filmShowings[i].setTicketsSold(ticketsSold);
+            int index = filmShowings[i].GetScreenNumber();
+            int ticketsSold = GetTicketsSoldValue(theScreens[index - 1]);
+            filmShowings[i].SetTicketsSold(ticketsSold);
 
             int currentCount = 0;
 
             for (int j = 0; j < i; j++)
             {
-                currentCount += filmShowings[j].getTicketsSold();
+                currentCount += filmShowings[j].GetTicketsSold();
             }
 
-            List<Customer> tmp = filmShowings[i].createCustomerList(currentCount, this);
+            List<Customer> tmp = filmShowings[i].CreateCustomerList(currentCount, this);
             allCustomers.AddRange(tmp);
         }
 
         // update day output 
         dayLabel.text = "DAY: " + currDay.ToString();
-
-        count = 0;
-        minutes = 0;
-        hours = 9;
-
-        timeLabel.text = "09:00";
-
+        
         movementScript.customerStatus.SetActive(false);
 
         //statusCode = 0;
@@ -1305,18 +1221,18 @@ public class Controller : MonoBehaviour
         }
 
         numWalkouts = 0;
-        servedCustomers = 0;
+        customersServed = 0;
+        customerMoney = 0;
 
         Save();
 
     }
 
-    void nextWeek()
+    void NextWeek()
     {
-        newShowTimes();
+        NewShowTimes();
     }
-
-
+    
     public void ViewReputation()
     {
         statusCode = 9;
@@ -1350,7 +1266,6 @@ public class Controller : MonoBehaviour
         statusCode = 0;
     }
 
-
     public void DestroyBuilderByScreenID(int screenNum)
     {
         GameObject[] builders = GameObject.FindGameObjectsWithTag("Builder");
@@ -1365,32 +1280,31 @@ public class Controller : MonoBehaviour
 
     }
 
-    private int getTodaysMoney()
+    private int GetTodaysMoney()
     {
-        int totalIntake = 0;
+        int totalIntake = customerMoney;
 
         // each ticket is 2 coins + 1 for each upgrade level
         for (int i = 0; i < filmShowings.Count; i++)
         {
-            int screenNum = filmShowings[i].getScreenNumber() - 1;
+            int screenNum = filmShowings[i].GetScreenNumber() - 1;
 
             if (!theScreens[screenNum].ConstructionInProgress())
             {
-                int upgradeLevel = theScreens[screenNum].getUpgradeLevel();
-                int numCustomers = filmShowings[i].getTicketsSold();
-
-                int screenIncome = (int)(1.5 + (1.5 * upgradeLevel)) * numCustomers;
+                int upgradeLevel = theScreens[screenNum].GetUpgradeLevel();
+                int numCustomers = filmShowings[i].GetTicketsSold();
 
                 #region 3D glasses income!
-                int random = UnityEngine.Random.Range(0, numCustomers);
+                int moneyFor3dGlasses = 0;
 
                 if (upgradeLevel == 4)
                 {
-                    screenIncome += 2 * random;  
+                    int random = UnityEngine.Random.Range(0, numCustomers);
+                    moneyFor3dGlasses += 2 * random;  
                 }
                 #endregion
 
-                totalIntake += screenIncome;
+                totalIntake += moneyFor3dGlasses;
             }
         }
 
@@ -1406,11 +1320,11 @@ public class Controller : MonoBehaviour
         return totalIntake;
     }
 
-    public int getTicketsSoldValue(ScreenObject screen)
+    public int GetTicketsSoldValue(ScreenObject screen)
     {
         UnityEngine.Random ran = new UnityEngine.Random();
-        int min = (int)(screen.getNumSeats() / 1.5);  // this will be affected by the posters etc, and rep
-        int max = screen.getNumSeats();
+        int min = (int)(screen.GetNumSeats() / 1.5);  // this will be affected by the posters etc, and rep
+        int max = screen.GetNumSeats();
         int ticketsSold = UnityEngine.Random.Range(min, max);
         float repMultiplier = reputation.GetMultiplier();
         ticketsSold = (int)(ticketsSold * repMultiplier);
@@ -1418,7 +1332,7 @@ public class Controller : MonoBehaviour
         return ticketsSold;
     }
 
-    private TimeTuple getShowTime(int i)
+    private TimeTuple GetShowTime(int i)
     {
         int startTime = UnityEngine.Random.Range(0, 5);
 
@@ -1444,7 +1358,7 @@ public class Controller : MonoBehaviour
 
     }
 
-    public void newShowTimes()
+    public void NewShowTimes()
     {
         allCustomers.Clear();
         filmShowings.Clear();
@@ -1457,7 +1371,7 @@ public class Controller : MonoBehaviour
 
                 for (int j = 0; j < screeningsThisDay; j++)     // screeningsThisDay
                 {
-                    TimeTuple showTime = getShowTime(j);
+                    TimeTuple showTime = GetShowTime(j);
 
                     FilmShowing newFilm = new FilmShowing(filmShowings.Count, i + 1, 0, showTime.hours, showTime.minutes, TileManager.floor);
                     filmShowings.Add(newFilm);
@@ -1469,72 +1383,8 @@ public class Controller : MonoBehaviour
     float queueCount = 0;
     float ticketStaffLevel = 4.5f;
 
-    //void QueueController()
-    //{
-    //    if (ticketQueue.Count > 0)
-    //    {
-    //        queueCount += Time.deltaTime;
 
-    //        if (queueCount > ticketStaffLevel)
-    //        {
-    //            queueCount = 0;
-
-    //            for (int i = 0; i < ticketStaff.Count; i++)
-    //            {
-    //                int index = ticketQueue.Peek().getCharIndex();
-
-    //                //if (queueDone != null)
-    //                //{
-    //                //    queueDone();
-    //                //    allCustomers[index].nextPoint(false);
-    //                //}
-    //                allCustomers[index].doneWithQueue();
-
-    //                ticketQueue.Dequeue();
-
-    //                for (int j = 0; j < allCustomers.Count; j++)
-    //                {
-    //                    if (allCustomers[j].inQueue && allCustomers[j].GetPatience() > 0)
-    //                    {
-    //                        allCustomers[j].transform.position = new Vector2(allCustomers[j].transform.position.x, allCustomers[j].transform.position.y + 0.8f);
-    //                    }
-    //                }
-
-    //            }
-
-    //            for (int j = 0; j < allCustomers.Count; j++)
-    //            {
-    //                if (allCustomers[j].inQueue)
-    //                {
-    //                    allCustomers[j].DecreasePatience(50);
-
-    //                    if (allCustomers[j].GetPatience() < 1)
-    //                    {
-    //                        WalkAway(j);
-    //                        numWalkouts++;
-
-    //                        // negatively effect rep
-    //                        reputation.Walkout();
-
-    //                    }
-    //                    else if (allCustomers[j].GetPatience() == 150)
-    //                    {
-    //                        allCustomers[j].animator.SetTrigger("bored");
-    //                    }
-    //                }
-    //            }
-
-    //        }
-
-
-    //    }
-    //    else {
-    //        queueCount = 0;
-    //    }
-    //}
-    
-
-    public void objectMoveComplete(bool confirmed)
+    public void ObjectMoveComplete(bool confirmed)
     {
         statusCode = 0;
 
@@ -1561,7 +1411,6 @@ public class Controller : MonoBehaviour
 
         if (!newObject)
         {
-
             GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
             for (int i = 0; i < staff.Length; i++)
             {
@@ -1586,15 +1435,13 @@ public class Controller : MonoBehaviour
 
                 Vector3 pos = new Vector3(x, y * 0.8f, 0);
 
-                theScreens[id].setPosition(x, y);
+                theScreens[id].SetPosition(x, y);
 
-                //pos.x = pos.x += 4.6f;
-                //pos.y += 6.05f;
                 pos.y += 0.8f;
 
                 ScreenObject temp = null;
 
-                GameObject theScreen = GameObject.Find("Screen#" + theScreens[id].getScreenNumber());
+                GameObject theScreen = GameObject.Find("Screen#" + theScreens[id].GetScreenNumber());
                 temp = theScreen.GetComponent<Screen_Script>().theScreen;
 
                 theScreen.GetComponent<SpriteRenderer>().sortingOrder = height - y - 1;
@@ -1611,16 +1458,25 @@ public class Controller : MonoBehaviour
                 {
                     for (int i = 0; i < builders.Length; i++)
                     {
-                        if (builders[i].name.Contains(temp.getScreenNumber().ToString()))
+                        if (builders[i].name.Contains(temp.GetScreenNumber().ToString()))
                         {
-                            builders[i].transform.position = new Vector2(temp.getX() + 1.8f, 0.7f + (0.8f * temp.getY()));
+                            builders[i].transform.position = new Vector2(temp.GetX() + 1.8f, 0.7f + (0.8f * temp.GetY()));
                         }
                     }
                 }
 
 
+                // check staff position
+                CheckStaffPosition(theScreen);
 
+                objectSelected = "";
+                tagSelected = "";
+                upgradeLevelSelected = 0;
 
+                for (int i = 0; i < staffMembers.Count; i++)
+                {
+                    staffMembers[i].GetTransform().position = new Vector3(staffMembers[i].GetTransform().position.x, staffMembers[i].GetTransform().position.y, -0.4f);
+                }
 
 
             }
@@ -1631,28 +1487,6 @@ public class Controller : MonoBehaviour
 
                 otherObjects[id].xPos = x;
                 otherObjects[id].yPos = y;
-
-                //float xCorrection = 0;
-                //float yCorrection = 0;
-
-                if (itemToAddID == 2)
-                {
-                    //xCorrection = 0.1f;
-                    //yCorrection = 0.35f;
-                }
-                else if (itemToAddID == 3)
-                {
-                    //xCorrection = 0.65f;
-                    //yCorrection = 1.5f;
-                }
-                else if (itemToAddID == 5)
-                {
-                    //xCorrection = 1.07f;
-                    //yCorrection = 1.62f;
-                }
-
-                //pos.x += xCorrection;
-                //pos.y += yCorrection;
 
                 string theTag = "";
 
@@ -1678,20 +1512,19 @@ public class Controller : MonoBehaviour
                 theObject.GetComponent<Renderer>().enabled = true;
                 theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y - 1;
 
-                //GameObject theObject = (GameObject)Instantiate(newItem.gameObject, pos, Quaternion.identity);
-                //theObject.name = "Element#" + (otherObjects.Count - 1);
-                //theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y;
-                //theObject.tag = theTag;
-                //gameObjectList.Add(theObject);
+                // check staff position
+                CheckStaffPosition(theObject);
             }
             itemToAddID = -1;
 
-            setTiles(2, x, y, theTileManager.fullWidth, theTileManager.fullHeight);
+            SetTiles(2, x, y, theTileManager.fullWidth, theTileManager.fullHeight);
 
             if (!confirmed)
             {
-                setTiles(0, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
+                SetTiles(0, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
                 ChangeColour(carpetColour, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
+
+                SetTiles(2, theTileManager.origX, theTileManager.origY, theTileManager.fullWidth, theTileManager.fullHeight);
 
                 staff = GameObject.FindGameObjectsWithTag("Staff");
                 for (int i = 0; i < staff.Length; i++)
@@ -1730,16 +1563,22 @@ public class Controller : MonoBehaviour
                 gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
             }
 
+            redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
+
+            objectSelected = "";
+            tagSelected = "";
+            upgradeLevelSelected = 0;
+
         }
         else if (confirmed)
         {
             String[] parameters = new String[5];
             parameters[0] = "Add this object?";
-            parameters[1] = getCost().ToString();
-            parameters[2] = getCurrency();
+            parameters[1] = GetCost().ToString();
+            parameters[2] = GetCurrency();
             parameters[3] = theTileManager.toMoveX.ToString();
             parameters[4] = theTileManager.toMoveY.ToString();
-            ConfirmationScript.OptionSelected(0, parameters);
+            ConfirmationScript.OptionSelected(0, parameters, "This will cost: ");
 
         }
         else {
@@ -1766,7 +1605,7 @@ public class Controller : MonoBehaviour
                 builders[i].GetComponent<SpriteRenderer>().enabled = true;
             }
 
-            
+
             for (int i = 0; i < screenObjectList.Count; i++)
             {
                 screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
@@ -1776,13 +1615,21 @@ public class Controller : MonoBehaviour
             {
                 gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
             }
+
+
+            objectSelected = "";
+            tagSelected = "";
+            upgradeLevelSelected = 0;
+            for (int i = 0; i < staffMembers.Count; i++)
+            {
+                staffMembers[i].GetTransform().position = new Vector3(staffMembers[i].GetTransform().position.x, staffMembers[i].GetTransform().position.y, -0.4f);
+            }
         }
-        
+
 
     }
 
-
-    int getCost()
+    int GetCost()
     {
         switch (objectSelected.ToUpper())
         {
@@ -1794,9 +1641,7 @@ public class Controller : MonoBehaviour
         }
     }
 
-
-
-    String getCurrency()
+    String GetCurrency()
     {
         // 0 = coins, 1 = popcorn
         switch (objectSelected)
@@ -1811,7 +1656,6 @@ public class Controller : MonoBehaviour
 
     public void AddNewObject(int x, int y)
     {
-
         confirmMovePanel.SetActive(false);
         moveButtons.SetActive(false);
 
@@ -1830,8 +1674,8 @@ public class Controller : MonoBehaviour
 
             int newID = theScreens.Count;
             ScreenObject aScreen = new ScreenObject(newID + 1, 0);
-            aScreen.setPosition(x, y);
-            aScreen.upgrade();
+            aScreen.SetPosition(x, y);
+            aScreen.Upgrade();
             theScreens.Add(aScreen);
 
             //pos.x += xCorrection;
@@ -1840,16 +1684,22 @@ public class Controller : MonoBehaviour
 
             GameObject screenThing = (GameObject)Instantiate(screen.gameObject, pos, Quaternion.identity) as GameObject;
             screenThing.GetComponent<Screen_Script>().theScreen = theScreens[newID];
-            screenThing.name = "Screen#" + theScreens[newID].getScreenNumber();
+            screenThing.name = "Screen#" + theScreens[newID].GetScreenNumber();
             screenThing.GetComponent<SpriteRenderer>().sortingOrder = height - y - 1;
             screenThing.GetComponent<SpriteRenderer>().sprite = screenImages[0];
 
             screenThing.tag = "Screen";
             screenObjectList.Add(screenThing);
 
-            CreateBuilder(x, y, theScreens[newID].getScreenNumber());
+            CreateBuilder(x, y, theScreens[newID].GetScreenNumber());
 
+            // check staff position
+            CheckStaffPosition(screenThing);
 
+            for (int i = 0; i < staffMembers.Count; i++)
+            {
+                staffMembers[i].GetTransform().position = new Vector3(staffMembers[i].GetTransform().position.x, staffMembers[i].GetTransform().position.y, -0.4f);
+            }
         }
         else {
 
@@ -1869,7 +1719,7 @@ public class Controller : MonoBehaviour
                 //xCorrection = 0.65f;
                 //yCorrection = 1.5f;
                 otherObjects.Add(new OtherObject(x, y, 3, otherObjects.Count));
-                theTag = "Bust of Game Creator";
+                theTag = "Bust";
             }
             else if (itemToAddID == 5)
             {
@@ -1891,11 +1741,18 @@ public class Controller : MonoBehaviour
             theObject.GetComponent<SpriteRenderer>().sortingOrder = height - y - 1;
 
             gameObjectList.Add(theObject);
+            // check staff position
+            CheckStaffPosition(theObject);
+
+            for (int i = 0; i < staffMembers.Count; i++)
+            {
+                staffMembers[i].GetTransform().position = new Vector3(staffMembers[i].GetTransform().position.x, staffMembers[i].GetTransform().position.y, -0.4f);
+            }
 
         }
         itemToAddID = -1;
 
-        setTiles(2, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
+        SetTiles(2, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
         ChangeColour(carpetColour, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
 
         CheckForPath();
@@ -1929,6 +1786,12 @@ public class Controller : MonoBehaviour
         {
             gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
         }
+
+        objectSelected = "";
+        tagSelected = "";
+        upgradeLevelSelected = 0;
+        
+
     }
 
     public void CheckForPath()
@@ -1960,9 +1823,98 @@ public class Controller : MonoBehaviour
         warningPanel.SetActive(!warningPanel.active);
     }
 
-
     public GameObject popupBox;
 
+    void CheckStaffPosition(GameObject go)
+    {
+        Bounds objectBounds;
+
+        if (go.tag != "Screen")
+        {
+            objectBounds = mouseDrag.GetObjectHiddenBounds(go);
+
+            for (int i = 0; i < staffMembers.Count; i++)
+            {
+                // check it
+                Bounds staffBounds = staffMembers[i].GetTransform().GetComponent<Renderer>().bounds;
+                if (objectBounds.Intersects(staffBounds))
+                {
+                    staffMembers[i].GetTransform().GetComponent<mouseDrag>().SortStaffLayer(go);
+                }
+                else
+                {
+                    GameObject hiddenBehind = mouseDrag.CheckHiddenBehind(staffBounds, gameObjectList, screenObjectList);
+
+                    if (hiddenBehind == null)
+                    {
+                        staffMembers[i].GetTransform().GetComponent<Renderer>().sortingOrder = 40;
+                        staffMembers[i].GetTransform().GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+                        staffMembers[i].GetTransform().FindChild("hiddenPointer").GetComponent<SpriteRenderer>().enabled = false;
+                    }
+                    else
+                    {
+                        // show the arrow
+                        staffMembers[i].GetTransform().FindChild("hiddenPointer").GetComponent<SpriteRenderer>().enabled = true;
+                    }
+
+                }
+            }
+        }
+        else
+        {
+            Bounds b1 = go.GetComponent<Renderer>().bounds;
+            Bounds bTop, bBottom;
+
+            String name = go.name;
+
+
+
+            int id = int.Parse(name.Split('#')[1]) - 1;
+
+            if (!theScreens[id].ConstructionInProgress())
+            {
+
+                bTop = new Bounds(new Vector3(b1.center.x, (b1.center.y - b1.extents.y + 8.8f), 0), 2 * new Vector3(b1.extents.x, 1.8f, 0.125f));
+                bBottom = new Bounds(new Vector3(b1.center.x, (b1.center.y - b1.extents.y + 0.9f), 0), 2 * new Vector3(b1.extents.x, 0.65f, 0.1f));
+            }
+            else
+            {
+                bTop = b1;
+                bBottom = b1;
+            }
+
+            for (int i = 0; i < staffMembers.Count; i++)
+            {
+                // check it
+                Bounds staffBounds = staffMembers[i].GetTransform().GetComponent<Renderer>().bounds;
+                if (bTop.Intersects(staffBounds) || bBottom.Intersects(staffBounds))
+                {
+                    staffMembers[i].GetTransform().GetComponent<mouseDrag>().SortStaffLayer(go);
+                }
+                else
+                {
+                    GameObject hiddenBehind = mouseDrag.CheckHiddenBehind(staffBounds, gameObjectList, screenObjectList);
+
+                    if (hiddenBehind == null)
+                    {
+                        staffMembers[i].GetTransform().GetComponent<Renderer>().sortingOrder = 40;
+                        staffMembers[i].GetTransform().GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+                        staffMembers[i].GetTransform().FindChild("hiddenPointer").GetComponent<SpriteRenderer>().enabled = false;
+                    }
+                    else
+                    {
+                        // show the arrow
+                        staffMembers[i].GetTransform().FindChild("hiddenPointer").GetComponent<SpriteRenderer>().enabled = true;
+                    }
+                }
+            }
+
+        }
+
+
+
+
+    }
 
     public void ShowEndOfDayPopup(int todaysMoney, int walkouts, int repChange, int numCustomers)
     {
@@ -1988,11 +1940,16 @@ public class Controller : MonoBehaviour
         popupBox.SetActive(false);
         statusCode = 0;
     }
-
-
-    public void moveScreen()
+    
+    public void MoveScreen()
     {
         
+        for (int i = 0; i < staffMembers.Count; i++)
+        {
+            staffMembers[i].GetTransform().position = new Vector3(staffMembers[i].GetTransform().position.x, staffMembers[i].GetTransform().position.y, 0);
+        }
+
+
         for (int i = 0; i < screenObjectList.Count; i++)
         {
             screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
@@ -2001,6 +1958,7 @@ public class Controller : MonoBehaviour
         {
             gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.6f);
         }
+        redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.3f);
 
         // hide staff
         GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
@@ -2016,6 +1974,14 @@ public class Controller : MonoBehaviour
         {
             builders[i].GetComponent<SpriteRenderer>().enabled = false;
         }
+
+        GameObject[] pointers = GameObject.FindGameObjectsWithTag("Pointer");
+
+        for (int i = 0; i < pointers.Length; i++)
+        {
+            pointers[i].GetComponent<SpriteRenderer>().enabled = false;
+        }
+
 
         // hide / show necessary buttons
         confirmMovePanel.SetActive(true);
@@ -2036,15 +2002,15 @@ public class Controller : MonoBehaviour
 
                 for (int j = 0; j < theScreens.Count; j++)
                 {
-                    if (theScreens[j].getScreenNumber() == int.Parse(tmp[1]))
+                    if (theScreens[j].GetScreenNumber() == int.Parse(tmp[1]))
                     {
                         index = j;
                         break;
                     }
                 }
 
-                int x = theScreens[index].getX(); //-4
-                int y = theScreens[index].getY(); //-6
+                int x = theScreens[index].GetX(); //-4
+                int y = theScreens[index].GetY(); //-6
 
 
                 itemToAddID = 0;
@@ -2058,7 +2024,7 @@ public class Controller : MonoBehaviour
                 theTileManager.fullWidth = 11;
                 theTileManager.fullHeight = 15;
 
-                setTiles(0, x, y, 11, 15);
+                SetTiles(0, x, y, 11, 15);
 
                 break;
             }
@@ -2102,7 +2068,7 @@ public class Controller : MonoBehaviour
                 theTileManager.fullWidth = w;
                 theTileManager.fullHeight = h;
 
-                setTiles(0, x, y, w, h);
+                SetTiles(0, x, y, w, h);
 
                 break;
             }
@@ -2110,7 +2076,7 @@ public class Controller : MonoBehaviour
 
     }
 
-    public void placeObject(int width, int height)
+    public void PlaceObject(int width, int height)
     {
 
 
@@ -2137,7 +2103,7 @@ public class Controller : MonoBehaviour
         confirmMovePanel.SetActive(true);
         moveButtons.SetActive(true);
 
-        bool valid = theTileManager.checkValidity(startX, startY, width, height);
+        bool valid = theTileManager.CheckValidity(startX, startY, width, height);
 
         Color newColour;
 
@@ -2184,7 +2150,7 @@ public class Controller : MonoBehaviour
             {
                 if (objectSelected.Equals(screenObjectList[i].name))
                 {
-                    DestroyBuilderByScreenID(theScreens[i].getScreenNumber());
+                    DestroyBuilderByScreenID(theScreens[i].GetScreenNumber());
                     screenObjectList.RemoveAt(i);
                     theScreens.RemoveAt(i);
                     foundPos = i;
@@ -2197,8 +2163,8 @@ public class Controller : MonoBehaviour
                 for (int i = foundPos; i < theScreens.Count; i++)
                 {
                     theScreens[i].DecreaseScreenNumber();
-                    screenObjectList[i].name = "Screen#" + theScreens[i].getScreenNumber();
-                    GameObject.Find("BuilderForScreen#" + (theScreens[i].getScreenNumber() + 1)).name = "BuilderForScreen#" + theScreens[i].getScreenNumber();
+                    screenObjectList[i].name = "Screen#" + theScreens[i].GetScreenNumber();
+                    GameObject.Find("BuilderForScreen#" + (theScreens[i].GetScreenNumber() + 1)).name = "BuilderForScreen#" + theScreens[i].GetScreenNumber();
                 }
             }
 
@@ -2231,16 +2197,13 @@ public class Controller : MonoBehaviour
         GameObject.Destroy(go);
         theTileManager.fullHeight = h;
         theTileManager.fullWidth = w;
-        hideObjectInfo();
-        setTiles(0, x, y, w, h);
-        theTileManager.colourAllTiles(x, y, carpetColour);
+        HideObjectInfo();
+        SetTiles(0, x, y, w, h);
+        theTileManager.ColourAllTiles(x, y, carpetColour);
         theTileManager.fullHeight = -1;
         theTileManager.fullHeight = -1;
 
-        theTileManager.showOutput();
-
-        Debug.Log(x + ", " + y + ", " + w + ", " + h);
-
+        theTileManager.ShowOutput();
     }
 
     void Save()
@@ -2254,25 +2217,24 @@ public class Controller : MonoBehaviour
         formatter.Serialize(file, data);
         file.Close();
     }
-
-    #region staff events
-    public void addStaffMember(StaffMember staff, int xPos, int yPos)
+    
+    public void AddStaffMember(StaffMember staff, int xPos, int yPos)
     {
         staffMembers.Add(staff);
-        createStaff(staff, xPos, yPos);
-        Transform t = staffMembers[staffMembers.Count - 1].getTransform();
+        CreateStaff(staff, xPos, yPos);
+        Transform t = staffMembers[staffMembers.Count - 1].GetTransform();
         t.FindChild("hiddenPointer").GetComponent<SpriteRenderer>().enabled = false;
     }
 
-    public int getStaffSize()
+    public int GetStaffSize()
     {
         return staffMembers.Count;
     }
 
-    public void updateStaffJob(int index, int job, int posInPost, bool add)
+    public void UpdateStaffJob(int index, int job, int posInPost, bool add)
     {
         
-        staffMembers[index].setJob(job);
+        staffMembers[index].SetJob(job);
 
         if (add)
         {
@@ -2289,17 +2251,17 @@ public class Controller : MonoBehaviour
             if (job == 1)
             {
                 ticketQueue.StaffMemberRemoved(staffMembers[index], posInPost);
-                staffMembers[index].setJob(0);
+                staffMembers[index].SetJob(0);
             }
         }
 
 
-        staffMenuList[index].GetComponentsInChildren<Text>()[1].text = "Current Job: " + jobTextFromID(staffMembers[index].getJobID());
+        staffMenuList[index].GetComponentsInChildren<Text>()[1].text = "Current Job: " + JobTextFromID(staffMembers[index].GetJobID());
 
         //UpdateJobList();
     }
 
-    string jobTextFromID(int index)
+    string JobTextFromID(int index)
     {
         switch (index)
         {
@@ -2312,8 +2274,7 @@ public class Controller : MonoBehaviour
         }
     }
 
-
-    public int getStaffJobById(int index) { return staffMembers[index].getJobID(); }
+    public int GetStaffJobById(int index) { return staffMembers[index].GetJobID(); }
 
     void ShowBuildingOptions(string line1, string line2, Sprite theImage, int constrDone, int constrTotal)
     {
@@ -2388,26 +2349,15 @@ public class Controller : MonoBehaviour
 
     }
 
-    public List<StaffMember> getFullStaffList()
+    public List<StaffMember> GetFullStaffList()
     {
         return staffMembers;
     }
-    #endregion
-
-    #region Ticket Queue events
-    private void addToQueueTickets(Customer customer)
+    
+    private void AddToQueueTickets(Customer customer)
     {
         ticketQueue.AddCustomer(customer);
     }
-    //private Queue<Customer> getTicketQueue()
-    //{
-    //    return this.ticketQueue;
-    //}
-    //private int getTicketQueueSize()
-    //{
-    //    return this.ticketQueue.Count;
-    //}
-    #endregion
 }
 
 [Serializable]

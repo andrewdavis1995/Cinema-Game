@@ -26,13 +26,13 @@ public class ButtonScript : MonoBehaviour {
     }
 
 
-    public void newGame()
+    public void NewGame()
     {
         loadGame = null;
         SceneManager.LoadScene("main screen");
     }
 
-    public void loadSavedGame()
+    public void LoadSavedGame()
     {
         loadGame = Load();
         SceneManager.LoadScene("main screen");

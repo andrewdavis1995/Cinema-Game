@@ -39,7 +39,7 @@ public class TileManager : MonoBehaviour
     void Start()
     {
 
-        Controller.updateTileState += updateTileState;
+        Controller.updateTileState += UpdateTileState;
 
 
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
@@ -54,7 +54,7 @@ public class TileManager : MonoBehaviour
             {
                 GameObject newTile = new GameObject();
                 SpriteRenderer tilesRenderer = newTile.AddComponent<SpriteRenderer>();
-                FloorTile currentTile = floor.getTileByCoord(x, y);
+                FloorTile currentTile = floor.GetTileByCoord(x, y);
 
                 //rectTransform.localScale = rectTransform.localScale - new Vector3(0, 0.2f, 0);
 
@@ -81,7 +81,7 @@ public class TileManager : MonoBehaviour
             mouseDownCount++;
             if (mouseDownCount > 10)
             {
-                doMove(code);
+                DoMove(code);
                 mouseDownCount = 0;
             }
         }
@@ -95,15 +95,15 @@ public class TileManager : MonoBehaviour
                 {
                     if (validMove)
                     {
-                        validMove = checkValidity(toMoveX - 1, toMoveY, 1, fullHeight);
+                        validMove = CheckValidity(toMoveX - 1, toMoveY, 1, fullHeight);
                     }
                     else
                     {
-                        validMove = checkValidity(toMoveX - 1, toMoveY, fullWidth, fullHeight);
+                        validMove = CheckValidity(toMoveX - 1, toMoveY, fullWidth, fullHeight);
                     }
 
-                    updateColumn(toMoveX + fullWidth - 1, toMoveY, false, -1);
-                    updateColumn(toMoveX - 1, toMoveY, true, -1);
+                    UpdateColumn(toMoveX + fullWidth - 1, toMoveY, false, -1);
+                    UpdateColumn(toMoveX - 1, toMoveY, true, -1);
                     toMoveX--;
                 }
 
@@ -115,16 +115,16 @@ public class TileManager : MonoBehaviour
 
                     if (validMove)
                     {
-                        validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, 1);
+                        validMove = CheckValidity(toMoveX, toMoveY - 1, fullWidth, 1);
                     }
                     else
                     {
-                        validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, fullHeight);
+                        validMove = CheckValidity(toMoveX, toMoveY - 1, fullWidth, fullHeight);
                     }
 
                     // check validity
-                    updateRow(toMoveX, toMoveY + fullHeight - 1, false, -1);
-                    updateRow(toMoveX, toMoveY - 1, true, -1);
+                    UpdateRow(toMoveX, toMoveY + fullHeight - 1, false, -1);
+                    UpdateRow(toMoveX, toMoveY - 1, true, -1);
                     toMoveY--;
                 }
             }
@@ -134,16 +134,16 @@ public class TileManager : MonoBehaviour
                 {
                     if (validMove)
                     {
-                        validMove = checkValidity(toMoveX + fullWidth, toMoveY, 1, fullHeight);
+                        validMove = CheckValidity(toMoveX + fullWidth, toMoveY, 1, fullHeight);
                     }
                     else
                     {
-                        validMove = checkValidity(toMoveX + 1, toMoveY, fullWidth, fullHeight);
+                        validMove = CheckValidity(toMoveX + 1, toMoveY, fullWidth, fullHeight);
                     }
 
                     // check validity
-                    updateColumn(toMoveX, toMoveY, false, 1);
-                    updateColumn(toMoveX + fullWidth, toMoveY, true, 1);
+                    UpdateColumn(toMoveX, toMoveY, false, 1);
+                    UpdateColumn(toMoveX + fullWidth, toMoveY, true, 1);
                     toMoveX++;
                 }
             }
@@ -153,16 +153,16 @@ public class TileManager : MonoBehaviour
                 {
                     if (validMove)
                     {
-                        validMove = checkValidity(toMoveX, toMoveY + fullHeight, fullWidth, 1);
+                        validMove = CheckValidity(toMoveX, toMoveY + fullHeight, fullWidth, 1);
                     }
                     else
                     {
-                        validMove = checkValidity(toMoveX, toMoveY + 1, fullWidth, fullHeight);
+                        validMove = CheckValidity(toMoveX, toMoveY + 1, fullWidth, fullHeight);
                     }
 
                     // check validity
-                    updateRow(toMoveX, toMoveY, false, 1);
-                    updateRow(toMoveX, toMoveY + fullHeight, true, 1);
+                    UpdateRow(toMoveX, toMoveY, false, 1);
+                    UpdateRow(toMoveX, toMoveY + fullHeight, true, 1);
                     toMoveY++;
                 }
             }
@@ -180,22 +180,22 @@ public class TileManager : MonoBehaviour
         for (int i = 0; i < Controller.theScreens.Count; i++)
         {
             // check that it is possible to reach them from the start point - i.e. ticket office
-            int screenX = Controller.theScreens[i].getX() + 5;
-            int screenY = Controller.theScreens[i].getY();
+            int screenX = Controller.theScreens[i].GetX() + 5;
+            int screenY = Controller.theScreens[i].GetY();
 
             List<Coordinate> path = floor.FindPath(40, 5, screenX, screenY);
 
             // if it finds one that isn't reachable, set bool to false and break
             if (path == null)
             {
-                unreachableScreens.Add(Controller.theScreens[i].getScreenNumber());
+                unreachableScreens.Add(Controller.theScreens[i].GetScreenNumber());
             }
         }
 
         return unreachableScreens;
     }
 
-    public void doMove(int code)
+    public void DoMove(int code)
     {
         if (code == 3)
         {
@@ -203,15 +203,15 @@ public class TileManager : MonoBehaviour
             {
                 if (validMove)
                 {
-                    validMove = checkValidity(toMoveX - 1, toMoveY, 1, fullHeight);
+                    validMove = CheckValidity(toMoveX - 1, toMoveY, 1, fullHeight);
                 }
                 else
                 {
-                    validMove = checkValidity(toMoveX - 1, toMoveY, fullWidth, fullHeight);
+                    validMove = CheckValidity(toMoveX - 1, toMoveY, fullWidth, fullHeight);
                 }
                 
-                updateColumn(toMoveX + fullWidth - 1, toMoveY, false, -1);
-                updateColumn(toMoveX - 1, toMoveY, true, -1);
+                UpdateColumn(toMoveX + fullWidth - 1, toMoveY, false, -1);
+                UpdateColumn(toMoveX - 1, toMoveY, true, -1);
                 
                 toMoveX--;
             }
@@ -224,15 +224,15 @@ public class TileManager : MonoBehaviour
 
                 if (validMove)
                 {
-                    validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, 1);
+                    validMove = CheckValidity(toMoveX, toMoveY - 1, fullWidth, 1);
                 }
                 else
                 {
-                    validMove = checkValidity(toMoveX, toMoveY - 1, fullWidth, fullHeight);
+                    validMove = CheckValidity(toMoveX, toMoveY - 1, fullWidth, fullHeight);
                 }
                 
-                updateRow(toMoveX, toMoveY + fullHeight - 1, false, -1);
-                updateRow(toMoveX, toMoveY - 1, true, -1);
+                UpdateRow(toMoveX, toMoveY + fullHeight - 1, false, -1);
+                UpdateRow(toMoveX, toMoveY - 1, true, -1);
                 
                 toMoveY--;
             }
@@ -243,16 +243,16 @@ public class TileManager : MonoBehaviour
             {
                 if (validMove)
                 {
-                    validMove = checkValidity(toMoveX + fullWidth, toMoveY, 1, fullHeight);
+                    validMove = CheckValidity(toMoveX + fullWidth, toMoveY, 1, fullHeight);
                 }
                 else
                 {
-                    validMove = checkValidity(toMoveX + 1, toMoveY, fullWidth, fullHeight);
+                    validMove = CheckValidity(toMoveX + 1, toMoveY, fullWidth, fullHeight);
                 }
                 
 
-                updateColumn(toMoveX, toMoveY, false, 1);
-                updateColumn(toMoveX + fullWidth, toMoveY, true, 1);
+                UpdateColumn(toMoveX, toMoveY, false, 1);
+                UpdateColumn(toMoveX + fullWidth, toMoveY, true, 1);
 
                 toMoveX++;
             }
@@ -263,16 +263,16 @@ public class TileManager : MonoBehaviour
             {
                 if (validMove)
                 {
-                    validMove = checkValidity(toMoveX, toMoveY + fullHeight, fullWidth, 1);
+                    validMove = CheckValidity(toMoveX, toMoveY + fullHeight, fullWidth, 1);
                 }
                 else
                 {
-                    validMove = checkValidity(toMoveX, toMoveY + 1, fullWidth, fullHeight);
+                    validMove = CheckValidity(toMoveX, toMoveY + 1, fullWidth, fullHeight);
                 }
                 
 
-                updateRow(toMoveX, toMoveY, false, 1);
-                updateRow(toMoveX, toMoveY + fullHeight, true, 1);
+                UpdateRow(toMoveX, toMoveY, false, 1);
+                UpdateRow(toMoveX, toMoveY + fullHeight, true, 1);
                 toMoveY++;
             }
 
@@ -282,77 +282,7 @@ public class TileManager : MonoBehaviour
 
     }
 
-    /*public void doMove(int code)
-    {
-        int xMove = 0, yMove = 0;
-        int trueHeight = 0;
-        int trueWidth = 0;
-        int validWidth = 0;
-        int validHeight = 0;
-        int width2 = 0;
-        int height2 = 0;
-
-        #region calculate Direction
-        switch (code)
-        {
-            case 0:
-                xMove = 0;
-                yMove = 1;
-                trueWidth = 0;
-                trueHeight = 1;
-                validWidth = fullWidth;
-                validHeight = 1;
-                break;
-            case 1:
-                xMove = 0;
-                yMove = -1;
-                trueWidth = 0;
-                trueHeight = fullHeight;
-                validWidth = fullWidth;
-                validHeight = 1;
-                break;
-            case 2:
-                xMove = 1;
-                yMove = 0;
-                trueWidth = 1;
-                trueHeight = 0;
-                trueWidth = toMoveX + trueWidth - 1;
-                validHeight = fullHeight;
-                break;
-            case 3:
-                xMove = -1;
-                yMove = 0;
-                trueWidth = fullWidth;
-                trueHeight = 0;
-                validWidth = 1;
-                validHeight = fullHeight;
-                break;
-        }
-        int direction = xMove + yMove; 
-        #endregion
-
-        if ((toMoveX >= 1 && xMove == -1) || (toMoveY > 0 && yMove == -1) || ((toMoveY < height - fullHeight) && yMove == 1) || ((toMoveX < width - fullWidth) && xMove == 1))
-        {
-            if (validMove)
-            {
-                showOutput();
-                validMove = checkValidity(toMoveX + xMove, toMoveY + yMove, validWidth, validHeight);
-            }
-            else
-            {
-                validMove = checkValidity(toMoveX + xMove, toMoveY + yMove, fullWidth, fullHeight);
-            }
-
-            updateColumn(, toMoveY + trueHeight, false, direction);
-            updateColumn(toMoveX + (fullWidth), toMoveY + yMove + trueHeight, true, direction);
-            toMoveX += xMove;
-            toMoveY += yMove;
-        }
-        previousValidMove = validMove;
-
-    }*/
-
-    public bool checkValidity(int startX, int startY, int width, int height)
+    public bool CheckValidity(int startX, int startY, int width, int height)
     {
         for (int i = startY; i < startY + height; i++)
         {
@@ -371,15 +301,15 @@ public class TileManager : MonoBehaviour
 
     public void NewItemAdded(int x, int y)
     {
-        validMove = checkValidity(x, y, fullWidth, fullHeight);
+        validMove = CheckValidity(x, y, fullWidth, fullHeight);
         Color col;
         if (validMove) { col = Color.green; mainController.confirmPanel.SetActive(true); } else { col = Color.red; mainController.confirmPanel.SetActive(false); }
 
-        colourAllTiles(x, y, col);
+        ColourAllTiles(x, y, col);
 
     }
 
-    public void colourAllTiles(int startX, int startY, Color col)
+    public void ColourAllTiles(int startX, int startY, Color col)
     {
         for (int i = startY; i < startY + fullHeight; i++)
         {
@@ -396,7 +326,7 @@ public class TileManager : MonoBehaviour
         }
     }
 
-    void updateColumn(int x, int y, bool newState, int direction)
+    void UpdateColumn(int x, int y, bool newState, int direction)
     {
 
         mainController.confirmPanel.SetActive(validMove);
@@ -425,7 +355,7 @@ public class TileManager : MonoBehaviour
 
             if (validMove != previousValidMove)
             {
-                colourAllTiles(toMoveX + direction, toMoveY, newColour);
+                ColourAllTiles(toMoveX + direction, toMoveY, newColour);
                 // hide / show confirm button
             }
             else
@@ -439,7 +369,7 @@ public class TileManager : MonoBehaviour
         }
     }
 
-    void updateRow(int x, int y, bool newState, int direction)
+    void UpdateRow(int x, int y, bool newState, int direction)
     {
         mainController.confirmPanel.SetActive(validMove);
 
@@ -469,7 +399,7 @@ public class TileManager : MonoBehaviour
 
             if (validMove != previousValidMove)
             {
-                colourAllTiles(toMoveX, toMoveY + direction, newColour);
+                ColourAllTiles(toMoveX, toMoveY + direction, newColour);
                 mainController.confirmPanel.SetActive(validMove);
             }
             else
@@ -485,7 +415,7 @@ public class TileManager : MonoBehaviour
         //}
     }
 
-    public void updateTileState(int x, int y, int w, int h, int newState, bool complete)
+    public void UpdateTileState(int x, int y, int w, int h, int newState, bool complete)
     {
         for (int i = y; i < y + h; i++)
         {
@@ -515,11 +445,11 @@ public class TileManager : MonoBehaviour
             }
         }
 
-        showOutput();
+        ShowOutput();
 
     }
 
-    public void showOutput()
+    public void ShowOutput()
     {
         System.IO.StreamWriter file = new System.IO.StreamWriter("C:/Users/asuth/Documents/banana.txt", true);
 
@@ -551,15 +481,6 @@ public class TileManager : MonoBehaviour
         mouseDownCount = 0;
         mouseDown = false;
     }
-
-    void CheckStaffAfterObjectMove(GameObject go)
-    {
-        GameObject[] staffList = GameObject.FindGameObjectsWithTag("Staff");
-
-        // loop
-
-    }
-
-   
+          
 
 }

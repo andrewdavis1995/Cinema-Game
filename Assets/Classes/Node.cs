@@ -76,7 +76,7 @@ public class Node
         return false;
     }
 
-    public bool matchesGoal(Coordinate cGoal)
+    public bool MatchesGoal(Coordinate cGoal)
     {
         if (location.x == cGoal.x && location.y == cGoal.y) { return true; } else { return false; }
     }

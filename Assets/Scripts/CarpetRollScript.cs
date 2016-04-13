@@ -6,7 +6,7 @@ public class CarpetRollScript : MonoBehaviour {
 
     public GameObject carpet;
 
-    public static CarpetRollScript current = new CarpetRollScript();
+    public static CarpetRollScript current;
 
     Controller mainController;
 
@@ -17,7 +17,7 @@ public class CarpetRollScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        current = new CarpetRollScript();
+        current = this;
         current.carpet = carpet;
 	}
 
@@ -71,7 +71,7 @@ public class CarpetRollScript : MonoBehaviour {
                 }
                 catch (Exception)
                 {
-                    Debug.Log(i + " " + x);
+                   
                 }
             }
 

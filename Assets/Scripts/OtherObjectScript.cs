@@ -70,6 +70,10 @@ public class OtherObjectScript : MonoBehaviour {
         {
             message = "Level " + mainController.boxOfficeLevel + "\nCustomers will buy tickets from here";
         }
+        else if (tag.Equals("Food Area"))
+        {
+            message = "";
+        }
 
         if (showBuildingMenu != null)
         {

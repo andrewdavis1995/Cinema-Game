@@ -52,7 +52,7 @@ public class movementScript : MonoBehaviour {
         //Controller.queueDone += sortQueuePosition;
 
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
-         
+        
         animator = GetComponent<Animator>();
 
 		imgs = customerStatus.GetComponentsInChildren<Image>();

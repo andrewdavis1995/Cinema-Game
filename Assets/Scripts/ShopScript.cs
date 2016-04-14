@@ -112,6 +112,28 @@ public class ShopScript : MonoBehaviour {
                     mainController.ShowPopup(5, "You already own this object!");
                 }
                 break;
+            case 7: // food area
+                if (Controller.foodArea == null)
+                {
+                    mainController.objectSelected = "NEW FOOD AREA";
+                    mainController.PlaceObject(10, 18);
+
+                    for (int i = 0; i < mainController.screenObjectList.Count; i++)
+                    {
+                        mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
+                    }
+                    for (int i = 0; i < mainController.gameObjectList.Count; i++)
+                    {
+                        mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.6f);
+                    }
+                    mainController.redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.3f);
+                }
+                else
+                {
+                    Debug.Log("Already Got it you stupid sausage!");
+                    mainController.ShowPopup(5, "You already own this object!");
+                }
+                break;
         }
     }
 
@@ -156,6 +178,7 @@ public class ShopScript : MonoBehaviour {
             case 0: return "Buying more screens will entice more customers to come to your cinema";
             case 1: return "Hiring more staff will allow you to carry out more tasks at a time";
             case 2: return "Vending machines will bring in a small amount of income each day";
+            case 3: return "Customers will visit the food area to buy food. Earns coins";
             default: return "No information available";
         }
     }

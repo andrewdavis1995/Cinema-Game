@@ -63,7 +63,7 @@ public class mouseDrag : MonoBehaviour
     void Start()
     {
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
-
+        
         animator = GetComponent<Animator>();
 
         attributeImages = staffAttributePanel.GetComponentsInChildren<Image>();

@@ -19,7 +19,7 @@ public class CarpetRollScript : MonoBehaviour {
 	void Start () {
         current = this;
         current.carpet = carpet;
-	}
+    }
 
     public void Begin(Color c, Controller con, Sprite[] t)
     {

@@ -9,7 +9,7 @@ public class CameraControls : MonoBehaviour
     float mouseSensitivity = 0.05f;
 
     //float minLeft;
-    
+
     public Vector3 endPos = new Vector3(0, 0, -10);
 
     public float orthographicZoomSpeed = .4f;
@@ -40,47 +40,47 @@ public class CameraControls : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        vertExtent = Camera.main.orthographicSize;
-        horizExtent = vertExtent * Screen.width / Screen.height;
-        bottomBarHeight = vertExtent / bottomBar.transform.localScale.y;
-        
-        minX = horizExtent;
-        maxX = 80f - (Camera.main.orthographicSize * 1.5f);
-        minY = vertExtent;
-        maxY = (40f - (Camera.main.orthographicSize * 1.25f)) * 0.8f;
-
-        if (transform.position != endPos)
+        if (mainController.statusCode < 3 && mainController.statusCode != 1 && mainController.statusCode != 10)
         {
-            transform.position = Vector3.Lerp(transform.position, endPos, Time.deltaTime * 5);
-        }
+            vertExtent = Camera.main.orthographicSize;
+            horizExtent = vertExtent * Screen.width / Screen.height;
+            bottomBarHeight = vertExtent / bottomBar.transform.localScale.y;
 
-        if (Input.GetAxis("Mouse ScrollWheel") > 0)
-        {
-            Camera.main.orthographicSize--;
-        }
-        else if (Input.GetAxis("Mouse ScrollWheel") < 0)
-        {
-            Camera.main.orthographicSize++;
-        }
+            minX = horizExtent;
+            maxX = 80f - (Camera.main.orthographicSize * 1.5f);
+            minY = vertExtent;
+            maxY = (40f - (Camera.main.orthographicSize * 1.25f)) * 0.8f;
 
-        if (Camera.main.orthographicSize < 4f)
-        {
-            Camera.main.orthographicSize = 4f;
-        }
+            if (transform.position != endPos)
+            {
+                transform.position = Vector3.Lerp(transform.position, endPos, Time.deltaTime * 5);
+            }
 
-        if (Camera.main.orthographicSize > 15f)
-        {
-            Camera.main.orthographicSize = 15f;
-        }
+            if (Input.GetAxis("Mouse ScrollWheel") > 0)
+            {
+                Camera.main.orthographicSize--;
+            }
+            else if (Input.GetAxis("Mouse ScrollWheel") < 0)
+            {
+                Camera.main.orthographicSize++;
+            }
+
+            if (Camera.main.orthographicSize < 4f)
+            {
+                Camera.main.orthographicSize = 4f;
+            }
+
+            if (Camera.main.orthographicSize > 15f)
+            {
+                Camera.main.orthographicSize = 15f;
+            }
 
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            lastPosition = Input.mousePosition;
-        }
+            if (Input.GetMouseButtonDown(0))
+            {
+                lastPosition = Input.mousePosition;
+            }
 
-        if (mainController.statusCode < 3 && mainController.statusCode != 1) 
-        {
 
             mainController.objectInfo.SetActive(false);
             mainController.closeInfo.SetActive(false);

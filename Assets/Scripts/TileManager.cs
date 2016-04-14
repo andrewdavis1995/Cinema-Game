@@ -44,7 +44,6 @@ public class TileManager : MonoBehaviour
 
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
 
-
         floor = new Floor(height, width);
 
         // part of this code was cooperated on with Flatmate

@@ -11,7 +11,10 @@ public class Customer
 
     #region Status Check Variables
     public int shouldMoveUp = 0;
+    public bool sortFoodQueuePos = false;
     public int moveToServingSlot = -1;
+    public float servingPositionX = 0;
+    public float servingPositionY = 0;
     public int servingSlot = -1;
     public bool walkingAway = false;
     public bool leaving;
@@ -22,41 +25,11 @@ public class Customer
     int index;
     public int currentDirection = 0;     // 1 down, 2 up, 3 left, 4 right, 0 still
     int patience = 1200;
+
     public Transform transform;
     public Controller mainController;
     public Animator animator;
-
-    public Vector2 MovementVector = new Vector2(2, 0);
-
-    public int GetPatience()
-    {
-        return patience;
-    }
-
-    public void DecreasePatience(int val)
-    {
-        patience -= val;
-
-        if (patience < 0) { patience = 0; }
-        else if (patience < 152 && patience > 145)
-        {
-            isBored = true;
-        }
-
-    }
-
-    public void MoveUpInQueue()
-    {
-        transform.Translate(0, 0.8f, 0);
-        transform.GetComponent<SpriteRenderer>().sortingOrder++;
-    }
-
-    public void MoveToServingSlot()
-    {
-        transform.position = new Vector3(38.5f + (2.6f * moveToServingSlot), 11 * 0.8f, 0);
-        SetTravellingTo(38.5f + (2.6f * moveToServingSlot), 11 * 0.8f);
-    }
-
+    
     int hourDue;
 
     public bool inQueue = false;
@@ -65,26 +38,30 @@ public class Customer
     public bool arrived = false;
 
     bool needsFood;
+    int foodDesired = -1;
+
     bool needsTickets;
     bool needsToilet;
 
+    public bool goingToFood = false;
     public bool goingToSeats = false;
 
     Floor theFloor;
 
     public List<Coordinate> pointsToVisit = new List<Coordinate>();
 
+    float travellingToX = 0;
+    float travellingToY = 0;
+
+    FilmShowing filmShowing;
+
+    public static GameObject[,] tiles;
+    
     public void SetTravellingTo(float x, float y)
     {
         this.travellingToX = x;
         this.travellingToY = y;
     }
-
-    float travellingToX = 0;
-    float travellingToY = 0;
-
-    FilmShowing filmShowing;
-    public static GameObject[,] tiles;
 
     public Customer(FilmShowing fs, int ID, Floor f, Controller c)
     {
@@ -97,9 +74,28 @@ public class Customer
 
         index = ID;
 
-        needsFood = Random.Range(0, 10) >= 4;
+        needsFood = Random.Range(0, 10) >= 5;         // 5
         needsTickets = Random.Range(0, 10) >= 0;      // 3
         needsToilet = Random.Range(0, 10) >= 6;
+
+        if (needsFood)
+        {
+
+            if (Controller.foodArea != null)
+            {
+
+                int rand = Random.Range(0, 15);
+                if (rand < 8) { foodDesired = 0; }
+                else if (rand < 13) { foodDesired = 1; }
+                else { foodDesired = 2; }
+            }
+            else
+            {
+                needsFood = false;
+                foodDesired = -1;
+                patience -= 150;
+            }
+        }
 
         int minutesEarly = Random.Range(20, 80);
 
@@ -132,8 +128,44 @@ public class Customer
         return false;
     }
 
+    public Vector2 MovementVector = new Vector2(2, 0);
+
+    public int GetPatience()
+    {
+        return patience;
+    }
+
+    public void DecreasePatience(int val)
+    {
+        patience -= val;
+
+        if (patience < 0) { patience = 0; }
+        else if (patience < 152 && patience > 145)
+        {
+            isBored = true;
+        }
+
+    }
+
+    public void MoveUpInQueue()
+    {
+        transform.Translate(0, 0.8f, 0);
+        transform.GetComponent<SpriteRenderer>().sortingOrder++;
+    }
+
+    public void MoveToServingSlot()
+    {
+        transform.position = new Vector3(servingPositionX + (2.6f * moveToServingSlot), (servingPositionY), -1);
+        SetTravellingTo(servingPositionX + (2.6f * moveToServingSlot), servingPositionY);
+    }
+
     public void NextPoint(bool first)
     {
+        //if (!first)
+        //{
+        //    transform.Translate(-2 * MovementVector);
+        //}
+
         try
         {
             this.pointsToVisit.RemoveAt(0);
@@ -145,11 +177,11 @@ public class Customer
             this.travellingToX = pointsToVisit[0].x;
             this.travellingToY = pointsToVisit[0].y;
 
-            if (goingToSeats || needsTickets)
+            if (goingToSeats || needsTickets || goingToFood)
             {
                 travellingToY *= 0.8f;
             }
-
+            
         }
         else
         {
@@ -229,23 +261,58 @@ public class Customer
 
         // food, toilets go here
 
-        else if (goingToSeats)
+        else if (goingToFood)
         {
             if (patience > 0)
             {
-                int targetScreen = filmShowing.GetScreenNumber();
-
-
-
-
                 // the path gets set here
-                List<Coordinate> copy = mainController.GetScreenPath(targetScreen - 1);
+                List<Coordinate> copy = mainController.GetPathToFood();
 
                 for (int i = 0; i < copy.Count; i++)
                 {
                     pointsToVisit.Add(copy[i]);
                 }
 
+                int xPos = (int)(Math.Round(transform.position.x, 0));
+
+                SetTravellingTo(xPos, 11);
+
+                transform.GetComponent<SpriteRenderer>().sortingOrder = 40;
+
+            }
+            else
+            {
+                pointsToVisit.Add(new Coordinate(0, 42));
+            }
+            
+        }
+        else if (goingToSeats)
+        {
+            if (patience > 0)
+            {
+                int targetScreen = filmShowing.GetScreenNumber();
+
+                List<Coordinate> copy;
+
+                // the path gets set here
+                if (foodDesired == -1)
+                {
+                    copy = mainController.GetScreenPath(targetScreen - 1);
+                }
+                else
+                {
+                    copy = mainController.GetFoodToScreenPath(targetScreen - 1);
+                }
+
+                for (int i = 0; i < copy.Count; i++)
+                {
+                    pointsToVisit.Add(copy[i]);
+                }
+
+                //float xPos = transform.position.x;
+                //float yPos = (transform.position.y) + 1;
+
+                //SetTravellingTo(xPos, 8000);
 
             }
             else
@@ -270,8 +337,8 @@ public class Customer
         {
             hasLeftTheBuilding = true;
         }
+        
     }
-    
 
     public void AddPatience(int val)
     {
@@ -281,7 +348,19 @@ public class Customer
     public int GetFilmScreen() { return filmShowing.GetScreenNumber(); }
     public float GetTravellingToX() { return travellingToX; }
     public float GetTravellingToY() { return travellingToY; }
-    public void TicketsDone() { this.needsTickets = false; goingToSeats = true; }
+    public void TicketsDone() {
+        this.needsTickets = false;
+
+        if (!needsFood)
+        {
+            goingToSeats = true;
+        }
+        else
+        {
+            goingToFood = true;
+            needsFood = false;
+        }
+    }
     public bool IsGoingToSeat() { return this.goingToSeats; }
     public int GetCharIndex() { return this.index; }
 

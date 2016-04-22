@@ -20,44 +20,34 @@ namespace Assets.Classes
         int totalCoinIncome;    // how many coins have been earnt in total - does not include expenditure
 
 
-        public String GetStringOutput()
+        /// <summary>
+        /// add coins to the total amount earnt 
+        /// </summary>
+        /// <param name="numCoins">How many coins to add</param>     
+        public void AddCoins(int numCoins)
         {
-            return "SPEED: " + speed + "\nOVERALL: " + overall;
+            totalCoinIncome += numCoins;
         }
 
-        public void SetFacilities(List<ScreenObject> screens, bool redCarpet)
+        /// <summary>
+        /// Set up a new Reputation instance
+        /// </summary>
+        public void Initialise()
         {
-            int numScreens = screens.Count;
-            int totalRating = 0;
+            // initial values
+            cleanliness = 15;
+            friendliness = 8;
+            speed = 8;
+            facilities = 1;
+            highestReputation = 0;
+            totalCoinIncome = 0;
 
-            for (int i = 0; i < numScreens; i++)
-            {
-                totalRating += screens[i].GetUpgradeLevel();
-            }
-
-            float averageRating = totalRating / numScreens;
-
-            this.facilities = (int)(1.5 * numScreens * averageRating);
-
-            if (redCarpet) { facilities += 2; }
-
-            if (facilities > 25) { facilities = 25; }
-
+            // calculate the overall rating
+            SetOverall();
         }
 
-        public void Walkout()
-        {
-            UpdateSpeedRating(-150);
-        }
-
-        public void UpdateSpeedRating(int patience)
-        {
-            numCustomersServed++;
-            totalSpeedValues += patience;
-
-            speed = (int)((float)(((float)totalSpeedValues / (float)(numCustomersServed * 1200)) * 25));       // 1200 ---> max value for patience
-        }
-
+        #region Accessors
+        // Accessors
         public int GetOverall() { return overall; }
         public int GetTotalCoins() { return totalCoinIncome; }
         public int GetTotalCustomers() { return numCustomersServed; }
@@ -67,9 +57,16 @@ namespace Assets.Classes
         public int GetCleanlinessRating() { return cleanliness; }
         public int GetFriendlinessRating() { return friendliness; }
         public int GetFacilitiesRating() { return facilities; }
+        public float GetMultiplier()
+        {
+            return (float)overall / (float)75f;
+        }
+        #endregion
 
+        #region Mutuators
         public void SetOverall()
         {
+            // calculate the overall rating
             overall = (int)((1.25 * cleanliness) + (1.25 * friendliness) + (0.5* speed) + facilities);
 
             // cap at 100 - just in case
@@ -78,34 +75,53 @@ namespace Assets.Classes
                 overall = 100;
             }
 
+            // if the current reputation level beats the record highest, replace the record with current
             if (overall > highestReputation)
             {
                 highestReputation = overall;
             }
 
         }
-
-        public void AddCoins(int numCoins)
+        public void UpdateSpeedRating(int patience)
         {
-            totalCoinIncome += numCoins;
-        }
+            numCustomersServed++;
+            totalSpeedValues += patience;
 
-        public float GetMultiplier()
+            speed = (int)((float)(((float)totalSpeedValues / (float)(numCustomersServed * 1250)) * 25));
+
+            if (speed > 100)
+            {
+                speed = 100;
+            }
+
+        }
+        public void Walkout()
         {
-            return (float)overall / (float)75f;
+            UpdateSpeedRating(-150);
         }
-
-        public void Initialise()
+        public void SetFacilities(List<ScreenObject> screens, bool redCarpet)
         {
-            cleanliness = 15;
-            friendliness = 8;
-            speed = 8;
-            facilities = 1;
-            highestReputation = 0;
-            totalCoinIncome = 0;
+            int numScreens = screens.Count;
+            int totalRating = 0;
 
-            SetOverall();
+            // get the combined total of the screen upgrade level
+            for (int i = 0; i < numScreens; i++)
+            {
+                totalRating += screens[i].GetUpgradeLevel();
+            }
+
+            // calculate the average screen upgrade level
+            float averageRating = totalRating / numScreens;
+
+            // set the facilities value
+            this.facilities = (int)(1.5 * numScreens * averageRating);
+
+            if (redCarpet) { facilities += 2; }
+
+            if (facilities > 25) { facilities = 25; }
+
         }
-
+        #endregion
+        
     }
 }

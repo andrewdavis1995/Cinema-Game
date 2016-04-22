@@ -10,12 +10,16 @@ public class movementScript : MonoBehaviour {
 
     public delegate void AddToTicketQueue(Customer customer);
     public static event AddToTicketQueue addToQueueTickets;
-
-    public delegate Queue<Customer> GetTicketQueue();
-    public static event GetTicketQueue getQueueTickets;
-
+    
     public delegate int GetTicketQueueSize();
     public static event GetTicketQueueSize getQueueTicketsSize;
+
+
+    public delegate void AddToFoodQueue(Customer customer);
+    public static event AddToFoodQueue addToQueueFood;
+    
+    public delegate int GetFoodQueueSize();
+    public static event GetFoodQueueSize getQueueFoodSize;
 
     Controller mainController;
 
@@ -66,23 +70,32 @@ public class movementScript : MonoBehaviour {
         {
             if (!customer.inQueue && customer.pointsToVisit.Count > 0)
             {
+
                 if (customer.leaving)
                 {
                     int xPos = (int)transform.position.x;
                     int yPos = (int)transform.position.y;
-                    
+
                     customer.SetTravellingTo(xPos, yPos);
                     transform.position = new Vector3(xPos, yPos, 0);
                     customer.leaving = false;
+
+                    try
+                    {
+                        GetComponent<AudioSource>().Play();
+                    }
+                    catch (Exception) { }
+
                 }
+
 
                 float theX = transform.position.x;
                 float theY = transform.position.y;
-
+                
 
                 if (customer.goingToSeats)
                 {
-                    customer.transform.GetComponent<SpriteRenderer>().sortingOrder =  TileManager.floor.height - (int)(theY) - 1;
+                    customer.transform.GetComponent<SpriteRenderer>().sortingOrder = TileManager.floor.height - (int)(theY) - 1;
                 }
 
                 bool checkY1 = theY <= customer.GetTravellingToY() + 0.3f;
@@ -92,11 +105,41 @@ public class movementScript : MonoBehaviour {
 
                 if (checkX1 && checkX2 && checkY1 && checkY2)
                 {
-                    if (customer.NeedsTickets() && customer.pointsToVisit.Count < 2)
+
+                    //Vector3 bounceBack = -0.15f * customer.MovementVector;
+
+                    if (customer.goingToFood && customer.pointsToVisit.Count < 2)
+                    {
+                        //customer.nextPoint(false);
+                        int queueLength = getQueueFoodSize();
+
+                        Vector3 temp = gameObject.transform.position;
+                        temp.y -= 2 + (queueLength * 0.8f);
+                        temp.x -= 0.7f;
+
+                        gameObject.transform.position = temp;
+
+                        // delay here - QUEUE
+                        if (addToQueueFood != null)
+                        {
+
+                            addToQueueFood(customer);
+                            customer.inQueue = true;
+                            customer.pointsToVisit.Clear();
+
+                            customer.goingToFood = false;
+                            customer.goingToSeats = true;
+                            customer.animator.SetTrigger("queue");
+
+                            customer.NextPlace(false);
+                        }
+                    }
+
+                    else if (customer.NeedsTickets() && customer.pointsToVisit.Count < 2)
                     {
                         //customer.nextPoint(false);
                         int queueLength = getQueueTicketsSize();
-                        
+
                         Vector3 temp = gameObject.transform.position;
                         temp.y -= 2 + (queueLength * 0.8f);
                         temp.x -= 1.5f;
@@ -122,6 +165,7 @@ public class movementScript : MonoBehaviour {
                         customer.NextPoint(false);
                         //customer.SetTravellingTo(customer.pointsToVisit[0].x, customer.pointsToVisit[0].y);
                     }
+                    //customer.transform.Translate(bounceBack);
                 }
 
                 //actually move
@@ -131,46 +175,52 @@ public class movementScript : MonoBehaviour {
                     transform.Translate(movementVector);
                 }
             }
-        }
 
-        if (customer.inQueue && customer.shouldMoveUp > 0)
-        {
-            int move = customer.shouldMoveUp;
-            customer.shouldMoveUp = 0;
-            transform.Translate(0, move * 0.8f, 0);
-        }
-        if (customer.moveToServingSlot > -1)
-        {
-            customer.MoveToServingSlot();
-            customer.servingSlot = customer.moveToServingSlot;
-            customer.moveToServingSlot = -1;
-            GetComponent<SpriteRenderer>().sortingLayerName = "Front";
-        }
-        if (customer.walkingAway)
-        {
-            transform.GetComponent<Animator>().SetTrigger("right");
-            customer.WalkOut();
-            mainController.reputation.Walkout();
-            customer.walkingAway = false;
-            customer.leaving = true;
-        }
-        if (customer.hasLeftTheBuilding)
-        {
-            Vector2 movementVector = customer.MovementVector * Time.deltaTime * moveSpeed;
-            transform.Translate(movementVector);
-            customer.walkingAway = false;
-        }
-        if (customer.isBored)
-        {
-            transform.GetComponent<Animator>().SetTrigger("bored");
-            customer.isBored = false;
-        }
-        if (transform.position.y < -20 && customer.GetPatience() < 1) 
-        {
-            // they have left the building!
-            transform.gameObject.SetActive(false);
-        }
 
+            if (customer.sortFoodQueuePos)
+            {
+                customer.sortFoodQueuePos = false;
+                transform.Translate(0, -1, 0);
+            }
+            if (customer.inQueue && customer.shouldMoveUp > 0)
+            {
+                int move = customer.shouldMoveUp;
+                customer.shouldMoveUp = 0;
+                transform.Translate(0, move * 0.8f, 0);
+            }
+            if (customer.moveToServingSlot > -1)
+            {
+                customer.MoveToServingSlot();
+                customer.servingSlot = customer.moveToServingSlot;
+                customer.moveToServingSlot = -1;
+                GetComponent<SpriteRenderer>().sortingLayerName = "Front";
+                GetComponent<SpriteRenderer>().sortingOrder = 70;
+            }
+            if (customer.walkingAway)
+            {
+                transform.GetComponent<Animator>().SetTrigger("right");
+                customer.WalkOut();
+                mainController.reputation.Walkout();
+                customer.walkingAway = false;
+                customer.leaving = true;
+            }
+            if (customer.hasLeftTheBuilding)
+            {
+                Vector2 movementVector = customer.MovementVector * Time.deltaTime * moveSpeed;
+                transform.Translate(movementVector);
+                customer.walkingAway = false;
+            }
+            if (customer.isBored)
+            {
+                transform.GetComponent<Animator>().SetTrigger("bored");
+                customer.isBored = false;
+            }
+            if (transform.position.y < -20 && customer.GetPatience() < 1)
+            {
+                // they have left the building!
+                transform.gameObject.SetActive(false);
+            }
+        }
 
 
     }
@@ -223,9 +273,7 @@ public class movementScript : MonoBehaviour {
         {
             MoveCustomer();
         }
-
-
-
+        
         if (showPatience)
         {
             patienceCount++;
@@ -255,27 +303,27 @@ public class movementScript : MonoBehaviour {
     }
 
 
-    public void SortQueuePosition()
-    {
-        if (customer.inQueue)
-        {
-            transform.position = transform.position + new Vector3(0, 0.8f, 0);
-        }
-        else
-        {
-            // finished with Queue
-            // set trigger
-            //Vector3 tmp = transform.position;
-            //tmp.y = customer.getTravellingToY();
-            customer.goingToSeats = true;
-            customer.SetTravellingTo(38.5f + (3 * customer.servingSlot), (11 * 0.8f));
-            customer.servingSlot = -1;
-            customer.pointsToVisit.Clear();
-            //customer.nextPoint(false);
-            //customer.SetTravellingTo(customer.getTravellingToX(), customer.getTravellingToY() / 0.8f);
-            //transform.position = tmp;
+    //public void SortQueuePosition()
+    //{
+    //    if (customer.inQueue)
+    //    {
+    //        transform.position = transform.position + new Vector3(0, 0.8f, 0);
+    //    }
+    //    else
+    //    {
+    //        // finished with Queue
+    //        // set trigger
+    //        //Vector3 tmp = transform.position;
+    //        //tmp.y = customer.getTravellingToY();
+    //        customer.goingToSeats = true;
+    //        customer.SetTravellingTo(38.5f + (3 * customer.servingSlot), (11 * 0.8f));
+    //        customer.servingSlot = -1;
+    //        customer.pointsToVisit.Clear();
+    //        //customer.nextPoint(false);
+    //        //customer.SetTravellingTo(customer.getTravellingToX(), customer.getTravellingToY() / 0.8f);
+    //        //transform.position = tmp;
 
-        }
-    }
+    //    }
+    //}
 
 }

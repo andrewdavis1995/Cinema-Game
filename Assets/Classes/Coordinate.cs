@@ -6,13 +6,15 @@ using System.Text;
 [System.Serializable]
 public class Coordinate
 {
+    // the x and y coordinates of the point
     public int x;
     public int y;
 
-    public Coordinate(int X, int Y)
+    // CONSTRUCTOR for the class
+    public Coordinate(int theX, int theY)
     {
-        x = X;
-        y = Y;
+        x = theX;
+        y = theY;
     }
 }
 

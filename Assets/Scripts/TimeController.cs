@@ -103,7 +103,7 @@ public class TimeController : MonoBehaviour
                         allCustomers[i].pointsToVisit = new List<Coordinate>();
 
                         allCustomers[i].transform = ObjectPool.current.GetGameObject().transform;
-
+                        
                         allCustomers[i].transform.position = new Vector3(40, -10);
 
                         allCustomers[i].transform.GetComponent<movementScript>().SetCustomer(allCustomers[i]);

@@ -30,7 +30,7 @@ public class ProjectorScript : MonoBehaviour
 
                     int randomValue = Random.Range(0, upperRange);
 
-                    if (randomValue == 0)
+                    if (randomValue == 0 && Controller.theScreens[i].GetClicksRemaining() > 0)
                     {
                         CreateNew(i);
                         Controller.theScreens[i].ProjectorBroke();

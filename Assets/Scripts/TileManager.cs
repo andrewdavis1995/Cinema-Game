@@ -368,6 +368,16 @@ public class TileManager : MonoBehaviour
         }
     }
 
+    public void ResetStatusVariables()
+    {
+        origX = -1;
+        origY = -1;
+        toMoveX = -1;
+        toMoveY = -1;
+        fullWidth = -1;
+        fullHeight = -1;
+    }
+
     void UpdateRow(int x, int y, bool newState, int direction)
     {
         mainController.confirmPanel.SetActive(validMove);
@@ -430,6 +440,18 @@ public class TileManager : MonoBehaviour
             }
         }
 
+
+
+        if (w == 10 && h == 18 && newState == 2)
+        {
+            for (int i = y; i < y + 6; i++)
+            {
+                for (int j = x; j < x + 10; j++)
+                {
+                    floor.floorTiles[i, j].inUse = 1;
+                }
+            }
+        }
 
 
         if (w == 11 && h == 15 && newState == 2)

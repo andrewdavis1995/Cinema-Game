@@ -25,21 +25,10 @@ public class ShopScript : MonoBehaviour {
             case 0: // ScreenObject
 
                 if (Controller.theScreens.Count < 8)
-                {
+               { 
+                    mainController.ShopItemSelected(11, 15, "SCREEN");
+                    mainController.SemiTransparentObjects();
 
-                    mainController.objectSelected = "NEW SCREEN";
-                    mainController.PlaceObject(11, 15);
-
-                    for (int i = 0; i < mainController.screenObjectList.Count; i++)
-                    {
-                        mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
-                    }
-                    for (int i = 0; i < mainController.gameObjectList.Count; i++)
-                    {
-                        mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.6f);
-                    }
-
-                    mainController.redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.3f);
                 }
                 else
                 {
@@ -57,49 +46,20 @@ public class ShopScript : MonoBehaviour {
                 }
                 break;
             case 2: // Plant
-                mainController.objectSelected = "NEW PLANT";
-                mainController.PlaceObject(1, 1);
-                
-                for (int i = 0; i < mainController.screenObjectList.Count; i++)
-                {
-                    mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
-                }
-                for (int i = 0; i < mainController.gameObjectList.Count; i++)
-                {
-                    mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.6f);
-                }
-                mainController.redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.3f);
+                mainController.ShopItemSelected(1, 1, "PLANT");
+                mainController.SemiTransparentObjects();
+
                 break;
             case 3: // Bust
-                mainController.objectSelected = "NEW BUST";
-                mainController.PlaceObject(2, 3);
-                
-                for (int i = 0; i < mainController.screenObjectList.Count; i++)
-                {
-                    mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
-                }
-                for (int i = 0; i < mainController.gameObjectList.Count; i++)
-                {
-                    mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.6f);
-                }
-                mainController.redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.3f);
+                mainController.ShopItemSelected(2, 3, "BUST");
+                mainController.SemiTransparentObjects();
                 break;
             case 4: // 5 Popcorns
                 // micro-transactions - MONEY!
                 break;
             case 5: // Vending Machine
-                mainController.objectSelected = "NEW VENDING MACHINE";
-                mainController.PlaceObject(3, 3);
-
-                for (int i = 0; i < mainController.screenObjectList.Count; i++)
-                {
-                    mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
-                }
-                for (int i = 0; i < mainController.gameObjectList.Count; i++)
-                {
-                    mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.8f);
-                }
-                mainController.redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.3f);
+                mainController.ShopItemSelected(3, 3, "VENDING MACHINE");
+                mainController.SemiTransparentObjects();
                 break;
             case 6: // Red Carpet
                 if (!mainController.hasUnlockedRedCarpet)
@@ -115,18 +75,9 @@ public class ShopScript : MonoBehaviour {
             case 7: // food area
                 if (Controller.foodArea == null)
                 {
-                    mainController.objectSelected = "NEW FOOD AREA";
-                    mainController.PlaceObject(10, 18);
+                    mainController.ShopItemSelected(10, 18, "FOOD AREA");
+                    mainController.SemiTransparentObjects();
 
-                    for (int i = 0; i < mainController.screenObjectList.Count; i++)
-                    {
-                        mainController.screenObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.7f);
-                    }
-                    for (int i = 0; i < mainController.gameObjectList.Count; i++)
-                    {
-                        mainController.gameObjectList[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.6f);
-                    }
-                    mainController.redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.3f);
                 }
                 else
                 {

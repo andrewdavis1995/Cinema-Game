@@ -86,7 +86,11 @@ public class ConfirmationScript : MonoBehaviour {
 
     }
 
-    public void Cancel() { mainController.confirmationPanel.SetActive(false); }
+    public void Cancel()
+    {
+        mainController.confirmationPanel.SetActive(false);
+        mainController.statusCode = mainController.newStatusCode;
+    }
 
     public void Confirmed ()
     {
@@ -166,8 +170,8 @@ public class ConfirmationScript : MonoBehaviour {
                             currentCount += mainController.filmShowings[j].GetTicketsSold();
                         }
 
-                        List<Customer> tmp = mainController.filmShowings[k].CreateCustomerList(currentCount, mainController);
-                        mainController.allCustomers.AddRange(tmp);
+                        //List<Customer> tmp = mainController.filmShowings[k].CreateCustomerList(currentCount, mainController);
+                        //mainController.allCustomers.AddRange(tmp);
                     }
 
                     break;
@@ -193,6 +197,11 @@ public class ConfirmationScript : MonoBehaviour {
                 case 7:
                     mainController.ClearAllProjectors();
                     mainController.statusCode = 0;
+                    break;
+                case 8:
+                    int theIndex = int.Parse(parameters[3]);
+                    FoodAreaScript.ComponentUnlocked(theIndex);
+                    mainController.statusCode = 10;
                     break;
             }
         }

@@ -7,19 +7,28 @@ using UnityEngine;
 
 public class Node
 {
-    public Coordinate location;
-    public List<Node> path = new List<Node>();
+    public Coordinate location;     // the location of the node
+    public List<Node> path = new List<Node>();  //  the  path
 
+    // CONSTRUCTOR for the class
     public Node(Coordinate l)
     {
         location = l;
     }
-
+    
+    // Accessors
     public List<Node> GetPath()
     {
         return this.path;
     }
 
+    /// <summary>
+    /// Find all children nodes for the current node. (i.e. the adjacent nodes)
+    /// </summary>
+    /// <param name="explored"></param>
+    /// <param name="tmp"></param>
+    /// <param name="states"></param>
+    /// <returns></returns>
     public List<Node> FindChildren(List<Node> explored, List<Node> tmp, FloorTile[,] states)
     {
         List<Node> temp = new List<Node>();
@@ -64,6 +73,12 @@ public class Node
         return temp;
     }
 
+    /// <summary>
+    /// Check that the node getting checked has not already been checked
+    /// </summary>
+    /// <param name="targetNode"></param>
+    /// <param name="explored"></param>
+    /// <returns></returns>
     public bool IsSameLocation(Node targetNode, List<Node> explored)
     {
         for (int i = 0; i < explored.Count; i++)
@@ -76,16 +91,16 @@ public class Node
         return false;
     }
 
+    /// <summary>
+    /// Check if the goal state matches the current node
+    /// </summary>
+    /// <param name="cGoal"></param>
+    /// <returns></returns>
     public bool MatchesGoal(Coordinate cGoal)
     {
         if (location.x == cGoal.x && location.y == cGoal.y) { return true; } else { return false; }
     }
-
-    public String LocationOutput()
-    {
-        return "X: " + location.x + ", Y:" + location.y;
-    }
-
+    
     //public void SetChildren(List<Node> childNodes)
     //{
     //    children = childNodes;

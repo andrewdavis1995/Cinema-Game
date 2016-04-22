@@ -47,9 +47,7 @@ public class mouseDrag : MonoBehaviour
 
     public float offset;
     private Animator animator;
-
-    int maxTicketStaff = 1;
-
+    
     bool dragging = false;
 
     bool triggerSet = false;
@@ -106,7 +104,6 @@ public class mouseDrag : MonoBehaviour
             mainController.statusCode = 1;
         }
 
-        //checkForOutOfBounds();
 
     }
 
@@ -152,6 +149,10 @@ public class mouseDrag : MonoBehaviour
     {
         if ((mainController.statusCode < 2) || mainController.statusCode == 6)
         {
+            dragging = true;
+
+            transform.Translate(new Vector3(0, 0, 1));
+
             attributeTexts[0].text = staffMember.GetStaffname();
             
             int[] values = staffMember.GetAttributes();
@@ -168,12 +169,15 @@ public class mouseDrag : MonoBehaviour
             for (int i = 0; i < mainController.staffSlot.Count; i++)
             {
                 Bounds b1 = mainController.staffSlot[i].GetComponent<Renderer>().bounds;
+                b1 = new Bounds(b1.center - new Vector3(0, 1.5f, 0), b1.extents);
                 b1.extents = b1.extents * 1.5f;
 
-                Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                mousePos = new Vector3(mousePos.x, mousePos.y, 0f);
+                Bounds staffBounds = transform.GetComponent<SpriteRenderer>().bounds;
 
-                if (b1.Contains(mousePos))
+                //Bounds newStaffBounds = new Bounds(staffBounds.center, new Vector3(0.25f, 0.25f, 1));
+
+
+                if (b1.Intersects(staffBounds))
                 {
                     mainController.slotState[i] = false;
 
@@ -186,6 +190,7 @@ public class mouseDrag : MonoBehaviour
                     }
                     else
                     {
+                        // a food slot
                         target = 2;
                     }
 
@@ -212,7 +217,6 @@ public class mouseDrag : MonoBehaviour
 
             //make the image shake and grow!
             GetComponent<SpriteRenderer>().sortingLayerName = "Staff";
-            dragging = true;
             prevCameraZoom = Camera.main.orthographicSize;
             Camera.main.orthographicSize = 6.5f;
             transform.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
@@ -249,9 +253,11 @@ public class mouseDrag : MonoBehaviour
 
             Bounds b = GameObject.Find("Box Office").GetComponent<Renderer>().bounds;
 
+            Bounds boxOfficeBounds = new Bounds(b.center - new Vector3(0, 0.5f, 0), b.extents);
+
             Bounds newStaffBounds = new Bounds(staffBounds.center + new Vector3(0, 0.5f, 0), staffBounds.extents - new Vector3(0, 0.25f, 0));
 
-            if (b.Intersects(newStaffBounds))
+            if (boxOfficeBounds.Intersects(newStaffBounds))
             {
                 float xPos = transform.position.x;
                 transform.position = new Vector2(xPos, 8f);
@@ -276,7 +282,7 @@ public class mouseDrag : MonoBehaviour
             }
 
             triggerSet = false;
-            this.transform.position = new Vector3(transform.position.x, transform.position.y + 0.2f, 0);
+            this.transform.position = new Vector3(transform.position.x, transform.position.y + 0.4f, 0);
 
             float x = this.transform.position.x;
             float y = this.transform.position.y;
@@ -322,7 +328,12 @@ public class mouseDrag : MonoBehaviour
                                     break;
                                 }
                             }
-                            
+
+                            if (target == 2)
+                            {
+                                transform.Translate(0, 0.27f, 0);
+                            }
+
                             changeStaffJob(staffMember.GetIndex(), target, posInPost, true);
                         }
                     }
@@ -371,12 +382,14 @@ public class mouseDrag : MonoBehaviour
 
         if (transform.position.x > 79f)
         {
-            transform.position = new Vector3(78, transform.position.y, 1);
+            transform.position = new Vector3(78, transform.position.y, -1);
         }
         if (transform.position.y > (39f * 0.8f))
         {
-            transform.position = new Vector3(transform.position.x, 38 * 0.8f, 1);
+            transform.position = new Vector3(transform.position.x, 38 * 0.8f, -1);
         }
+
+        transform.position = new Vector3(transform.position.x, transform.position.y, -1);
 
         staffMember.SetTransform(transform);
 
@@ -409,7 +422,7 @@ public class mouseDrag : MonoBehaviour
                 Vector3 position = mainController.staffSlot[i].transform.position;
                 position.y -= 1.8f;
                 transform.position = position;
-                // change image / animation ?
+                // TODO: change image / animation of staff ?
             }
             else
             {
@@ -422,19 +435,19 @@ public class mouseDrag : MonoBehaviour
 
         if (Camera.main.WorldToScreenPoint(transform.position).x > UnityEngine.Screen.width - 50)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0.20f, 0, 0);
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0.3f, 0, 0);
         }
         if (Camera.main.WorldToScreenPoint(transform.position).x < 100)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(-0.20f, 0, 0);
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(-0.3f, 0, 0);
         }
         if (Camera.main.WorldToScreenPoint(transform.position).y > UnityEngine.Screen.height - 100)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, 0.20f, 0);
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, 0.3f, 0);
         }
         if (Camera.main.WorldToScreenPoint(transform.position).y < 50)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, -0.20f, 0);
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, -0.3f, 0);
         }
 
         Camera.main.GetComponent<CameraControls>().endPos = Camera.main.transform.position;
@@ -442,9 +455,10 @@ public class mouseDrag : MonoBehaviour
         //tmp.z = -10;
         //tmp.x -= UnityEngine.ScreenObject.width / 2;
         //tmp.y -= UnityEngine.ScreenObject.height / 2;
+
+        //CheckForOutOfBounds();
     }
-
-
+    
     public static Bounds GetObjectHiddenBounds(GameObject go)
     {
         Bounds toReturn = new Bounds();
@@ -465,7 +479,6 @@ public class mouseDrag : MonoBehaviour
 
         return toReturn;
     }
-
 
     public static GameObject CheckHiddenBehind(Bounds staffBounds, List<GameObject> gameObjectList, List<GameObject> screenObjectList)
     {

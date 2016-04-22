@@ -12,7 +12,7 @@ public class CameraControls : MonoBehaviour
 
     public Vector3 endPos = new Vector3(0, 0, -10);
 
-    public float orthographicZoomSpeed = .4f;
+    public float orthographicZoomSpeed = .33f;
 
     GameObject[] staff;
 
@@ -30,7 +30,6 @@ public class CameraControls : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-
         staff = GameObject.FindGameObjectsWithTag("Staff");
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
         endPos = transform.position;
@@ -47,7 +46,7 @@ public class CameraControls : MonoBehaviour
             bottomBarHeight = vertExtent / bottomBar.transform.localScale.y;
 
             minX = horizExtent;
-            maxX = 80f - (Camera.main.orthographicSize * 1.5f);
+            maxX = 80f - (Camera.main.orthographicSize * 1.79f);
             minY = vertExtent;
             maxY = (40f - (Camera.main.orthographicSize * 1.25f)) * 0.8f;
 

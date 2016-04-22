@@ -33,12 +33,12 @@ public class OtherObjectScript : MonoBehaviour {
     {
         GameObject[] ticketSlots = GameObject.FindGameObjectsWithTag("Slot Type 1");
         int numSlots = ticketSlots.Length;
-
+        
         // upgrade the queue
         mainController.ticketQueue.Upgrade();
 
         // generate a new staff slot
-        CreateStaffSlot(1, new Vector3(37.8f + (2.65f * numSlots), 12.5f, 0));
+        CreateStaffSlot(1, new Vector3(37.8f + (2.65f * numSlots), 12.3f, 0));
 
         // update the image - bigger desk, computer system etc
         mainController.boxOfficeLevel++;

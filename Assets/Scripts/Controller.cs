@@ -594,6 +594,9 @@ public class Controller : MonoBehaviour
     {
         popup.SetActive(false);
         confirmationPanel.SetActive(false);
+
+        popupBox.SetActive(false);
+
         statusCode = newStatusCode;
 
         if (statusCode == 99)
@@ -618,6 +621,7 @@ public class Controller : MonoBehaviour
 
             // change camera position
             Camera.main.transform.position = new Vector3(32.68f, 0, 1);
+            Camera.main.orthographicSize = 14;
             staffAppearanceMenu.SetActive(true);
             staffModel.SetActive(true);
         }
@@ -760,6 +764,7 @@ public class Controller : MonoBehaviour
     {
         Camera.main.orthographicSize = 5f;
         Vector3 pos = staffMembers[staffID].GetVector();
+        pos.x = pos.x - 1.2f;
         pos.z = -10;
         
         Camera.main.GetComponent<CameraControls>().endPos = pos;
@@ -1144,7 +1149,7 @@ public class Controller : MonoBehaviour
 
             UpdateStaffJob(i, 0, 0, false);
 
-            staffObjects[i].GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+            staffObjects[i].GetComponent<SpriteRenderer>().color = staffMembers[i].GetColourByIndex(0);
 
             //try
             //{
@@ -2208,7 +2213,7 @@ public class Controller : MonoBehaviour
     {
 
         // get values here - pass some as parameters
-
+        newStatusCode = 0;
 
         popupBox.SetActive(true);
 
@@ -2549,7 +2554,11 @@ public class Controller : MonoBehaviour
         sm.SetColours(cols);
 
         staffMembers.Add(sm);
-        CreateStaff(sm, 34 + id * 3, 1);
+
+        int x = 35 + (2 * (id % 6));
+        int y = (2 * (id / 6));
+
+        CreateStaff(sm, x, y);
         Transform t = staffMembers[staffMembers.Count - 1].GetTransform();
         t.FindChild("hiddenPointer").GetComponent<SpriteRenderer>().enabled = false;
 

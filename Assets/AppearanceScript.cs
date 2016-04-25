@@ -7,7 +7,7 @@ using Assets.Classes;
 public class AppearanceScript : MonoBehaviour {
 
     public Sprite[] hairStyles;     // the images to use for hair
-
+    
     public GameObject staffMember;      // the game object for the staff member
 
     public GameObject popup;        // popup box
@@ -15,20 +15,22 @@ public class AppearanceScript : MonoBehaviour {
     public InputField txtName;        // the name textbox
 
     // the various components / body parts of the staff member
-    SpriteRenderer head;
-    SpriteRenderer hands;
-    SpriteRenderer body;
-    SpriteRenderer hair;
+    static SpriteRenderer head;
+    static SpriteRenderer hands;
+    static SpriteRenderer body;
+    static SpriteRenderer hair;
 
     // the lists of colours to use for each component
     Color[] shirtColours = new Color[6];
-    Color[] hairColours = new Color[3];
+    Color[] hairColours = new Color[4];
     Color[] skinTones = new Color[3];
-    
+
+    static AppearanceScript current;
+
     // details to pass back to other scene
     public static Sprite hairStyle;     // the sprite for hair
     public static Color[] colours = new Color[3];   // the colours chosen for each component
-    public static bool isNew = false;   // whether or not the staff member is new
+    static bool isNew = false;   // whether or not the staff member is new
 
     int newCount = 2;       // if a new game, count how many are required
 
@@ -36,6 +38,8 @@ public class AppearanceScript : MonoBehaviour {
 
     void Start()
     {
+        current = this;
+
         // get the Sprite Renderer for each component
         body = staffMember.GetComponent<SpriteRenderer>();
         SpriteRenderer[] srs = staffMember.GetComponentsInChildren<SpriteRenderer>();
@@ -59,6 +63,7 @@ public class AppearanceScript : MonoBehaviour {
         hairColours[0] = new Color(0.427f, 0.251f, 0.133f);
         hairColours[1] = new Color(1, 1, 0.580f);
         hairColours[2] = new Color(0, 0, 0);
+        hairColours[3] = new Color(1, 0.443f, 0.094f);
 
         // skin tones
         skinTones[0] = new Color(1, 0.886f, 0.808f);
@@ -84,6 +89,7 @@ public class AppearanceScript : MonoBehaviour {
             colours = col;
         }
 
+        AppearanceScript.current.Reset();
     }
 
     /// <summary>
@@ -93,7 +99,7 @@ public class AppearanceScript : MonoBehaviour {
     public void HairStyleChanged(int index)
     {
         // bald check   
-        if (index != 3)
+        if (index != 4)
         {
             hair.sprite = hairStyles[index];
         }

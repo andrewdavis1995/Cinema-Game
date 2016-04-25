@@ -196,6 +196,14 @@ public class ConfirmationScript : MonoBehaviour {
                     //// reset the states
                     //mainController.HideObjectInfo();
                     //mainController.statusCode = 0;
+                    mainController.statusCode = 99;
+                    AppearanceScript.Initialise(true, null, 1);
+                    mainController.staffModel.SetActive(true);
+                    mainController.staffAppearanceMenu.SetActive(true);
+                    theShop.gameObject.SetActive(false);
+                    Camera.main.transform.position = new Vector3(32.68f, 0, 1);
+                    Camera.main.orthographicSize = 14;
+
                     break;
                 #endregion
 

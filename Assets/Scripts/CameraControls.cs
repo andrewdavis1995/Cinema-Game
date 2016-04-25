@@ -38,7 +38,7 @@ public class CameraControls : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (mainController.statusCode < 3 && mainController.statusCode != 1 && mainController.statusCode != 10)
+        if (mainController.statusCode < 3 && mainController.statusCode != 1 && mainController.statusCode != 10 || mainController.statusCode == 6)
         {
             vertExtent = Camera.main.orthographicSize;
             horizExtent = vertExtent * Screen.width / Screen.height;

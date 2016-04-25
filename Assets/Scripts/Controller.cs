@@ -8,6 +8,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Net;
 using System.Text;
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
 public class Controller : MonoBehaviour
@@ -86,7 +87,7 @@ public class Controller : MonoBehaviour
 
     public List<Customer> allCustomers = new List<Customer>();
 
-    public int statusCode = 0;     // 0 = free, 1 = dragging staff, 2 = moving object, 3 = in menu, 4 = moving camera, 5 = shop, 6 = staff menu, 7 = staff member info, 8 = Confirmation page, 9 = popup, 10 = upgrade food area
+    public int statusCode = 99;     // 0 = free, 1 = dragging staff, 2 = moving object, 3 = in menu, 4 = moving camera, 5 = shop, 6 = staff menu, 7 = staff member info, 8 = Confirmation page, 9 = popup, 10 = upgrade food area
 
     public Color carpetColour;
 
@@ -101,7 +102,7 @@ public class Controller : MonoBehaviour
     public Transform plantPrefab;
     public Transform bustPrefab;
     public Transform vendingMachinePrefab;
-    public Transform[] staffPrefabs;
+    public Transform staffPrefab;
     public Transform foodAreaPrefab;
 
     public Text timeLabel;
@@ -151,6 +152,12 @@ public class Controller : MonoBehaviour
     List<Coordinate> ticketToFood = new List<Coordinate>();
     List<List<Coordinate>> foodToScreen = new List<List<Coordinate>>();
     List<Coordinate> exitPath = new List<Coordinate>();
+
+
+    public GameObject staffModel;
+    public GameObject staffAppearanceMenu;
+
+
 
     public int totalCoins = 40000;
     public int numPopcorn = 15;
@@ -254,7 +261,6 @@ public class Controller : MonoBehaviour
         #endregion
 
         #region Add Delegate references
-        mouseDrag.addStaff += AddStaffMember;
         mouseDrag.getStaffListSize += GetStaffSize;
         mouseDrag.getStaffJobById += GetStaffJobById;
         mouseDrag.changeStaffJob += UpdateStaffJob;
@@ -313,15 +319,18 @@ public class Controller : MonoBehaviour
 
             NextDay(false);
 
-            for (int i = 0; i < 2; i++)
-            {
-                int index = UnityEngine.Random.Range(0, 5);
+            //for (int i = 0; i < 2; i++)
+            //{
+            //    int index = UnityEngine.Random.Range(0, 5);
 
-                int x = 35 + (2 * (i % 6));
-                int y = (2 * (i / 6));
+            //    int x = 35 + (2 * (i % 6));
+            //    int y = (2 * (i / 6));
 
-                AddStaffMember(new StaffMember(i, "Andrew", staffPrefabs[index], currDay, index), x, y);
-            }
+            //    AddStaffMember(new StaffMember(i, "Andrew", staffPrefabs[index], currDay, index), x, y);
+            //}
+
+            // do staff intro thing here
+            ShowPopup(99, "Welcome!!! This is your cinema!\nLets get started by hiring some staff shall we?");
 
             foodArea = null;
 
@@ -382,7 +391,7 @@ public class Controller : MonoBehaviour
             {
                 int id = s[i].index;
                 string name = s[i].name;
-                Transform transform = staffPrefabs[s[i].transformID];
+                Transform transform = staffPrefab;
                 int dayHired = s[i].dayHired;
                 int tID = s[i].transformID;
                 int[] attributes = s[i].attributes;
@@ -394,7 +403,7 @@ public class Controller : MonoBehaviour
                 int x = 35 + (2 * (newStaff.GetIndex() % 6)); ;
                 int y = 2 * (newStaff.GetIndex() / 6);
 
-                AddStaffMember(newStaff, x, y);
+                //AddStaffMember(newStaff, x, y);
             }
 
             filmShowings = new List<FilmShowing>(data.filmShowings);
@@ -540,7 +549,7 @@ public class Controller : MonoBehaviour
         popcornLabel.text = numPopcorn.ToString();
 
         Save();
-
+        
     }
 
     public void FoodUpgradesDone()
@@ -586,6 +595,33 @@ public class Controller : MonoBehaviour
         popup.SetActive(false);
         confirmationPanel.SetActive(false);
         statusCode = newStatusCode;
+
+        if (statusCode == 99)
+        {
+            AppearanceScript.Initialise(true, null, 2);
+            #region hide people
+            // hide all staff
+            GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
+
+            for (int i = 0; i < staff.Length; i++)
+            {
+                staff[i].GetComponent<SpriteRenderer>().enabled = false;
+            }
+
+            GameObject[] builders = GameObject.FindGameObjectsWithTag("Builder");
+
+            for (int i = 0; i < builders.Length; i++)
+            {
+                builders[i].GetComponent<SpriteRenderer>().enabled = false;
+            }
+            #endregion
+
+            // change camera position
+            Camera.main.transform.position = new Vector3(32.68f, 0, 1);
+            staffAppearanceMenu.SetActive(true);
+            staffModel.SetActive(true);
+        }
+
     }
 
     public List<Coordinate> GetScreenPath(int index)
@@ -612,6 +648,9 @@ public class Controller : MonoBehaviour
 
     void CreateStaff(StaffMember staff, int xPos, int yPos)
     {
+        // get the colours to set the components to
+        Color[] colours = AppearanceScript.colours;
+
         Vector3 pos = new Vector3(xPos, yPos);
 
         Transform t = staff.GetTransform();
@@ -626,6 +665,27 @@ public class Controller : MonoBehaviour
 
         goStaff.GetComponent<mouseDrag>().staffMember.SetVector(x, y);
 
+        // colours[2] = skin
+        // colours[1] = hair
+        // colours[0] = shirt
+
+        SpriteRenderer[] components = goStaff.GetComponentsInChildren<SpriteRenderer>();
+        components[0].color = colours[0];
+        components[1].color = colours[2];
+        components[2].color = colours[2];
+        components[3].color = colours[1];
+
+        components[3].sprite = AppearanceScript.hairStyle;
+
+        GameObject[] sms = GameObject.FindGameObjectsWithTag("Staff");
+        for (int i = 0; i < sms.Length; i++)
+        {
+            sms[i].GetComponent<SpriteRenderer>().color = colours[0];
+        }
+
+
+
+        // staff menu stuff 
         GameObject go = (GameObject)Instantiate(staffInfoObject.gameObject, new Vector3(0, 0, 0), Quaternion.identity);
         go.transform.SetParent(staffList, false);
 
@@ -2162,13 +2222,7 @@ public class Controller : MonoBehaviour
         statusCode = 9;
 
     }
-
-    public void ClosePopup()
-    {
-        popupBox.SetActive(false);
-        statusCode = 0;
-    }
-
+    
     public void MoveScreen()
     {
 
@@ -2482,12 +2536,28 @@ public class Controller : MonoBehaviour
         file.Close();
     }
 
-    public void AddStaffMember(StaffMember staff, int xPos, int yPos)
+    public void AddStaffMember(String name)
     {
-        staffMembers.Add(staff);
-        CreateStaff(staff, xPos, yPos);
+        int id = staffMembers.Count;
+
+        StaffMember sm = new StaffMember(id, name, staffPrefab, currDay, 0);
+
+        Color[] cols = new Color[3];
+        cols[0] = AppearanceScript.colours[0];
+        cols[1] = AppearanceScript.colours[1];
+        cols[2] = AppearanceScript.colours[2];
+        sm.SetColours(cols);
+
+        staffMembers.Add(sm);
+        CreateStaff(sm, 34 + id * 3, 1);
         Transform t = staffMembers[staffMembers.Count - 1].GetTransform();
         t.FindChild("hiddenPointer").GetComponent<SpriteRenderer>().enabled = false;
+
+        for (int i = 0; i < staffMembers.Count; i++)
+        {
+            staffMembers[i].UniformChanged(AppearanceScript.colours[0]);
+        }
+
     }
 
     public int GetStaffSize()

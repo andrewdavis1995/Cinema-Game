@@ -21,10 +21,7 @@ public class mouseDrag : MonoBehaviour
 {
 
     public static GameObject staffAttributePanel;
-
-    public delegate void AddStaffMember(StaffMember staff, int x, int y);
-    public static event AddStaffMember addStaff;
-
+    
     public delegate int GetStaffSize();
     public static event GetStaffSize getStaffListSize;
 
@@ -41,9 +38,7 @@ public class mouseDrag : MonoBehaviour
 
     public static event getFullStaffList getStaffList;
 
-    float prevCameraZoom = 10f;
-
-    
+    float prevCameraZoom = 10f;    
 
     public float offset;
     private Animator animator;
@@ -56,8 +51,6 @@ public class mouseDrag : MonoBehaviour
 
     Controller mainController;
 
-
-
     void Start()
     {
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
@@ -66,19 +59,6 @@ public class mouseDrag : MonoBehaviour
 
         attributeImages = staffAttributePanel.GetComponentsInChildren<Image>();
         attributeTexts = staffAttributePanel.GetComponentsInChildren<Text>();
-    }
-
-    void AddToStaffList(StaffMember staff)
-    {
-
-        int x = 35 + (2 * staff.GetIndex() % 6);
-        int y = 3 * (staff.GetIndex() / 6);
-
-
-        if (addStaff != null)
-        {
-            addStaff(staff, x, y);
-        }
     }
 
     void Update()
@@ -151,6 +131,19 @@ public class mouseDrag : MonoBehaviour
         {
             dragging = true;
 
+
+            SpriteRenderer[] subImages = GetComponentsInChildren<SpriteRenderer>();
+            foreach (SpriteRenderer sr in subImages)
+            {
+                sr.sortingOrder = TileManager.floor.height + 7;
+            }
+            subImages[3].sortingOrder++;
+            subImages[0].sortingOrder--;
+            subImages[0].color = staffMember.GetColourByIndex(0);
+            subImages[1].color = staffMember.GetColourByIndex(2);
+            subImages[2].color = staffMember.GetColourByIndex(2);
+            subImages[3].color = staffMember.GetColourByIndex(1);
+
             transform.Translate(new Vector3(0, 0, 1));
 
             attributeTexts[0].text = staffMember.GetStaffname();
@@ -214,12 +207,16 @@ public class mouseDrag : MonoBehaviour
 
             Transform pi3 = transform.FindChild("hiddenPointer");
             pi3.GetComponent<SpriteRenderer>().enabled = false;
+                       
+            foreach (SpriteRenderer sr in subImages)
+            {
+                sr.sortingLayerName = "Staff";
+            }
 
             //make the image shake and grow!
-            GetComponent<SpriteRenderer>().sortingLayerName = "Staff";
             prevCameraZoom = Camera.main.orthographicSize;
             Camera.main.orthographicSize = 6.5f;
-            transform.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+            transform.GetComponent<SpriteRenderer>().color = staffMember.GetColourByIndex(0);
             transform.localScale = new Vector3(2f, 2f, 2f);
             changeStaffJob(staffMember.GetIndex(), staffMember.GetJobID(), posInPost, false);
 
@@ -241,8 +238,12 @@ public class mouseDrag : MonoBehaviour
 
     void OnMouseUp()
     {
-        GetComponent<SpriteRenderer>().sortingLayerName = "Front";
-        
+        SpriteRenderer[] subImages = GetComponentsInChildren<SpriteRenderer>();
+        foreach (SpriteRenderer sr in subImages)
+        {
+            sr.sortingLayerName = "Front";
+        }
+
         if (dragging && (mainController.statusCode == 1 || mainController.statusCode == 0 || mainController.statusCode == 6 || mainController.statusCode != 7))
         {
             staffAttributePanel.SetActive(false);
@@ -263,14 +264,13 @@ public class mouseDrag : MonoBehaviour
                 transform.position = new Vector2(xPos, 8f);
             }
             staffBounds = new Bounds(transform.position, new Vector3(1, 1, 1));
-
-            //Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            //mousePos = new Vector3(mousePos.x, mousePos.y, 0f);
-
+            
 
             this.transform.localScale = new Vector3(1, 1, 1);
             animator.SetTrigger("land");
-            
+
+            Animator handimator = GetComponentsInChildren<Animator>()[1];
+            handimator.SetTrigger("land");
 
             // check if in an invalid place - in middle of screen or object - sort layer accordingly
             GameObject hidden = CheckHiddenBehind(staffBounds, mainController.gameObjectList, mainController.screenObjectList);           
@@ -406,6 +406,8 @@ public class mouseDrag : MonoBehaviour
         {
             animator.SetTrigger("fly");
             triggerSet = true;
+            Animator handimator = GetComponentsInChildren<Animator>()[1];
+            handimator.SetTrigger("fly");
         }
 
         for (int i = 0; i < mainController.staffSlot.Count; i++)
@@ -524,7 +526,9 @@ public class mouseDrag : MonoBehaviour
         if (hidden == null)
         {
             transform.GetComponent<SpriteRenderer>().sortingOrder = TileManager.floor.height;
-            transform.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
+
+
+            //transform.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
 
             // check bounds with the walls of the screens
             CheckWallCollision();
@@ -532,8 +536,15 @@ public class mouseDrag : MonoBehaviour
         }
         else
         {
-            transform.GetComponent<SpriteRenderer>().sortingOrder = hidden.GetComponent<SpriteRenderer>().sortingOrder + 5;
-            transform.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.175f);
+            SpriteRenderer[] subImages = GetComponentsInChildren<SpriteRenderer>();
+            foreach (SpriteRenderer sr in subImages)
+            {
+                sr.sortingOrder = hidden.GetComponent<SpriteRenderer>().sortingOrder + 6;
+                sr.color = new Color(1, 1, 1, 0.175f);
+            }
+            subImages[0].sortingOrder--;
+            subImages[3].sortingOrder++;
+
 
             Transform pi3 = transform.FindChild("hiddenPointer");
             pi3.GetComponent<SpriteRenderer>().enabled = true;

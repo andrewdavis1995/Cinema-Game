@@ -20,7 +20,7 @@ public class movementScript : MonoBehaviour {
     
     public delegate int GetFoodQueueSize();
     public static event GetFoodQueueSize getQueueFoodSize;
-
+    
     Controller mainController;
 
     public static GameObject customerStatus;

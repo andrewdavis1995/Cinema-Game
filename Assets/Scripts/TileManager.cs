@@ -472,20 +472,23 @@ public class TileManager : MonoBehaviour
 
     public void ShowOutput()
     {
-        System.IO.StreamWriter file = new System.IO.StreamWriter("C:/Users/asuth/Documents/banana.txt", true);
-
-        for (int i = height - 1; i >= 0; i--)
+        try
         {
-            for (int j = 0; j < width; j++)
+            System.IO.StreamWriter file = new System.IO.StreamWriter("C:/Users/asuth/Documents/banana.txt", true);
+
+            for (int i = height - 1; i >= 0; i--)
             {
-                file.Write(floor.floorTiles[i, j].inUse + " ");
+                for (int j = 0; j < width; j++)
+                {
+                    file.Write(floor.floorTiles[i, j].inUse + " ");
+                }
+                //Debug.Log(lineOutput);
+                file.WriteLine();
             }
-            //Debug.Log(lineOutput);
-            file.WriteLine();
+
+            file.Close();
         }
-
-        file.Close();
-
+        catch (Exception) { }
     }
 
     bool mouseDown = false;

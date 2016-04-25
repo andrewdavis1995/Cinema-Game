@@ -17,10 +17,12 @@ namespace Assets.Classes
         Transform transform;    // the visual representation of the staff member
         int transformID;    // which transform they are (0 -> 4)
 
+        Color[] colours = new Color[3];     // the colours of hair, shirt and skin
+
         int[] attributes = new int[4];      // the staff member's attribute array
 
         // position vairables (for moving the camera to view the staff member)
-        float xPos = 0;     
+        float xPos = 0;
         float yPos = 0;
 
         /// <summary>
@@ -46,6 +48,24 @@ namespace Assets.Classes
         }
 
         #region Mutators
+
+        /// <summary>
+        /// Set the colours of the components
+        /// </summary>
+        /// <param name="col"></param>
+        public void SetColours(Color[] col)
+        {
+            colours = col;
+        }
+
+        /// <summary>
+        /// If the colour of the uniform is changed
+        /// </summary>
+        /// <param name="c"></param>
+        public void UniformChanged(Color c)
+        {
+            colours[0] = c;
+        }
 
         /// <summary>
         /// Set the attributes for the Staff Member
@@ -101,6 +121,11 @@ namespace Assets.Classes
             return this.transformID;
         }
 
+        public Color GetColourByIndex(int index)
+        {
+            return colours[index];
+        }
+
         public Transform GetTransform()
         {
             return transform;
@@ -146,7 +171,6 @@ namespace Assets.Classes
         {
             attributes[index]++;
         }
-
 
         
 

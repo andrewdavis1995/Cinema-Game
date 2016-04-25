@@ -16,7 +16,7 @@ public class CameraControls : MonoBehaviour
 
     GameObject[] staff;
 
-    Controller mainController;
+    public Controller mainController;
 
     float vertExtent;
     float horizExtent;
@@ -31,7 +31,6 @@ public class CameraControls : MonoBehaviour
     void Start()
     {
         staff = GameObject.FindGameObjectsWithTag("Staff");
-        mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
         endPos = transform.position;
         //minLeft = mainController.floorTiles[0, 0].transform.position.x;
     }

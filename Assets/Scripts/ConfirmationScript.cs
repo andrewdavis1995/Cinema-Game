@@ -180,22 +180,22 @@ public class ConfirmationScript : MonoBehaviour {
 
                 #region Hire new staff
                 case 2:
-                    // hire new staff
-                    int index2 = UnityEngine.Random.Range(0, 5);
+                    //// hire new staff
+                    //int index2 = UnityEngine.Random.Range(0, 5);
 
-                    // create a new staff member
-                    StaffMember sm = new StaffMember(mainController.staffMembers.Count, "New", mainController.staffPrefabs[index2], mainController.currDay, index2);
+                    //// create a new staff member
+                    //StaffMember sm = new StaffMember(mainController.staffMembers.Count, "New", mainController.staffPrefab, mainController.currDay, index2);
 
-                    // work out the staff member's position
-                    int x = 35 + 2 * (sm.GetIndex() % 6);
-                    int y = 2 * (sm.GetIndex() / 6);
+                    //// work out the staff member's position
+                    //int x = 35 + 2 * (sm.GetIndex() % 6);
+                    //int y = 2 * (sm.GetIndex() / 6);
 
-                    // add the new staff member
-                    mainController.AddStaffMember(sm, x, y);
+                    //// add the new staff member
+                    //mainController.AddStaffMember(sm, x, y);
 
-                    // reset the states
-                    mainController.HideObjectInfo();
-                    mainController.statusCode = 0;
+                    //// reset the states
+                    //mainController.HideObjectInfo();
+                    //mainController.statusCode = 0;
                     break;
                 #endregion
 

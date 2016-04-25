@@ -10,18 +10,27 @@ namespace Assets.Classes
     [Serializable]
     public class StaffMember
     {
-        int index;
-        int currentJob = 0;     // 0 = idle, 1 = tickets, 2 = food
-        int dayHired;
-        string name;
-        Transform transform;
-        int transformID;
+        int index;      // the staff member's id number
+        int currentJob = 0;     // the post where the staff member is situated (0 = unassigned, 1 = tickets, 2 = food)
+        int dayHired;       // which day they were hired on
+        string name;        // the staff member's name
+        Transform transform;    // the visual representation of the staff member
+        int transformID;    // which transform they are (0 -> 4)
 
-        int[] attributes = new int[4];
+        int[] attributes = new int[4];      // the staff member's attribute array
 
-        float xPos = 0;
+        // position vairables (for moving the camera to view the staff member)
+        float xPos = 0;     
         float yPos = 0;
 
+        /// <summary>
+        /// CONSTRUCTOR
+        /// </summary>
+        /// <param name="i">id for the staff member</param>
+        /// <param name="n">Their name</param>
+        /// <param name="t">The transform to use</param>
+        /// <param name="dH">The day they were hired</param>
+        /// <param name="tID">the id of the transform to use (which appearance)</param>
         public StaffMember(int i, string n, Transform t, int dH, int tID)
         {
             index = i;
@@ -36,31 +45,79 @@ namespace Assets.Classes
 
         }
 
+        #region Mutators
+
+        /// <summary>
+        /// Set the attributes for the Staff Member
+        /// </summary>
+        /// <param name="att">The attriubte array ([0] = Tickets, [1] = Food, [2] = Friendliness, [3] = Clarity</param>
         public void SetAttributes(int[] att)
         {
             attributes = att;
         }
 
+        /// <summary>
+        /// Update the staff member's name
+        /// </summary>
+        /// <param name="newName">The new name for the staff member</param>
+        public void UpdateName(string newName)
+        {
+            this.name = newName;
+        }
+
+        /// <summary>
+        /// Set the tranform element
+        /// </summary>
+        /// <param name="t">The transform to use</param>
         public void SetTransform(Transform t)
         {
             transform = t;
         }
 
+        /// <summary>
+        /// Set the job for the staff member
+        /// </summary>
+        /// <param name="jobID"></param>
+        public void SetJob(int jobID)
+        {
+            currentJob = jobID;
+        }
+
+        /// <summary>
+        /// set the position vector of the staff member
+        /// </summary>
+        /// <param name="x">X position</param>
+        /// <param name="y">Y position</param>
+        public void SetVector(float x, float y)
+        {
+            this.xPos = x; this.yPos = y;
+        }
+
+        #endregion
+
+        #region Accessors
         public int GetTransformID()
         {
             return this.transformID;
         }
 
-        public void Upgrade(int index)
+        public Transform GetTransform()
         {
-            attributes[index]++;
+            return transform;
         }
 
-        public int[] GetAttributes()
+        public int GetIndex() { return this.index; }
+
+        public int GetJobID()
         {
-            return attributes;
+            return currentJob;
         }
 
+        public string GetStaffname()
+        {
+            return name;
+        }
+        
         public int GetAttributeByIndex(int index)
         {
             return this.attributes[index];
@@ -71,35 +128,27 @@ namespace Assets.Classes
             return this.dayHired;
         }
 
-        public Vector3 GetVector() { return new Vector3(xPos, yPos, 0); }
-        public void SetVector(float x, float y) { this.xPos = x; this.yPos = y; }
-
-        public string GetStaffname()
-        {
-            return name;
+        public Vector3 GetVector() {
+            return new Vector3(xPos, yPos, 0);
         }
 
-        public void UpdateName(string newName)
+        public int[] GetAttributes()
         {
-            this.name = newName;
+            return attributes;
+        }
+        #endregion
+
+        /// <summary>
+        /// Upgrade one of the attributes
+        /// </summary>
+        /// <param name="index">The index of which attribute to upgrade (0 = Tickets, 1 = Food, 2 = Friendliness, 3 = Clarity)</param>
+        public void Upgrade(int index)
+        {
+            attributes[index]++;
         }
 
-        public Transform GetTransform()
-        {
-            return transform;
-        }
-       
-        public int GetIndex() { return this.index; }
 
-        public void SetJob(int jobID)
-        {
-            currentJob = jobID;
-        }
-        public int GetJobID()
-        {
-            return currentJob;
-        }
-       
+        
 
     }
 }

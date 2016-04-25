@@ -351,6 +351,12 @@ public class Customer
     public void TicketsDone() {
         this.needsTickets = false;
 
+        if (needsFood && mainController.foodQueue.GetQueueSize() > 10)
+        {
+            needsFood = false;
+            foodDesired = -1;
+        }
+
         if (!needsFood)
         {
             goingToSeats = true;

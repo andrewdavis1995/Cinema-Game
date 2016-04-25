@@ -5,40 +5,45 @@ using System.Threading;
 using UnityEngine.EventSystems;
 
 public class Screen_Script : MonoBehaviour {
-
-    Transform transform;
-
+    
     public ScreenObject theScreen;
     
-    public delegate void ShowBuildingOptions(string screen, string upgrade, Sprite s, int constrDone, int constrTotal);
+    public delegate void ShowBuildingOptions(string screen, string upgrade, Sprite s, int constrDone, int constrTotal);     // delegate call back to Controller
     public static event ShowBuildingOptions showBuildingMenu;
 
-    Controller theController;
+    Controller theController;       // the instance of Controller to use
 
     // Use this for initialization
     void Start ()
     {
+        // set the Controller up
         theController = GameObject.Find("Central Controller").GetComponent<Controller>();
-        transform = GameObject.Find(gameObject.name).GetComponent<Transform>();
-    }
-    
+    }    
 
+    /// <summary>
+    /// When the user clicks on the screen game object
+    /// </summary>
     void OnMouseDown()
     {
+        // if the object is enabled, the status code = 0, the Business Day is not running and there is not a UI element overlapping the object, the show the menu
         if (GetComponent<Renderer>().enabled && theController.statusCode == 0 && !theController.simulationRunning && !EventSystem.current.IsPointerOverGameObject())
         {
             ShowMenu();
         }
     }
-
-    
+        
+    /// <summary>
+    /// Show the object info menu
+    /// </summary>
     void ShowMenu()
     {
+        // if the delegate is not null
         if (showBuildingMenu != null)
         {
             string screenNum = "Screen " + theScreen.GetScreenNumber();
             string level;
 
+            // get the right message - depending on whether or not construction is taking place
             if (!theScreen.ConstructionInProgress())
             {
                 level = "Level " + theScreen.GetUpgradeLevel();
@@ -48,19 +53,24 @@ public class Screen_Script : MonoBehaviour {
                 level = "(Level " + (theScreen.GetUpgradeLevel() - 1) + " >>> Level " + theScreen.GetUpgradeLevel() + ")";
             }
 
+            // get the sprite of the object
             Sprite s = transform.GetComponent<SpriteRenderer>().sprite;
 
             // calculate days done / needed
             int done = -1;
             int total = -1;
 
+            // if construction is in progress, calculate how many days it will take and how many have been done
             if (theScreen.ConstructionInProgress())
             {
                 total = GetUpgradeTime(theScreen.GetUpgradeLevel());
                 done = total - theScreen.GetDaysOfConstruction();
             }
 
+            // show the menu
             showBuildingMenu(screenNum, level, s, done, total);
+
+            // reset status variables
             theController.statusCode = 3;
             theController.objectSelected = name;
             theController.tagSelected = tag;
@@ -68,8 +78,14 @@ public class Screen_Script : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Get the number of days that construction of the Screen will take
+    /// </summary>
+    /// <param name="level">The upgrade level of the screen</param>
+    /// <returns>The number of days that construction will take</returns>
     public int GetUpgradeTime(int level)
     {
+        // get the number of days, based on the level
         if (level == 1)
         {
             return 3;

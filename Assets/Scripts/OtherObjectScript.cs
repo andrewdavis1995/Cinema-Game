@@ -4,33 +4,37 @@ using UnityEngine.EventSystems;
 
 public class OtherObjectScript : MonoBehaviour {
 
-    static Controller mainController;
-    public delegate void ShowBuildingOptions(string screen, string upgrade, Sprite s, int constrDone, int constrTotal);
+    static Controller mainController;       // the instance of Controller to use
+    public delegate void ShowBuildingOptions(string screen, string upgrade, Sprite s, int constrDone, int constrTotal); //      delegate call back to Controller
     public static event ShowBuildingOptions showBuildingMenu;
-    Transform transform;
 
     // Use this for initialization
     void Start () {
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
-        transform = GameObject.Find(gameObject.name).GetComponent<Transform>(); 
     }
 	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
+    /// <summary>
+    /// Create a new Slot to drag staff members into
+    /// </summary>
+    /// <param name="type">The id for which type of slot to make (1 = Ticket, 2 = Food)</param>
+    /// <param name="pos">A vector of the position in which to place the slot</param>
     public static void CreateStaffSlot(int type, Vector3 pos)
     {
+        // instantiate a new slot and name/tag/disable it
         mainController.staffSlot.Add(Instantiate(mainController.slotPrefab, pos, Quaternion.identity) as Transform);
         mainController.staffSlot[mainController.staffSlot.Count - 1].GetComponent<SpriteRenderer>().enabled = false;
         mainController.staffSlot[mainController.staffSlot.Count - 1].name = "StaffSlot" + (mainController.staffSlot.Count - 1);
         mainController.staffSlot[mainController.staffSlot.Count - 1].tag = "Slot Type " + type;
+        // initialise the slot to not be in use
         mainController.slotState.Add(false);
     }
 
+    /// <summary>
+    /// Upgrades the box office - add 1 staff slot and update image
+    /// </summary>
     public static void UpgradeBoxOffice()
     {
+        // get all the slots of type ticket
         GameObject[] ticketSlots = GameObject.FindGameObjectsWithTag("Slot Type 1");
         int numSlots = ticketSlots.Length;
         
@@ -51,16 +55,25 @@ public class OtherObjectScript : MonoBehaviour {
 
     }
 
+    /// <summary>
+    /// When the user clicks on the Object
+    /// </summary>
     void OnMouseDown()
     {
+        // if the object is enabled, the status code = 0, the Business Day is not running and there is not a UI element overlapping the object, the show the menu
         if (GetComponent<Renderer>().enabled && mainController.statusCode == 0 && !mainController.simulationRunning && !EventSystem.current.IsPointerOverGameObject())
         {
             ShowMenu();
         }
     }
 
+    /// <summary>
+    /// Show the object info menu
+    /// </summary>
     void ShowMenu()
     {
+        #region Get Message
+        // based on the tag of the object, get the relevant message to display
         string message = "No purpose";
         if (tag.Equals("Bust of Game Creator"))
         {
@@ -74,12 +87,20 @@ public class OtherObjectScript : MonoBehaviour {
         {
             message = "";
         }
+        #endregion
 
+        // if the delegate has been initialised...
         if (showBuildingMenu != null)
         {
+            // get the object sprite
             Sprite s = transform.GetComponent<SpriteRenderer>().sprite;
 
+            // TODO: if box office or food court, change the sprite
+
+            //call the delegate
             showBuildingMenu(tag, message, s, -1, -1);
+
+            // reset the status variables
             mainController.statusCode = 3;
             mainController.objectSelected = name;
             mainController.tagSelected = tag;

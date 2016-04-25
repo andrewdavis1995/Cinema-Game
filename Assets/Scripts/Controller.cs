@@ -6,6 +6,8 @@ using UnityEngine.UI;
 using Assets.Classes;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+using System.Net;
+using System.Text;
 
 [System.Serializable]
 public class Controller : MonoBehaviour
@@ -699,8 +701,7 @@ public class Controller : MonoBehaviour
         Camera.main.orthographicSize = 5f;
         Vector3 pos = staffMembers[staffID].GetVector();
         pos.z = -10;
-
-        //Camera.main.transform.position = (pos);
+        
         Camera.main.GetComponent<CameraControls>().endPos = pos;
     }
 
@@ -745,7 +746,7 @@ public class Controller : MonoBehaviour
             int width = GetWidthOfObject();
             int height = GetHeightOfObject();
 
-            if (objectSelected.Contains("Screen") && yPos == 1)
+            if (objectSelected.Contains("Screen"))
             {
                 yPos -= 1;
             }
@@ -1052,7 +1053,13 @@ public class Controller : MonoBehaviour
         carpetColour = GetColourFromID(id);
         Sprite[] s = GetSpriteFromID(id);
 
-        //carpetRoll.GetComponent<SpriteRenderer>().color = carpetColour;
+        // check if the script is already running
+        if (CarpetRollScript.shouldRun)
+        {
+            // if so, finish the current placement
+            CarpetRollScript.current.FinishPlacement();
+        }
+
         CarpetRollScript.current.Begin(carpetColour, this, s);
     }
 
@@ -1089,10 +1096,9 @@ public class Controller : MonoBehaviour
 
         }
     }
-
+    
     public void StartDay()
     {
-
         // check if any screens available
         bool screensAvailable = false;
 

@@ -3,23 +3,30 @@ using System.Collections;
 
 public class FoodAreaScript : MonoBehaviour {
 
-    public int index;
-    static Controller mainController;
+    public int index;       // which component the script represents (0 = hot food, 1 = popcorn, 2 = ice-cream, -1 = unassigned)
+    static Controller mainController;       // the Controller instance to read from
 
-
+    // called once at startup
     void Start()
     {
+        // find and set the controller
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
     }
 
+    /// <summary>
+    /// When the user clicks on one of the components
+    /// </summary>
     public void OnMouseDown()
     {
+        // if the status code is 10 - i.e. in the Upgrade menu
         if (mainController.statusCode == 10)
         {
             bool unlocked = false;
             string component = "";
             int cost = 0;
 
+            // get the necessary values based on which component was selected
+            #region Get values
             if (index == 0)
             {
                 unlocked = Controller.foodArea.hasHotFood;
@@ -44,11 +51,14 @@ public class FoodAreaScript : MonoBehaviour {
                 component = "Bigger Table";
                 cost = 5000;
             }
+            #endregion
 
+            // if the item has already been unlocked, tell the user
             if (unlocked)
             {
                 mainController.ShowPopup(10, "You already purchased the " + component + " Component!");
             }
+            // otherwise, ask them to confirm their purchase
             else
             {
                 mainController.newStatusCode = 10;
@@ -58,13 +68,17 @@ public class FoodAreaScript : MonoBehaviour {
 
     }
 
+    /// <summary>
+    /// When the user chooses to unlock a new component or upgrade the table
+    /// </summary>
+    /// <param name="index">The index of the item to be unlocked (0 = hot food, 1 = popcorn, 2 = ice-cream)</param>
     public static void ComponentUnlocked(int index)
     {
-        // hide all locked components
+        // find all the sub-images of Food Area
         SpriteRenderer[] subImages = GameObject.FindGameObjectWithTag("Food Area").GetComponentsInChildren<SpriteRenderer>();
 
-
-        // update boolean
+        // based on the index selected, update the status of each component and change the color of the image
+        #region Set Variables and Images       
         if (index == 0)
         {
             Controller.foodArea.hasHotFood = true;
@@ -82,18 +96,20 @@ public class FoodAreaScript : MonoBehaviour {
         }
         else if (index == 3)
         {
+            // update the table state
             Controller.foodArea.tableStatus = 1;
             subImages[4].color = new Color(1, 1, 1, 1);
-
+            
+            // create a new staff slot, in a position relative to the Food area
             Transform t = GameObject.FindGameObjectWithTag("Food Area").transform;
-
             OtherObjectScript.CreateStaffSlot(2, t.position + new Vector3(5.5f, 7.95f, 0));
 
+            // add an extra serving slot to the queue
             mainController.foodQueue.Upgrade();
 
         }
+        #endregion
 
         mainController.NewShowTimes();
-
     }
 }

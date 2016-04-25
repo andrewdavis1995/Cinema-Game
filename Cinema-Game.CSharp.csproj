@@ -13,13 +13,11 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile>
-    </CompilerResponseFile>
+    <CompilerResponseFile></CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>iOS:9</UnityBuildTarget>
     <UnityVersion>5.3.4f1</UnityVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <LangVersion Condition=" '$(VisualStudioVersion)' != '10.0' ">4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -71,18 +69,25 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\AppearanceScript.cs" />
+    <Compile Include="Assets\Classes\CalcStuff.cs" />
     <Compile Include="Assets\Classes\Coordinate.cs" />
     <Compile Include="Assets\Classes\Customer.cs" />
     <Compile Include="Assets\Classes\CustomerQueue.cs" />
     <Compile Include="Assets\Classes\FilmShowing.cs" />
+    <Compile Include="Assets\Classes\Fixture.cs" />
     <Compile Include="Assets\Classes\Floor.cs" />
     <Compile Include="Assets\Classes\FloorTile.cs" />
     <Compile Include="Assets\Classes\FoodArea.cs" />
+    <Compile Include="Assets\Classes\Form1.cs" />
     <Compile Include="Assets\Classes\Node.cs" />
+    <Compile Include="Assets\Classes\Odds.cs" />
     <Compile Include="Assets\Classes\Reputation.cs" />
+    <Compile Include="Assets\Classes\Result.cs" />
     <Compile Include="Assets\Classes\SaveableStaff.cs" />
     <Compile Include="Assets\Classes\ScreenObject.cs" />
     <Compile Include="Assets\Classes\StaffMember.cs" />
+    <Compile Include="Assets\Classes\Team.cs" />
     <Compile Include="Assets\Classes\TimeTuple.cs" />
     <Compile Include="Assets\FBScript.cs" />
     <Compile Include="Assets\FacebookSDK\Examples\Scripts\ConsoleBase.cs" />
@@ -178,12 +183,13 @@
     <Compile Include="Assets\FacebookSDK\SDK\Scripts\Utils\IFacebookLogger.cs" />
     <Compile Include="Assets\FacebookSDK\SDK\Scripts\Utils\MiniJson.cs" />
     <Compile Include="Assets\FacebookSDK\SDK\Scripts\Utils\Utilities.cs" />
-    <Compile Include="Assets\Scripts\FoodAreaScript.cs" />
+    <Compile Include="Assets\Runner.cs" />
     <Compile Include="Assets\Scripts\ButtonScript.cs" />
     <Compile Include="Assets\Scripts\CameraControls.cs" />
     <Compile Include="Assets\Scripts\CarpetRollScript.cs" />
     <Compile Include="Assets\Scripts\ConfirmationScript.cs" />
     <Compile Include="Assets\Scripts\Controller.cs" />
+    <Compile Include="Assets\Scripts\FoodAreaScript.cs" />
     <Compile Include="Assets\Scripts\ObjectPool.cs" />
     <Compile Include="Assets\Scripts\OtherObjectScript.cs" />
     <Compile Include="Assets\Scripts\ProjectorScript.cs" />

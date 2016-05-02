@@ -38,23 +38,31 @@ public class QuestionScript : MonoBehaviour
     {
         if (!isButton) {
             // if the loop should run...
-            if (runGeneration && sm.GetClicksRemaining() < 1)
+            if (runGeneration)
             {
-                // get how many days they have worked for 
-                // (the longer they have worked, the less likely they are to have questions)
-                int daysWorked = dayNum - sm.GetStartDay();
-
-                // get an upper bound based on the number of days worked
-                int upperRange = GetQuestionFrequency(daysWorked);
-
-                // generate a random number from 0 to upper bound
-                int randomValue = UnityEngine.Random.Range(0, upperRange);
-
-                // if that number is 0, break the screen
-                if (randomValue == 0)
+                // if there isn't already a question for the that staff member
+                if (sm.GetClicksRemaining() < 1)
                 {
-                    sm.QuestionRaised();
-                    CreateNew();
+                    // get how many days they have worked for 
+                    // (the longer they have worked, the less likely they are to have questions)
+                    int daysWorked = dayNum - sm.GetStartDay();
+
+                    // get an upper bound based on the number of days worked
+                    int upperRange = GetQuestionFrequency(daysWorked);
+
+                    // generate a random number from 0 to upper bound
+                    int randomValue = UnityEngine.Random.Range(0, upperRange);
+
+                    // if that number is 0, break the screen
+                    if (randomValue == 0)
+                    {
+                        sm.QuestionRaised();
+                        CreateNew();
+                    }
+                }
+                else
+                {
+                    sm.UpdateCount();
                 }
             }
         }

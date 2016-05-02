@@ -1470,6 +1470,20 @@ public class Controller : MonoBehaviour
     public void NextDay(bool shouldCollect)
     {
         // update the reputation fields
+
+        int questionCount = 0;
+
+        for (int i = 0; i < staffMembers.Count; i++)
+        {
+            questionCount += staffMembers[i].GetQuestionCount() / 100;
+        }
+
+
+        // use questions to effect staff
+
+        // do the same for projectors and facilities
+
+        reputation.SetStaffQuestionSpeed(questionCount);
         reputation.SetFacilities(theScreens, hasUnlockedRedCarpet, foodArea);
         reputation.SetPublicityRating(postersUnlocked);
         reputation.SetStaffRating(staffMembers);

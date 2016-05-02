@@ -21,6 +21,8 @@ namespace Assets.Classes
         Sprite hairStyle;   // which type of hair they have
         Sprite extras;   // which extras option has been selected
 
+        int currQuestionCount = 0;      // how long (in total for the current day) the staff member has been waiting for an answer to the question
+
         int questionClicksRemaining = 0;        // how many times the question bubble needs to be clicked before it is resolved
 
         int hairID;
@@ -65,6 +67,22 @@ namespace Assets.Classes
             colours = col;
             hairID = hID;
             extrasID = eID;
+        }
+
+        /// <summary>
+        /// Updates the count of how long the question has been active for
+        /// </summary>
+        public void UpdateCount()
+        {
+            currQuestionCount++;
+        }
+
+        /// <summary>
+        /// Resets the question count to 0
+        /// </summary>
+        public void ResetQuestionCount()
+        {
+            currQuestionCount = 0;
         }
 
         /// <summary>
@@ -195,6 +213,11 @@ namespace Assets.Classes
         {
             return extras;
 
+        }
+
+        public int GetQuestionCount()
+        {
+            return currQuestionCount;
         }
 
         public Transform GetTransform()

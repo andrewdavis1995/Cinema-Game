@@ -87,5 +87,20 @@ public class ButtonScript : MonoBehaviour {
         return null;
     }
     
+    /// <summary>
+    ///  go back to the main menu
+    /// </summary>
+    public void BackToMenu()
+    {
+        SceneManager.LoadScene(0);
+    }     
+    
+    /// <summary>
+    ///  view the rules page
+    /// </summary>
+    public void GoToRules()
+    {
+        SceneManager.LoadScene(3);
+    }
 }
 

@@ -15,7 +15,9 @@ public class ScreenObject
     int constructionTimeRemaining = 0;      // how many days are left in the construction process
 
     int projectorClicksRemaining = 0;       // how many times the projector needs to be clicked in order to be fixed
-
+    
+    int currBrokenCount = 0;      // how long (in total for the current day) the projector has been broken for
+    
     // position variables
     int pointX = 0;
     int pointY = 0;

@@ -8,8 +8,19 @@ public class FBScript : MonoBehaviour {
 
     //public Text txtUsername;
     //public Image picProfilePic;
-    string username;
-    
+    string firstname;
+    string surname;
+    string id;
+
+    public Button newGame;
+    public Button loadGame;
+
+    public GameObject facebookPanel;
+    public GameObject loggedInPanel;
+
+    public Text txtLoggedInAs;
+
+
     // Use this for initialization
     void Awake()
     {
@@ -42,8 +53,12 @@ public class FBScript : MonoBehaviour {
 
     public void FBLogin()
     {
+        newGame.enabled = false;
+        loadGame.enabled = false;
+
         List<string> permissions = new List<string>();
         permissions.Add("public_profile");
+        permissions.Add("user_friends");
 
         FB.LogInWithReadPermissions(permissions, AuthCallBack);
     }
@@ -77,11 +92,21 @@ public class FBScript : MonoBehaviour {
     {
         appLink = result.Url;
     }
-
+    
     void DisplayUsername(IResult result)
     {
-        username = result.ResultDictionary["first_name"].ToString();
+        firstname = result.ResultDictionary["first_name"].ToString();
+        surname = result.ResultDictionary["last_name"].ToString();
+        id = result.ResultDictionary["id"].ToString();
         //txtUsername.text = "Welcome back " + result.ResultDictionary["first_name"].ToString() + " " + result.ResultDictionary["last_name"].ToString();
+
+        if (firstname != null && !firstname.Equals(""))
+        {
+            txtLoggedInAs.text = "Logged In as: " + firstname + " " + surname;
+            loggedInPanel.SetActive(true);
+            facebookPanel.SetActive(false);
+        }
+
     }
 
     //void DisplayProfilePic(IGraphResult result)
@@ -89,14 +114,20 @@ public class FBScript : MonoBehaviour {
     //    picProfilePic.sprite = Sprite.Create(result.Texture, new Rect(0, 0, 128, 128), new Vector2());
     //    Controller.profilePicture = Sprite.Create(result.Texture, new Rect(0, 0, 128, 128), new Vector2());
     //}
-
-
+    
     public void InviteFriends()
     {
         FB.Mobile.AppInvite(
             new System.Uri(appLink));
     }
 
+    public void Logout()
+    {
+        firstname = "";
+        id = "";
+        facebookPanel.SetActive(true);
+        loggedInPanel.SetActive(false);
+    }
 
 }
 

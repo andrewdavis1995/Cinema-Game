@@ -18,6 +18,8 @@ namespace Assets.Classes
         int numCustomersServed; // how many customers were served
         int highestReputation;  // the max that the reputation has been
         int totalCoinIncome;    // how many coins have been earnt in total - does not include expenditure
+        int totalQuestionCount = 0;     // the amount of time a question has been open for
+        int currDay = 0;        // the current day
 
 
         /// <summary>
@@ -110,6 +112,8 @@ namespace Assets.Classes
         }
         public void SetStaffRating(List<StaffMember> sl)
         {
+            currDay++;
+
             int rating = 0;
 
             int temp = 0;
@@ -122,11 +126,27 @@ namespace Assets.Classes
                 temp = temp / 2;
                 rating += temp;
             }
+            
+            int maxExpected = currDay * 25;
+
+            float waitTimePerDay = totalQuestionCount / maxExpected;
+
+            int toMinus = (int)Math.Round(waitTimePerDay, 0) * 2;
+
+            rating -= toMinus;    
 
             if (rating > 25) { rating = 25; }
+            if (rating < 0) { rating = 0; }
 
             staff = rating;
 
+        }
+
+
+
+        public void SetStaffQuestionSpeed(int speed)
+        {
+            totalQuestionCount += speed;
         }
 
         public void Walkout()

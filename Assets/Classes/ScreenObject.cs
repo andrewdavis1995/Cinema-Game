@@ -105,9 +105,9 @@ public class ScreenObject
     /// If the projector has broken
     /// </summary>
     public void ProjectorBroke()
-    {
+    {        
         // add to the number of clicks that are required to fix it
-        projectorClicksRemaining = 20 * (int)Math.Round(0.5 * upgradeLevel, 0);
+        projectorClicksRemaining = 10 + (8 * upgradeLevel);
     }
 
     /// <summary>

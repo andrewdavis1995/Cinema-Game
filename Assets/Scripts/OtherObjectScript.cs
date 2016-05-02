@@ -75,7 +75,7 @@ public class OtherObjectScript : MonoBehaviour {
         #region Get Message
         // based on the tag of the object, get the relevant message to display
         string message = "No purpose";
-        if (tag.Equals("Bust of Game Creator"))
+        if (tag.Equals("Bust"))
         {
             message = "Thanks for playing!";
         }

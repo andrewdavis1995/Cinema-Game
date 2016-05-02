@@ -6,9 +6,9 @@ public class ProjectorScript : MonoBehaviour
 {
     public Controller mainController;   // the instance of Controller to use
     public Transform projector;     // the prefab of the projector icon (clickable)
-    public bool runGeneration;      // whether or not the generation / creation loop should run
     public static int numVisible = 0;   // how many projectors are visible
-    
+    public bool runGeneration;
+
     /// <summary>
     /// Run the loop
     /// </summary>
@@ -39,8 +39,8 @@ public class ProjectorScript : MonoBehaviour
                     if (randomValue == 0)
                     {
                         // create a new projector icon to click
-                        CreateNew(i);
                         Controller.theScreens[i].ProjectorBroke();
+                        CreateNew(i);
                     }
                 }
             }
@@ -101,6 +101,13 @@ public class ProjectorScript : MonoBehaviour
 
         // get the current clicks remaining for the associated screen
         int prevClicks = Controller.theScreens[id - 1].GetClicksRemaining();
+
+
+
+        Debug.Log(prevClicks);
+
+
+
 
         // update the clicks
         int remaining = Controller.theScreens[id - 1].ProjectorClicked();

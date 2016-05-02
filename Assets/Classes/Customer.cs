@@ -16,6 +16,7 @@ public class Customer
     public float servingPositionX = 0;
     public float servingPositionY = 0;
     public int servingSlot = -1;
+    public int queueDoneWith = -1;
     public bool walkingAway = false;
     public bool leaving;
     public bool hasLeftTheBuilding = false;

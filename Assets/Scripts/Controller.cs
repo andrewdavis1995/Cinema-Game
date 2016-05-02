@@ -20,6 +20,7 @@ public class Controller : MonoBehaviour
     public int customersServed = 0;
     public int customerMoney = 0;
 
+    public bool[] postersUnlocked = new bool[2];
 
     public GameObject confirmBtn;
 
@@ -37,9 +38,8 @@ public class Controller : MonoBehaviour
     public Sprite[] foodTableSprites;
 
     public Sprite completeFoodAreaSprite;
-
-    public GameObject picProfile;
-    public static Sprite profilePicture;
+    
+    //public static Sprite profilePicture;
 
     public List<Transform> staffSlot = new List<Transform>();
     public List<bool> slotState = new List<bool>();
@@ -135,10 +135,8 @@ public class Controller : MonoBehaviour
     const int height = 40;
 
     public GameObject[,] floorTiles;
-
-    //List<GameObject> customerObjects = new List<GameObject>();
-
-    public CustomerQueue ticketQueue = new CustomerQueue(11, 38.5f, 6.8f, "Ticket");
+    
+    public CustomerQueue ticketQueue = new CustomerQueue(11, 38.5f, 6.8f, 0);
     public CustomerQueue foodQueue;
 
     public bool simulationRunning = false;
@@ -146,19 +144,15 @@ public class Controller : MonoBehaviour
     public GameObject warningPanel;
     public Image warningIcon;
     public Text warningLabel;
-
-
+    
     List<List<Coordinate>> ticketToScreen = new List<List<Coordinate>>();
     List<Coordinate> ticketToFood = new List<Coordinate>();
     List<List<Coordinate>> foodToScreen = new List<List<Coordinate>>();
     List<Coordinate> exitPath = new List<Coordinate>();
-
-
+    
     public GameObject staffModel;
     public GameObject staffAppearanceMenu;
-
-
-
+    
     public int totalCoins = 40000;
     public int numPopcorn = 15;
 
@@ -187,7 +181,6 @@ public class Controller : MonoBehaviour
 
     public bool paused = false;
 
-
     void OnApplicationQuit()
     {
         // close off all open threads - memory issues
@@ -214,9 +207,8 @@ public class Controller : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        picProfile.GetComponent<SpriteRenderer>().sprite = profilePicture;
-
-
+        postersUnlocked = new bool[2];
+        
         #region Find Objects
         theTileManager = GameObject.Find("TileManagement").GetComponent<TileManager>();
         confirmPanel = GameObject.Find("pnlConfirm");
@@ -318,17 +310,7 @@ public class Controller : MonoBehaviour
             // NYAH
 
             NextDay(false);
-
-            //for (int i = 0; i < 2; i++)
-            //{
-            //    int index = UnityEngine.Random.Range(0, 5);
-
-            //    int x = 35 + (2 * (i % 6));
-            //    int y = (2 * (i / 6));
-
-            //    AddStaffMember(new StaffMember(i, "Andrew", staffPrefabs[index], currDay, index), x, y);
-            //}
-
+            
             // do staff intro thing here
             ShowPopup(99, "Welcome!!! This is your cinema!\nLets get started by hiring some staff shall we?");
 
@@ -337,6 +319,8 @@ public class Controller : MonoBehaviour
         }
         else
         {
+            statusCode = 0;
+
             PlayerData data = ButtonScript.loadGame;
 
             carpetColour = new Color(data.carpetColour[0], data.carpetColour[1], data.carpetColour[2]);
@@ -351,6 +335,7 @@ public class Controller : MonoBehaviour
             isMarbleFloor = data.marbleFloor;
             reputation = data.reputation;
             foodArea = data.foodArea;
+            postersUnlocked = data.posters;
 
             int boxLevel = data.boxOfficeLevel;
             OtherObjectScript.CreateStaffSlot(1, new Vector3(37.8f, 12.3f, 0));
@@ -385,6 +370,8 @@ public class Controller : MonoBehaviour
             #endregion
 
             theScreens = new List<ScreenObject>(data.theScreens);
+
+
             SaveableStaff[] s = data.staffMembers;
 
             for (int i = 0; i < s.Length; i++)
@@ -395,15 +382,43 @@ public class Controller : MonoBehaviour
                 int dayHired = s[i].dayHired;
                 int tID = s[i].transformID;
                 int[] attributes = s[i].attributes;
+                float[,] cols = s[i].colourArrays;
+                int hair = s[i].hairStyleID;
+                int extras = s[i].extrasID;
 
-                StaffMember newStaff = new StaffMember(id, name, transform, dayHired, tID);
 
+                GameObject go = GameObject.Find("AppearanceController");
+                AppearanceScript aS = go.GetComponent<AppearanceScript>();
+
+                Sprite hairSprite = null;
+                Sprite extraSprite = null;
+
+                if (hair != 6)
+                {
+                    hairSprite = aS.hairStyles[hair];
+                }
+                if (extras != 3)
+                {
+                    extraSprite = aS.extraImages[extras];
+                }
+                Color[] c = new Color[3];
+
+                for (int colID = 0; colID < 3; colID++)
+                {
+                    c[colID] = new Color(cols[colID, 0], cols[colID, 1], cols[colID, 2]);
+                }
+
+                // TODO: set colours and hair style
+                StaffMember newStaff = new StaffMember(id, name, transform, dayHired, tID, hairSprite);
+                newStaff.SetColours(c, hair, extras);
+                newStaff.SetSprites(hairSprite, extraSprite);
                 newStaff.SetAttributes(attributes);
 
                 int x = 35 + (2 * (newStaff.GetIndex() % 6)); ;
                 int y = 2 * (newStaff.GetIndex() / 6);
 
-                //AddStaffMember(newStaff, x, y);
+                staffMembers.Add(newStaff);
+                CreateStaff(newStaff, x, y);
             }
 
             filmShowings = new List<FilmShowing>(data.filmShowings);
@@ -418,11 +433,56 @@ public class Controller : MonoBehaviour
             currDay--; // needed for some reason
 
 
-            // hopefully un-fucks things
+            // hopefully un-breaks things
             for (int i = 0; i < theScreens.Count; i++)
             {
                 Vector3 pos = new Vector3(theScreens[i].GetX(), theScreens[i].GetY(), 0);
                 theScreens[i].SetPosition((int)pos.x, (int)(pos.y));
+            }
+
+
+            // sort staff appearance
+            GameObject[] staffs = GameObject.FindGameObjectsWithTag("Staff");
+            for (int i = 0; i < staffs.Length; i++)
+            {
+                SpriteRenderer[] srs = staffs[i].GetComponentsInChildren<SpriteRenderer>();
+                srs[0].color = staffMembers[i].GetColourByIndex(0);
+                srs[1].color = staffMembers[i].GetColourByIndex(2);
+                srs[2].color = staffMembers[i].GetColourByIndex(2);
+                srs[3].color = staffMembers[i].GetColourByIndex(1);
+                srs[4].color = staffMembers[i].GetColourByIndex(1);
+
+                srs[3].sprite = staffMembers[i].GetHairStyle();
+                srs[4].sprite = staffMembers[i].GetExtras();
+            }
+
+            // show relevant posters
+            if (postersUnlocked[0])
+            {
+                GameObject[] allPosters = GameObject.FindGameObjectsWithTag("Poster");
+
+                for (int i = 0; i < allPosters.Length; i++)
+                {
+                    if (i % 2 == 0)
+                    {
+                        SpriteRenderer sr = allPosters[i].GetComponent<SpriteRenderer>();
+                        sr.enabled = true;
+                    }
+                }
+            }
+
+            if (postersUnlocked[1])
+            {
+                GameObject[] allPosters = GameObject.FindGameObjectsWithTag("Poster");
+
+                for (int i = 0; i < allPosters.Length; i++)
+                {
+                    if (i % 2 == 1)
+                    {
+                        SpriteRenderer sr = allPosters[i].GetComponent<SpriteRenderer>();
+                        sr.enabled = true;
+                    }
+                }
             }
 
         }
@@ -490,7 +550,7 @@ public class Controller : MonoBehaviour
                 //xCorrection = 0.65f;
                 //yCorrection = 1.5f;
                 w = 2; h = 2;
-                tag = "Bust of Game Creator";
+                tag = "Bust";
             }
             else if (itemToAddID == 5)
             {
@@ -601,24 +661,10 @@ public class Controller : MonoBehaviour
 
         if (statusCode == 99)
         {
-            AppearanceScript.Initialise(true, null, 2);
-            #region hide people
+            AppearanceScript.Initialise(true, null, 2, new Color(1,1,1,1), -1, null, "", null);
             // hide all staff
             GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
-
-            for (int i = 0; i < staff.Length; i++)
-            {
-                staff[i].GetComponent<SpriteRenderer>().enabled = false;
-            }
-
-            GameObject[] builders = GameObject.FindGameObjectsWithTag("Builder");
-
-            for (int i = 0; i < builders.Length; i++)
-            {
-                builders[i].GetComponent<SpriteRenderer>().enabled = false;
-            }
-            #endregion
-
+            
             // change camera position
             Camera.main.transform.position = new Vector3(32.68f, 0, 1);
             Camera.main.orthographicSize = 14;
@@ -640,6 +686,105 @@ public class Controller : MonoBehaviour
     public List<Coordinate> GetPathToFood()
     {
         return this.ticketToFood;
+    }
+
+    /// <summary>
+    /// Opens the editing menu for the staff member
+    /// </summary>
+    public void EditStaff()
+    {
+        // set the status code
+        statusCode = 99;
+
+        // initialise the values for the staff customisation
+        AppearanceScript.Initialise(false, staffMembers[selectedStaff].GetAllColours(), 1, staffMembers[0].GetColourByIndex(0), staffMembers[selectedStaff].GetIndex(), staffMembers[selectedStaff].GetHairStyle(), staffMembers[selectedStaff].GetStaffname(), staffMembers[selectedStaff].GetExtras());
+
+        // show the necessary menus / objects
+        staffModel.SetActive(true);
+        staffAppearanceMenu.SetActive(true);
+
+        staffMemberInfo.SetActive(false);
+
+        // move the camera into place
+        Camera.main.transform.position = new Vector3(32.68f, 0, 1);
+        Camera.main.orthographicSize = 14;
+        
+    }
+
+    /// <summary>
+    /// 
+    /// Once the editing is complete
+    /// </summary>
+    /// <param name="index">The index of the staff member who was edited</param>
+    public void StaffEditComplete(int index, string name, int hID, int eID)
+    {
+        Color[] c = new Color[3];
+        c[0] = AppearanceScript.colours[0];
+        c[1] = AppearanceScript.colours[1];
+        c[2] = AppearanceScript.colours[2];
+
+        Sprite hs = AppearanceScript.hairStyle;
+        Sprite ex = AppearanceScript.extraOption;
+
+        staffMembers[index].UpdateName(name);
+        staffMembers[index].SetHair(hs);
+        staffMembers[index].SetColours(c, hID, eID);
+        staffMembers[index].SetSprites(hs, ex);
+
+        GameObject staffOb = GameObject.Find("Staff#" + index);
+        SpriteRenderer[] srs = staffOb.GetComponentsInChildren<SpriteRenderer>();
+
+        srs[0].color = staffMembers[index].GetColourByIndex(0);
+        srs[1].color = staffMembers[index].GetColourByIndex(2);
+        srs[2].color = staffMembers[index].GetColourByIndex(2);
+        srs[3].color = staffMembers[index].GetColourByIndex(1);
+        srs[4].color = staffMembers[index].GetColourByIndex(1);
+
+        srs[3].sprite = hs;
+        srs[4].sprite = ex;
+
+
+        for (int i = 0; i < staffMembers.Count; i++)
+        {
+            GameObject staffObj = GameObject.Find("Staff#" + i);
+            SpriteRenderer sr = staffObj.GetComponent<SpriteRenderer>();
+            sr.color = c[0];
+            staffMembers[i].UniformChanged(c[0]);
+        }
+        
+
+        // update label
+        Text[] txts = staffList.GetComponentsInChildren<Text>();
+        txts[index * 2].text = name;
+        
+        Image[] imgs = staffList.GetComponentsInChildren<Image>();
+
+        imgs[2 + (6 * index)].color = staffMembers[index].GetColourByIndex(2);
+        imgs[3 + (6 * index)].color = staffMembers[index].GetColourByIndex(1);
+        imgs[4 + (6 * index)].color = staffMembers[index].GetColourByIndex(1);
+
+        if (staffMembers[index].GetHairStyle() != null)
+        {
+            imgs[4 + (6 * index)].sprite = staffMembers[index].GetHairStyle();
+        }
+        else
+        {
+            imgs[4 + (6 * index)].sprite = null;
+            imgs[4 + (6 * index)].color = new Color(0, 0, 0, 0);
+        }
+
+
+        if (staffMembers[index].GetExtras() != null)
+        {
+            imgs[3 + (6 * index)].sprite = staffMembers[index].GetExtras();
+        }
+        else
+        {
+            imgs[3 + (6 * index)].sprite = null;
+            imgs[3 + (6 * index)].color = new Color(0, 0, 0, 0);
+        }
+
+
     }
 
     public void CreateBuilder(float x, float y, int screenNum)
@@ -678,8 +823,11 @@ public class Controller : MonoBehaviour
         components[1].color = colours[2];
         components[2].color = colours[2];
         components[3].color = colours[1];
-
+        components[4].color = colours[1];
+        
+        // TODO: sort the colour if not 0 or 2
         components[3].sprite = AppearanceScript.hairStyle;
+        components[4].sprite = AppearanceScript.extraOption;
 
         GameObject[] sms = GameObject.FindGameObjectsWithTag("Staff");
         for (int i = 0; i < sms.Length; i++)
@@ -696,13 +844,38 @@ public class Controller : MonoBehaviour
         Image[] imgs = go.GetComponentsInChildren<Image>();
         Text[] txts = go.GetComponentsInChildren<Text>();
 
-        imgs[1].sprite = staff.GetTransform().GetComponent<SpriteRenderer>().sprite;
+        
+        imgs[1].color = staff.GetColourByIndex(2);
+        imgs[2].color = staff.GetColourByIndex(1);
+        imgs[3].color = staff.GetColourByIndex(1);
+
+        if (staff.GetHairStyle() != null)
+        {
+            imgs[3].sprite = staff.GetHairStyle();
+        }
+        else
+        {
+            imgs[3].sprite = null;
+            imgs[3].color = new Color(0, 0, 0, 0);
+        }
+
+
+        if (staff.GetExtras() != null)
+        {
+            imgs[2].sprite = staff.GetExtras();
+        }
+        else
+        {
+            imgs[2].sprite = null;
+            imgs[2].color = new Color(0, 0, 0, 0);
+        }
+
         txts[0].text = staff.GetStaffname();
 
-        Button b = imgs[2].GetComponent<Button>();
+        Button b = imgs[4].GetComponent<Button>();
         b.onClick.AddListener(() => MoveToStaffLocation(staff.GetIndex()));
 
-        Button b2 = imgs[3].GetComponent<Button>();
+        Button b2 = imgs[5].GetComponent<Button>();
         b2.onClick.AddListener(() => ViewStaffMemberInfo(staff.GetIndex()));
 
         staffMenuList.Add(go);
@@ -727,41 +900,52 @@ public class Controller : MonoBehaviour
         // find the elements of the form
         Image[] imgs = staffMemberInfo.GetComponentsInChildren<Image>();
         Text[] txts = staffMemberInfo.GetComponentsInChildren<Text>();
-        InputField ins = staffMemberInfo.GetComponentInChildren<InputField>();
 
-        ins.text = name;
-        txts[1].text = name;
+        txts[5].text = "Edit " + name;
 
-        txts[7].text = "Worked here since: DAY " + dayHired;
+        txts[4].text = "Worked here since: DAY " + dayHired;
 
-        imgs[2].sprite = sprite;
+        imgs[1].sprite = sprite;
+
+        imgs[1].color = s.GetColourByIndex(0);
+        imgs[2].color = s.GetColourByIndex(2);
+        imgs[5].color = s.GetColourByIndex(2);
+        imgs[3].color = s.GetColourByIndex(1);
+        imgs[4].color = s.GetColourByIndex(1);
+
+
+
+        if (s.GetHairStyle() != null)
+        {
+            imgs[4].sprite = s.GetHairStyle();
+        }
+        else
+        {
+            imgs[4].sprite = null;
+            imgs[4].color = new Color(0, 0, 0, 0);
+        }
+
+
+        if (s.GetExtras() != null)
+        {
+            imgs[3].sprite = s.GetExtras();
+        }
+        else
+        {
+            imgs[3].sprite = null;
+            imgs[3].color = new Color(0, 0, 0, 0);
+        }
 
         for (int i = 0; i < 4; i++)
         {
-            imgs[7 + (i * 4)].fillAmount = 0.25f * attributes[i];
+            imgs[9 + (i * 4)].fillAmount = 0.25f * attributes[i];
         }
 
     }
-
-    public void StaffMemberUpdate()
-    {
-        Text[] txts = staffMemberInfo.GetComponentsInChildren<Text>();
-
-        staffMembers[selectedStaff].UpdateName(txts[2].text);
-        staffMemberInfo.SetActive(false);
-
-        // update the object in the staffMenu
-        Text[] txts2 = staffList.GetComponentsInChildren<Text>();
-
-        int index = selectedStaff * 2;
-        txts2[index].text = txts[2].text;
-
-        selectedStaff = -1;
-        statusCode = 0;
-    }
-
+    
     public void MoveToStaffLocation(int staffID)
     {
+        statusCode = 50;
         Camera.main.orthographicSize = 5f;
         Vector3 pos = staffMembers[staffID].GetVector();
         pos.x = pos.x - 1.2f;
@@ -772,18 +956,13 @@ public class Controller : MonoBehaviour
 
     public void UpgradeStaffAttribute(int index)
     {
-
         staffMembers[selectedStaff].Upgrade(index);
 
         Image[] imgs = staffMemberInfo.GetComponentsInChildren<Image>();
 
         int attributeEffected = staffMembers[selectedStaff].GetAttributes()[index];
 
-        imgs[7 + (index * 4)].fillAmount = 0.25f * attributeEffected;
-
-        //NewTicketQueueSpeed();
-
-
+        imgs[9 + (index * 4)].fillAmount = 0.25f * attributeEffected;
     }
 
     public void ChangeColour(Color c, int x, int y, int width, int height)
@@ -1015,6 +1194,7 @@ public class Controller : MonoBehaviour
         objectSelected = "";
         tagSelected = "";
         upgradeLevelSelected = 0;
+        selectedStaff = -1;
     }
 
     void NewColourButton(int row, int column, bool texture)
@@ -1155,6 +1335,7 @@ public class Controller : MonoBehaviour
             //{
             Transform pi3 = staffObjects[i].transform.FindChild("hiddenPointer");
             pi3.GetComponent<SpriteRenderer>().enabled = false;
+            staffMembers[i].SetVector(x, y);
             //}
             //catch (Exception) { }
             //t.Translate(new Vector3(10, o0, 0));
@@ -1252,6 +1433,15 @@ public class Controller : MonoBehaviour
                     ObjectPool.current.AddNewItem();
                 }
             }
+
+            GameObject[] staffs = GameObject.FindGameObjectsWithTag("Staff");
+            for (int i = 0; i < staffs.Length; i++)
+            {
+                QuestionScript qs = staffs[i].GetComponent<QuestionScript>();
+                qs.Begin(staffMembers[i]);
+            }
+
+
         }
 
     }
@@ -1279,23 +1469,19 @@ public class Controller : MonoBehaviour
 
     public void NextDay(bool shouldCollect)
     {
+        // update the reputation fields
+        reputation.SetFacilities(theScreens, hasUnlockedRedCarpet, foodArea);
+        reputation.SetPublicityRating(postersUnlocked);
+        reputation.SetStaffRating(staffMembers);
+
 
         for (int i = 0; i < theScreens.Count; i++)
         {
-            int prevDays = theScreens[i].GetDaysOfConstruction();
-
             theScreens[i].ProgressOneDay();
-            int days = theScreens[i].GetDaysOfConstruction();
-
-            if (prevDays == 1 && days == 0 && screenObjectList.Count > 0)
-            {
-
-                reputation.SetFacilities(theScreens, redCarpet);
-            }
-
             theScreens[i].ResetClicks();
-
         }
+
+        ClearAllProjectors();
 
         ticketQueue.End();
         ticketQueue.Clear();
@@ -1304,6 +1490,13 @@ public class Controller : MonoBehaviour
         {
             foodQueue.End();
             foodQueue.Clear();
+        }
+
+        // stop the questions from running
+        GameObject[] staffs = GameObject.FindGameObjectsWithTag("Staff");
+        for (int i = 0; i < staffs.Length; i++)
+        {
+            staffs[i].GetComponent<QuestionScript>().End();
         }
 
 
@@ -1468,16 +1661,15 @@ public class Controller : MonoBehaviour
         textElements[6].text = reputation.GetHighestRep().ToString();
 
         textElements[9].text = (4 * reputation.GetSpeedRating()).ToString();
-        textElements[11].text = (4 * reputation.GetCleanlinessRating()).ToString();
+        textElements[11].text = (4 * reputation.GetPublicityRating()).ToString();
         textElements[13].text = (4 * reputation.GetFacilitiesRating()).ToString();
-        textElements[15].text = (4 * reputation.GetFriendlinessRating()).ToString();
+        textElements[15].text = (4 * reputation.GetStaffRating()).ToString();
 
 
         Image[] imageElements = reputationPage.gameObject.GetComponentsInChildren<Image>();
-        imageElements[4].fillAmount = (float)reputation.GetSpeedRating() / 25f;
-        imageElements[7].fillAmount = (float)reputation.GetCleanlinessRating() / 25f;
+        imageElements[7].fillAmount = (float)reputation.GetPublicityRating() / 25f;
         imageElements[10].fillAmount = (float)reputation.GetFacilitiesRating() / 25f;
-        imageElements[13].fillAmount = (float)reputation.GetFriendlinessRating() / 25f;
+        imageElements[13].fillAmount = (float)reputation.GetStaffRating() / 25f;
     }
 
     public void CloseReputation()
@@ -1539,6 +1731,22 @@ public class Controller : MonoBehaviour
         totalIntake += vendingMachineIncome;
 
         return totalIntake;
+    }
+
+    public void UnlockPosterPack(int index)
+    {
+        postersUnlocked[index] = true;
+
+        GameObject[] allPosters = GameObject.FindGameObjectsWithTag("Poster");
+
+        for (int i = 0; i < allPosters.Length; i++)
+        {
+            if (i % 2 == index)
+            {
+                SpriteRenderer sr = allPosters[i].GetComponent<SpriteRenderer>();
+                sr.enabled = true;
+            }
+        }
     }
 
     public int GetTicketsSoldValue(ScreenObject screen)
@@ -1610,11 +1818,9 @@ public class Controller : MonoBehaviour
     float queueCount = 0;
     float ticketStaffLevel = 4.5f;
 
-
     public void ObjectMoveComplete(bool confirmed)
     {
         statusCode = 0;
-
 
         //objectInfo.SetActive(true);
 
@@ -1643,11 +1849,8 @@ public class Controller : MonoBehaviour
             string[] tmp = objectSelected.Split('#');
             int id = int.Parse(tmp[1]);
 
-            
-
             Transform newItem = null;
-
-
+            
             if (itemToAddID == 0)
             {
                 id -= 1;
@@ -1717,7 +1920,7 @@ public class Controller : MonoBehaviour
                 else if (itemToAddID == 3)
                 {
                     newItem = bustPrefab;
-                    theTag = "Bust of Game Creator";
+                    theTag = "Bust";
                 }
                 else if (itemToAddID == 5)
                 {
@@ -1802,6 +2005,10 @@ public class Controller : MonoBehaviour
 
                 // check staff position
                 CheckStaffPosition(theObject);
+
+
+
+
             }
             itemToAddID = -1;
 
@@ -1813,7 +2020,6 @@ public class Controller : MonoBehaviour
                 ChangeColour(carpetColour, theTileManager.toMoveX, theTileManager.toMoveY, theTileManager.fullWidth, theTileManager.fullHeight);
 
                 SetTiles(2, theTileManager.origX, theTileManager.origY, theTileManager.fullWidth, theTileManager.fullHeight);
-
                 
             }
 
@@ -1828,6 +2034,17 @@ public class Controller : MonoBehaviour
             ReShowStaffAndBuildings();
 
             redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
+
+            // show food area
+            GameObject foodPlace = GameObject.FindGameObjectWithTag("Food Area");
+            if (foodPlace != null)
+            {
+                SpriteRenderer[] foodAreaRenderers = foodPlace.GetComponentsInChildren<SpriteRenderer>();
+                foreach (SpriteRenderer sr in foodAreaRenderers)
+                {
+                    sr.color = new Color(1, 1, 1, 1);
+                }
+            }
 
             objectSelected = "";
             tagSelected = "";
@@ -1868,8 +2085,15 @@ public class Controller : MonoBehaviour
         GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
         for (int i = 0; i < staff.Length; i++)
         {
-            staff[i].GetComponent<SpriteRenderer>().enabled = true;
-            staff[i].transform.Translate(new Vector3(0, 0, -1));
+            SpriteRenderer[] srs = staff[i].GetComponentsInChildren<SpriteRenderer>();
+            for(int j = 0; j < 5; j++)
+            {
+                srs[j].enabled = true;
+            }
+
+            // sort z position
+            staff[i].transform.position = new Vector3(staff[i].transform.position.x, staff[i].transform.position.y, -1);
+
         }
         GameObject[] builders = GameObject.FindGameObjectsWithTag("Builder");
         for (int i = 0; i < builders.Length; i++)
@@ -1889,6 +2113,17 @@ public class Controller : MonoBehaviour
         }
 
         redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+
+        GameObject foodPlace = GameObject.FindGameObjectWithTag("Food Area");
+        if (foodPlace != null)
+        {
+            SpriteRenderer[] foodAreaRenderers = foodPlace.GetComponentsInChildren<SpriteRenderer>();
+            foreach (SpriteRenderer sr in foodAreaRenderers)
+            {
+                sr.color = new Color(1, 1, 1, 1);
+            }
+        }
+
     }
 
     int GetCost()
@@ -1948,7 +2183,7 @@ public class Controller : MonoBehaviour
             GameObject screenThing = (GameObject)Instantiate(screenPrefab.gameObject, pos, Quaternion.identity) as GameObject;
             screenThing.GetComponent<Screen_Script>().theScreen = theScreens[newID];
             screenThing.name = "Screen#" + theScreens[newID].GetScreenNumber();
-            screenThing.GetComponent<SpriteRenderer>().sortingOrder = height - y - 1;
+            screenThing.GetComponent<SpriteRenderer>().sortingOrder = 40 - y - 1;
             screenThing.GetComponent<SpriteRenderer>().sprite = screenImages[0];
 
             screenThing.tag = "Screen";
@@ -2003,7 +2238,7 @@ public class Controller : MonoBehaviour
                 foodArea = new FoodArea();
                 foodArea.hasHotFood = true;     // give them 1 thing to start with
 
-                foodQueue = new CustomerQueue(70, x + 3, ((y + 5) * 0.8f) - 1, "Food");
+                foodQueue = new CustomerQueue(70, x + 3, ((y + 4) * 0.8f) - 1, 1);
 
             }
             
@@ -2060,7 +2295,15 @@ public class Controller : MonoBehaviour
         GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
         for (int i = 0; i < staff.Length; i++)
         {
-            staff[i].GetComponent<SpriteRenderer>().enabled = true;
+            SpriteRenderer[] srs = staff[i].GetComponentsInChildren<SpriteRenderer>();
+            for (int j = 0; j < 4; j++)
+            {
+                srs[j].enabled = true;
+            }
+
+            // sort z position
+            staff[i].transform.position = new Vector3(staff[i].transform.position.x, staff[i].transform.position.y, -1);
+
         }
         GameObject[] builders = GameObject.FindGameObjectsWithTag("Builder");
         for (int i = 0; i < builders.Length; i++)
@@ -2079,6 +2322,18 @@ public class Controller : MonoBehaviour
         }
 
         redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+
+
+        GameObject foodPlace = GameObject.FindGameObjectWithTag("Food Area");
+        if (foodPlace != null)
+        {
+            SpriteRenderer[] foodAreaRenderers = foodPlace.GetComponentsInChildren<SpriteRenderer>();
+            foreach (SpriteRenderer sr in foodAreaRenderers)
+            {
+                sr.color = new Color(1, 1, 1, 1);
+            }
+        }
+
 
         objectSelected = "";
         tagSelected = "";
@@ -2129,10 +2384,15 @@ public class Controller : MonoBehaviour
             for (int i = 0; i < staffMembers.Count; i++)
             {
                 // check it
-                Bounds staffBounds = staffMembers[i].GetTransform().GetComponent<Renderer>().bounds;
+                staffMembers[i].GetTransform().Translate(new Vector3(0, 0, 1));
+                //Bounds staffBounds = staffMembers[i].GetTransform().GetComponent<Renderer>().bounds;
+                Bounds staffBounds = new Bounds(staffMembers[i].GetTransform().position, new Vector3(1, 1, 1));
+
                 if (objectBounds.Intersects(staffBounds))
                 {
                     staffMembers[i].GetTransform().GetComponent<mouseDrag>().SortStaffLayer(go);
+                    // show the arrow
+                    staffMembers[i].GetTransform().GetComponentsInChildren<SpriteRenderer>()[4].enabled = true;
                 }
                 else
                 {
@@ -2141,13 +2401,28 @@ public class Controller : MonoBehaviour
                     if (hiddenBehind == null)
                     {
                         staffMembers[i].GetTransform().GetComponent<Renderer>().sortingOrder = 40;
-                        staffMembers[i].GetTransform().GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+
+                        // sort the colours
+                        SpriteRenderer[] subImages = staffMembers[i].GetTransform().GetComponentsInChildren<SpriteRenderer>();
+                        foreach (SpriteRenderer sr in subImages)
+                        {
+                            sr.sortingOrder = TileManager.floor.height + 7;
+                        }
+                        subImages[3].sortingOrder++;
+                        subImages[0].sortingOrder--;
+                        subImages[0].color = staffMembers[i].GetColourByIndex(0);
+                        subImages[1].color = staffMembers[i].GetColourByIndex(2);
+                        subImages[2].color = staffMembers[i].GetColourByIndex(2);
+                        subImages[3].color = staffMembers[i].GetColourByIndex(1);
+
+
+
                         staffMembers[i].GetTransform().FindChild("hiddenPointer").GetComponent<SpriteRenderer>().enabled = false;
                     }
                     else
                     {
                         // show the arrow
-                        staffMembers[i].GetTransform().FindChild("hiddenPointer").GetComponent<SpriteRenderer>().enabled = true;
+                        staffMembers[i].GetTransform().GetComponentsInChildren<SpriteRenderer>()[4].enabled = true;
                     }
 
                 }
@@ -2179,10 +2454,16 @@ public class Controller : MonoBehaviour
             for (int i = 0; i < staffMembers.Count; i++)
             {
                 // check it
-                Bounds staffBounds = staffMembers[i].GetTransform().GetComponent<Renderer>().bounds;
+                staffMembers[i].GetTransform().Translate(new Vector3(0, 0, 1));
+                //Bounds staffBounds = staffMembers[i].GetTransform().GetComponent<Renderer>().bounds;
+                Bounds staffBounds = new Bounds(staffMembers[i].GetTransform().position, new Vector3(1, 1, 1));
+
+
                 if (bTop.Intersects(staffBounds) || bBottom.Intersects(staffBounds))
                 {
                     staffMembers[i].GetTransform().GetComponent<mouseDrag>().SortStaffLayer(go);
+                    // show the arrow
+                    staffMembers[i].GetTransform().GetComponentsInChildren<SpriteRenderer>()[4].enabled = true;
                 }
                 else
                 {
@@ -2191,13 +2472,28 @@ public class Controller : MonoBehaviour
                     if (hiddenBehind == null)
                     {
                         staffMembers[i].GetTransform().GetComponent<Renderer>().sortingOrder = 40;
-                        staffMembers[i].GetTransform().GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+
+
+                        // sort the colours
+                        SpriteRenderer[] subImages = staffMembers[i].GetTransform().GetComponentsInChildren<SpriteRenderer>();
+                        foreach (SpriteRenderer sr in subImages)
+                        {
+                            sr.sortingOrder = TileManager.floor.height + 7;
+                        }
+                        subImages[3].sortingOrder++;
+                        subImages[0].sortingOrder--;
+                        subImages[0].color = staffMembers[i].GetColourByIndex(0);
+                        subImages[1].color = staffMembers[i].GetColourByIndex(2);
+                        subImages[2].color = staffMembers[i].GetColourByIndex(2);
+                        subImages[3].color = staffMembers[i].GetColourByIndex(1);
+
+
                         staffMembers[i].GetTransform().FindChild("hiddenPointer").GetComponent<SpriteRenderer>().enabled = false;
                     }
                     else
                     {
                         // show the arrow
-                        staffMembers[i].GetTransform().FindChild("hiddenPointer").GetComponent<SpriteRenderer>().enabled = true;
+                        staffMembers[i].GetTransform().GetComponentsInChildren<SpriteRenderer>()[4].enabled = true;
                     }
                 }
             }
@@ -2246,12 +2542,29 @@ public class Controller : MonoBehaviour
         }
         redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.3f);
 
+        // ghost the food area
+        GameObject foodPlace = GameObject.FindGameObjectWithTag("Food Area");
+        if (foodPlace != null)
+        {
+            SpriteRenderer[] foodAreaRenderers = foodPlace.GetComponentsInChildren<SpriteRenderer>();
+            foreach (SpriteRenderer sr in foodAreaRenderers)
+            {
+                sr.color = new Color(1, 1, 1, 0.25f);
+            }
+        }
+
         // hide staff
         GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
 
         for (int i = 0; i < staff.Length; i++)
         {
-            staff[i].GetComponent<SpriteRenderer>().enabled = false;
+
+            SpriteRenderer[] srs = staff[i].GetComponentsInChildren<SpriteRenderer>();
+            foreach (SpriteRenderer sr in srs)
+            {
+                sr.enabled = false;
+            }
+            //srs[4].enabled = false;
         }
 
         GameObject[] builders = GameObject.FindGameObjectsWithTag("Builder");
@@ -2339,7 +2652,7 @@ public class Controller : MonoBehaviour
                     itemToAddID = 2;
                     w = 1; h = 1;
                 }
-                else if (gameObjectList[i].tag.Equals("Bust of Game Creator"))
+                else if (gameObjectList[i].tag.Equals("Bust"))
                 {
                     itemToAddID = 3;
                     w = 2; h = 3;
@@ -2375,7 +2688,6 @@ public class Controller : MonoBehaviour
     public void PlaceObject(int width, int height)
     {
 
-
         int startX = (int)Camera.main.transform.position.x;
         int startY = (int)Camera.main.transform.position.y;
 
@@ -2383,7 +2695,13 @@ public class Controller : MonoBehaviour
 
         for (int i = 0; i < staff.Length; i++)
         {
-            staff[i].GetComponent<SpriteRenderer>().enabled = false;
+
+            SpriteRenderer[] srs = staff[i].GetComponentsInChildren<SpriteRenderer>();
+            foreach (SpriteRenderer sr in srs)
+            {
+                sr.enabled = false;
+            }
+            //srs[4].enabled = false;
         }
 
         GameObject[] builders = GameObject.FindGameObjectsWithTag("Builder");
@@ -2392,6 +2710,20 @@ public class Controller : MonoBehaviour
         {
             builders[i].GetComponent<SpriteRenderer>().enabled = false;
         }
+
+
+
+        // ghost the food area
+        GameObject foodPlace = GameObject.FindGameObjectWithTag("Food Area");
+        if (foodPlace != null)
+        {
+            SpriteRenderer[] foodAreaRenderers = foodPlace.GetComponentsInChildren<SpriteRenderer>();
+            foreach (SpriteRenderer sr in foodAreaRenderers)
+            {
+                sr.color = new Color(1, 1, 1, 0.25f);
+            }
+        }
+
 
         statusCode = 2;
 
@@ -2534,24 +2866,30 @@ public class Controller : MonoBehaviour
         BinaryFormatter formatter = new BinaryFormatter();
         FileStream file = File.Create(Application.persistentDataPath + "/saveState.gd");
 
-        PlayerData data = new PlayerData(theScreens, carpetColour, staffMembers, filmShowings, totalCoins, currDay, numPopcorn, otherObjects, hasUnlockedRedCarpet, isMarbleFloor, reputation, boxOfficeLevel, foodArea);
+        PlayerData data = new PlayerData(theScreens, carpetColour, staffMembers, filmShowings, totalCoins, currDay, numPopcorn, otherObjects, hasUnlockedRedCarpet, isMarbleFloor, reputation, boxOfficeLevel, foodArea, postersUnlocked);
 
 
         formatter.Serialize(file, data);
         file.Close();
     }
 
-    public void AddStaffMember(String name)
+    public void AddStaffMember(String name, int hID, int eID)
     {
         int id = staffMembers.Count;
 
-        StaffMember sm = new StaffMember(id, name, staffPrefab, currDay, 0);
+        StaffMember sm = new StaffMember(id, name, staffPrefab, currDay, 0, AppearanceScript.hairStyle);
 
         Color[] cols = new Color[3];
         cols[0] = AppearanceScript.colours[0];
         cols[1] = AppearanceScript.colours[1];
         cols[2] = AppearanceScript.colours[2];
-        sm.SetColours(cols);
+        sm.SetColours(cols, hID, eID);
+        Sprite hairSprite, extrasSprite;
+
+        hairSprite = AppearanceScript.hairStyle;
+        extrasSprite = AppearanceScript.extraOption;
+
+        sm.SetSprites(hairSprite, extrasSprite);
 
         staffMembers.Add(sm);
 
@@ -2562,11 +2900,15 @@ public class Controller : MonoBehaviour
         Transform t = staffMembers[staffMembers.Count - 1].GetTransform();
         t.FindChild("hiddenPointer").GetComponent<SpriteRenderer>().enabled = false;
 
+        Color c = AppearanceScript.colours[0];
+
+        Color toPass = new Color(c.r, c.g, c.b, 1);
+
         for (int i = 0; i < staffMembers.Count; i++)
         {
-            staffMembers[i].UniformChanged(AppearanceScript.colours[0]);
+            staffMembers[i].UniformChanged(toPass);
         }
-
+        
     }
 
     public int GetStaffSize()
@@ -2760,10 +3102,10 @@ public class PlayerData
     public Reputation reputation;
     public int boxOfficeLevel;
     public FoodArea foodArea;
+    public bool[] posters;
 
-    public PlayerData(List<ScreenObject> screens, Color col, List<StaffMember> staff, List<FilmShowing> films, int coins, int day, int popcorn, List<OtherObject> others, bool redCarpet, bool marble, Reputation rep, int boxOffice, FoodArea fa)
+    public PlayerData(List<ScreenObject> screens, Color col, List<StaffMember> staff, List<FilmShowing> films, int coins, int day, int popcorn, List<OtherObject> others, bool redCarpet, bool marble, Reputation rep, int boxOffice, FoodArea fa, bool[] poster)
     {
-        //gameObjectList = sO.ToArray();
         theScreens = screens.ToArray();
         carpetColour = new float[4] { col.r, col.g, col.b, col.a };
 
@@ -2785,6 +3127,7 @@ public class PlayerData
         marbleFloor = marble;
         reputation = rep;
         boxOfficeLevel = boxOffice;
+        posters = poster;
     }
 
 }

@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class FBScript : MonoBehaviour {
-    
-    public Text txtUsername;
-    public Image picProfilePic;
 
+    //public Text txtUsername;
+    //public Image picProfilePic;
+    string username;
+    
     // Use this for initialization
     void Awake()
     {
@@ -41,7 +42,6 @@ public class FBScript : MonoBehaviour {
 
     public void FBLogin()
     {
-
         List<string> permissions = new List<string>();
         permissions.Add("public_profile");
 
@@ -61,7 +61,7 @@ public class FBScript : MonoBehaviour {
                 Debug.Log("SUCCESS");
 
                 FB.API("/me?fields=first_name,last_name", HttpMethod.GET, DisplayUsername);
-                FB.API("me/picture?type=square&height=128&width=128", HttpMethod.GET, DisplayProfilePic);
+                //FB.API("me/picture?type=square&height=128&width=128", HttpMethod.GET, DisplayProfilePic);
                 FB.GetAppLink(GetAppLink);
             }
             else
@@ -80,14 +80,15 @@ public class FBScript : MonoBehaviour {
 
     void DisplayUsername(IResult result)
     {
-        txtUsername.text = "Welcome back " + result.ResultDictionary["first_name"].ToString() + " " + result.ResultDictionary["last_name"].ToString();
+        username = result.ResultDictionary["first_name"].ToString();
+        //txtUsername.text = "Welcome back " + result.ResultDictionary["first_name"].ToString() + " " + result.ResultDictionary["last_name"].ToString();
     }
 
-    void DisplayProfilePic(IGraphResult result)
-    {
-        picProfilePic.sprite = Sprite.Create(result.Texture, new Rect(0, 0, 128, 128), new Vector2());
-        Controller.profilePicture = Sprite.Create(result.Texture, new Rect(0, 0, 128, 128), new Vector2());
-    }
+    //void DisplayProfilePic(IGraphResult result)
+    //{
+    //    picProfilePic.sprite = Sprite.Create(result.Texture, new Rect(0, 0, 128, 128), new Vector2());
+    //    Controller.profilePicture = Sprite.Create(result.Texture, new Rect(0, 0, 128, 128), new Vector2());
+    //}
 
 
     public void InviteFriends()

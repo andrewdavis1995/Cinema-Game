@@ -180,27 +180,19 @@ public class ConfirmationScript : MonoBehaviour {
 
                 #region Hire new staff
                 case 2:
-                    //// hire new staff
-                    //int index2 = UnityEngine.Random.Range(0, 5);
-
-                    //// create a new staff member
-                    //StaffMember sm = new StaffMember(mainController.staffMembers.Count, "New", mainController.staffPrefab, mainController.currDay, index2);
-
-                    //// work out the staff member's position
-                    //int x = 35 + 2 * (sm.GetIndex() % 6);
-                    //int y = 2 * (sm.GetIndex() / 6);
-
-                    //// add the new staff member
-                    //mainController.AddStaffMember(sm, x, y);
-
-                    //// reset the states
-                    //mainController.HideObjectInfo();
-                    //mainController.statusCode = 0;
+                    
+                    // set the status code
                     mainController.statusCode = 99;
-                    AppearanceScript.Initialise(true, null, 1);
+
+                    // initialise the values for the staff customisation
+                    AppearanceScript.Initialise(true, null, 1, mainController.staffMembers[0].GetColourByIndex(0), -1, AppearanceScript.hairStyle, "", AppearanceScript.extraOption);
+
+                    // show the necessary menus / objects
                     mainController.staffModel.SetActive(true);
                     mainController.staffAppearanceMenu.SetActive(true);
                     theShop.gameObject.SetActive(false);
+
+                    // move the camera into place
                     Camera.main.transform.position = new Vector3(32.68f, 0, 1);
                     Camera.main.orthographicSize = 14;
 
@@ -279,6 +271,18 @@ public class ConfirmationScript : MonoBehaviour {
                     mainController.statusCode = 10;
                     break;
                 #endregion
+
+                #region Purchase Poster pack 1
+                case 9:
+                        mainController.UnlockPosterPack(0);
+                    break;
+                #endregion
+
+                #region Purchase Poster pack 2
+                case 10:
+                        mainController.UnlockPosterPack(1);                    
+                    break;
+                    #endregion
             }
             #endregion
         }

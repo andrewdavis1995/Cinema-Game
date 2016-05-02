@@ -10,8 +10,8 @@ namespace Assets.Classes
     {
         int overall;            // out of 100
 
-        int cleanliness;        // out of 25
-        int friendliness;       // out of 25
+        int publicity;        // out of 25
+        int staff;              // out of 25
         int speed;              // out of 25
         int facilities;         // out of 25            // 1.5 x no.Screens x average upgrade level
         int totalSpeedValues;   // value of all remaining patiences
@@ -35,8 +35,8 @@ namespace Assets.Classes
         public void Initialise()
         {
             // initial values
-            cleanliness = 15;
-            friendliness = 8;
+            publicity = 5;
+            staff = 2;
             speed = 8;
             facilities = 1;
             highestReputation = 0;
@@ -54,8 +54,8 @@ namespace Assets.Classes
         public int GetHighestRep() { return highestReputation; }
         
         public int GetSpeedRating() { return speed; }
-        public int GetCleanlinessRating() { return cleanliness; }
-        public int GetFriendlinessRating() { return friendliness; }
+        public int GetPublicityRating() { return publicity; }
+        public int GetStaffRating() { return staff; }
         public int GetFacilitiesRating() { return facilities; }
         public float GetMultiplier()
         {
@@ -67,7 +67,7 @@ namespace Assets.Classes
         public void SetOverall()
         {
             // calculate the overall rating
-            overall = (int)((1.25 * cleanliness) + (1.25 * friendliness) + (0.5* speed) + facilities);
+            overall = (int)((0.7f * (float)publicity) + (1.3f * (float)staff) + (0.6 * (float)speed) + facilities);
 
             // cap at 100 - just in case
             if (overall > 100)
@@ -93,13 +93,47 @@ namespace Assets.Classes
             {
                 speed = 100;
             }
+            if (speed < 0)
+            {
+                speed = 0;
+            }
 
         }
+        public void SetPublicityRating(bool[] posters)
+        {
+            int rating = 0;
+            if (posters[0]) { rating += 12; }
+            if (posters[1]) { rating += 12; }
+
+            publicity = rating;
+
+        }
+        public void SetStaffRating(List<StaffMember> sl)
+        {
+            int rating = 0;
+
+            int temp = 0;
+
+            foreach (StaffMember sm in sl)
+            {
+                temp += sm.GetAttributeByIndex(2);
+                temp += sm.GetAttributeByIndex(3);
+
+                temp = temp / 2;
+                rating += temp;
+            }
+
+            if (rating > 25) { rating = 25; }
+
+            staff = rating;
+
+        }
+
         public void Walkout()
         {
             UpdateSpeedRating(-150);
         }
-        public void SetFacilities(List<ScreenObject> screens, bool redCarpet)
+        public void SetFacilities(List<ScreenObject> screens, bool redCarpet, FoodArea food)
         {
             int numScreens = screens.Count;
             int totalRating = 0;
@@ -107,16 +141,22 @@ namespace Assets.Classes
             // get the combined total of the screen upgrade level
             for (int i = 0; i < numScreens; i++)
             {
-                totalRating += screens[i].GetUpgradeLevel();
+                int level = screens[i].GetUpgradeLevel();
+
+                if (screens[i].GetDaysOfConstruction() > 1)
+                {
+                    level--;
+                }
+                totalRating += level;
+                if (screens[i].GetUpgradeLevel() == 4) { totalRating += 2; }
+                if (screens[i].GetUpgradeLevel() == 3) { totalRating += 1; }
             }
-
-            // calculate the average screen upgrade level
-            float averageRating = totalRating / numScreens;
-
+            
             // set the facilities value
-            this.facilities = (int)(1.5 * numScreens * averageRating);
+            this.facilities = totalRating;
 
             if (redCarpet) { facilities += 2; }
+            if (food != null) { facilities += 4; }
 
             if (facilities > 25) { facilities = 25; }
 

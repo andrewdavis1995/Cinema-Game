@@ -9,6 +9,7 @@ public class ButtonScript : MonoBehaviour {
 
     public static PlayerData loadGame;      // the data to be loaded (if load is selected)
     Button loadButton;      // the button to load a game
+    public Image loadImage;
      
     void Start()
     {
@@ -37,6 +38,9 @@ public class ButtonScript : MonoBehaviour {
     /// </summary>
     public void NewGame()
     {
+
+        loadImage.enabled = true;
+
         // make the load game details = null
         loadGame = null;
         // load the other scene
@@ -48,6 +52,8 @@ public class ButtonScript : MonoBehaviour {
     /// </summary>
     public void LoadSavedGame()
     {
+        loadImage.enabled = true;
+
         // get the details to load
         loadGame = Load();
         // open the other scene
@@ -80,12 +86,6 @@ public class ButtonScript : MonoBehaviour {
 
         return null;
     }
-
-    // TEMP
-    public void TestStaff()
-    {
-        SceneManager.LoadScene(2);
-    }
-
+    
 }
 

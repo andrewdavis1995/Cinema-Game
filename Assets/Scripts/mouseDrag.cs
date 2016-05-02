@@ -124,15 +124,15 @@ public class mouseDrag : MonoBehaviour
         //    Camera.main.transform.position = tmp;
         //}
     }
-
+    
     void OnMouseDown()
     {
-        if ((mainController.statusCode < 2) || mainController.statusCode == 6)
+        if ((mainController.statusCode < 2) && staffMember.GetClicksRemaining() < 1)
         {
             dragging = true;
 
 
-            SpriteRenderer[] subImages = GetComponentsInChildren<SpriteRenderer>();
+            SpriteRenderer[] subImages = GetComponentsInChildren<SpriteRenderer>(); 
             foreach (SpriteRenderer sr in subImages)
             {
                 sr.sortingOrder = TileManager.floor.height + 7;
@@ -244,10 +244,9 @@ public class mouseDrag : MonoBehaviour
             sr.sortingLayerName = "Front";
         }
 
-        if (dragging && (mainController.statusCode == 1 || mainController.statusCode == 0 || mainController.statusCode == 6 || mainController.statusCode != 7))
+        if (dragging && (mainController.statusCode == 1 || mainController.statusCode == 0 || mainController.statusCode != 7) && mainController.statusCode != 50 && mainController.statusCode != 6)
         {
             staffAttributePanel.SetActive(false);
-
 
             Bounds staffBounds = new Bounds(transform.position, new Vector3(1, 1, 1));
 
@@ -263,8 +262,7 @@ public class mouseDrag : MonoBehaviour
                 float xPos = transform.position.x;
                 transform.position = new Vector2(xPos, 8f);
             }
-            staffBounds = new Bounds(transform.position, new Vector3(1, 1, 1));
-            
+                        
 
             this.transform.localScale = new Vector3(1, 1, 1);
             animator.SetTrigger("land");
@@ -545,6 +543,8 @@ public class mouseDrag : MonoBehaviour
             subImages[0].sortingOrder--;
             subImages[3].sortingOrder++;
 
+            subImages[4].color = new Color(1, 1, 1, 1);
+            subImages[4].enabled = true;
 
             Transform pi3 = transform.FindChild("hiddenPointer");
             pi3.GetComponent<SpriteRenderer>().enabled = true;

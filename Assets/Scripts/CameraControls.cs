@@ -38,7 +38,7 @@ public class CameraControls : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (mainController.statusCode < 3 && mainController.statusCode != 1 && mainController.statusCode != 10 || mainController.statusCode == 6)
+        if (mainController.statusCode < 3 && mainController.statusCode != 1 || mainController.statusCode == 50)
         {
             vertExtent = Camera.main.orthographicSize;
             horizExtent = vertExtent * Screen.width / Screen.height;
@@ -52,6 +52,10 @@ public class CameraControls : MonoBehaviour
             if (transform.position != endPos)
             {
                 transform.position = Vector3.Lerp(transform.position, endPos, Time.deltaTime * 5);
+            }
+            else if (mainController.statusCode == 50 && !mainController.staffList.gameObject.active)
+            {
+                mainController.statusCode = 6;
             }
 
             if (Input.GetAxis("Mouse ScrollWheel") > 0)
@@ -147,24 +151,26 @@ public class CameraControls : MonoBehaviour
         float x = currPos.x;
         float y = currPos.y;
 
+        if (mainController.statusCode != 10 && mainController.statusCode != 8)
+        {
+            if (x < minX)
+            {
+                currPos.x = minX;
+            }
+            if (y < minY - bottomBarHeight)
+            {
+                currPos.y = minY - bottomBarHeight;
+            }
+            if (x > maxX)
+            {
+                currPos.x = maxX;
+            }
+            if (y > maxY)
+            {
+                currPos.y = maxY;
+            }
 
-        if (x < minX)
-        {
-            currPos.x = minX;
         }
-        if (y < minY - bottomBarHeight)
-        {
-            currPos.y = minY - bottomBarHeight;
-        }
-        if (x > maxX)
-        {
-            currPos.x = maxX;
-        }
-        if (y > maxY)
-        {
-            currPos.y = maxY;
-        }
-
         currPos.z = -10;
         Camera.main.transform.position = (currPos);
 

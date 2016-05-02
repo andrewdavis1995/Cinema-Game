@@ -15,7 +15,7 @@ namespace Assets.Classes
         int sortingOrderOnFinish = 11;      // the sorting order to move to after a customer is fdone with the queue
         float queuePosX = 0;        // the x coordinate of the queue start position
         float queuePosY = 0;        // the y coordinate of the queue start position 
-        string queueType = "";
+        int queueType = 0;
 
         Thread[] staffThreads = new Thread[1];         // one thread per staff member on the post
         Thread patienceThread;        // the first parameter is the slot, the second is the speed
@@ -23,7 +23,7 @@ namespace Assets.Classes
         bool running = false;         // whether or not the day is running
 
         // CONSTRUCTOR for the class
-        public CustomerQueue(int sO, float x, float y, string type)
+        public CustomerQueue(int sO, float x, float y, int type)
         {
             sortingOrderOnFinish = sO;
             queuePosX = x;
@@ -167,7 +167,8 @@ namespace Assets.Classes
                     // update status variables
                     servingSlots[index].inQueue = false;
                     servingSlots[index].AddPatience(50);
-                    
+                    servingSlots[index].queueDoneWith = queueType;
+                                        
                 }
 
                 // get another customer from the queue

@@ -18,6 +18,13 @@ namespace Assets.Classes
         int transformID;    // which transform they are (0 -> 4)
 
         Color[] colours = new Color[3];     // the colours of hair, shirt and skin
+        Sprite hairStyle;   // which type of hair they have
+        Sprite extras;   // which extras option has been selected
+
+        int questionClicksRemaining = 0;        // how many times the question bubble needs to be clicked before it is resolved
+
+        int hairID;
+        int extrasID;
 
         int[] attributes = new int[4];      // the staff member's attribute array
 
@@ -33,7 +40,7 @@ namespace Assets.Classes
         /// <param name="t">The transform to use</param>
         /// <param name="dH">The day they were hired</param>
         /// <param name="tID">the id of the transform to use (which appearance)</param>
-        public StaffMember(int i, string n, Transform t, int dH, int tID)
+        public StaffMember(int i, string n, Transform t, int dH, int tID, Sprite hs)
         {
             index = i;
             name = n;
@@ -44,7 +51,7 @@ namespace Assets.Classes
             attributes[1] = 1;
             attributes[2] = 1;
             attributes[3] = 1;
-
+            hairStyle = hs;
         }
 
         #region Mutators
@@ -53,9 +60,36 @@ namespace Assets.Classes
         /// Set the colours of the components
         /// </summary>
         /// <param name="col"></param>
-        public void SetColours(Color[] col)
+        public void SetColours(Color[] col, int hID, int eID)
         {
             colours = col;
+            hairID = hID;
+            extrasID = eID;
+        }
+
+        /// <summary>
+        /// When the staff member has a question
+        /// </summary>
+        public void QuestionRaised()
+        {
+            questionClicksRemaining += 15;
+        }
+
+        /// <summary>
+        /// When the associated Question icon is clicked
+        /// </summary>
+        public int QuestionClicked()
+        {
+            questionClicksRemaining--;
+            return questionClicksRemaining;
+        }
+
+        /// <summary>
+        /// Rest the number of clicks required to 0
+        /// </summary>
+        public void ResetClicks()
+        {
+            questionClicksRemaining = 0;
         }
 
         /// <summary>
@@ -94,6 +128,11 @@ namespace Assets.Classes
             transform = t;
         }
 
+        public void SetHair(Sprite h)
+        {
+            hairStyle = h;
+        }
+
         /// <summary>
         /// Set the job for the staff member
         /// </summary>
@@ -113,6 +152,17 @@ namespace Assets.Classes
             this.xPos = x; this.yPos = y;
         }
 
+        /// <summary>
+        /// Set the sprites used for hair and extras
+        /// </summary>
+        /// <param name="h">The hair sprite</param>
+        /// <param name="e">The extras sprite</param>
+        public void SetSprites(Sprite h, Sprite e)
+        {
+            hairStyle = h;
+            extras = e;
+        }
+
         #endregion
 
         #region Accessors
@@ -124,6 +174,27 @@ namespace Assets.Classes
         public Color GetColourByIndex(int index)
         {
             return colours[index];
+        }
+
+        public Color[] GetAllColours()
+        {
+            return this.colours;
+        }
+
+        public int GetClicksRemaining()
+        {
+            return this.questionClicksRemaining;
+        }
+
+        public Sprite GetHairStyle()
+        {
+            return hairStyle;
+        }
+
+        public Sprite GetExtras()
+        {
+            return extras;
+
         }
 
         public Transform GetTransform()
@@ -142,7 +213,7 @@ namespace Assets.Classes
         {
             return name;
         }
-        
+
         public int GetAttributeByIndex(int index)
         {
             return this.attributes[index];
@@ -153,13 +224,24 @@ namespace Assets.Classes
             return this.dayHired;
         }
 
-        public Vector3 GetVector() {
+        public Vector3 GetVector()
+        {
             return new Vector3(xPos, yPos, 0);
         }
 
         public int[] GetAttributes()
         {
             return attributes;
+        }
+
+        public int GetHairID()
+        {
+            return hairID;
+        }
+
+        public int GetExtrasID()
+        {
+            return extrasID;
         }
         #endregion
 
@@ -171,8 +253,6 @@ namespace Assets.Classes
         {
             attributes[index]++;
         }
-
-        
 
     }
 }

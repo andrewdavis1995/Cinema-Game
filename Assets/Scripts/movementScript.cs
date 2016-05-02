@@ -177,10 +177,14 @@ public class movementScript : MonoBehaviour {
             }
 
 
-            if (customer.sortFoodQueuePos)
+            if (customer.queueDoneWith != -1)
             {
-                customer.sortFoodQueuePos = false;
-                transform.Translate(0, -1, 0);
+                if (customer.queueDoneWith == 1)
+                {
+                    transform.Translate(0, -1, 0);
+                }
+                transform.GetComponent<SpriteRenderer>().sortingOrder = 40 - (int)(transform.position.y / 0.8f) - 1;
+                customer.queueDoneWith = -1;
             }
             if (customer.inQueue && customer.shouldMoveUp > 0)
             {

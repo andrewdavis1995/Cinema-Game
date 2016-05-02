@@ -129,6 +129,32 @@ public class ShopScript : MonoBehaviour
                     mainController.ShowPopup(5, "You already own this object!");
                 }
                 break;
+            #endregion
+
+            #region Posters 1
+            case 8: // posters 1
+                if (!mainController.postersUnlocked[0])
+                {
+                    ConfirmationScript.OptionSelected(9, new string[] { "buy this poster pack", "750", "0" }, "This will cost: ");
+                }
+                else
+                {
+                    mainController.ShowPopup(5, "You already own this item!");
+                }
+                break;
+            #endregion
+                
+            #region Posters 2
+            case 9: // posters 2
+                if (!mainController.postersUnlocked[1])
+                {
+                    ConfirmationScript.OptionSelected(10, new string[] { "buy this poster pack", "750", "0" }, "This will cost: ");
+                }
+                else
+                {
+                    mainController.ShowPopup(5, "You already own this item!");
+                }
+                break;
                 #endregion
         }
         #endregion
@@ -198,6 +224,8 @@ public class ShopScript : MonoBehaviour
             case 1: return "Hiring more staff will allow you to carry out more tasks at a time";
             case 2: return "Vending machines will bring in a small amount of income each day";
             case 3: return "Customers will visit the food area to buy food. Earns coins";
+            case 4: return "Posters will raise awareness of your cinemas and entice more customers to come";
+            case 5: return "Posters will raise awareness of your cinemas and entice more customers to come";
             default: return "No information available";
         }
     }

@@ -75,6 +75,7 @@
     <Compile Include="Assets\Classes\Coordinate.cs" />
     <Compile Include="Assets\Classes\Customer.cs" />
     <Compile Include="Assets\Classes\CustomerQueue.cs" />
+    <Compile Include="Assets\Classes\FacebookFriend.cs" />
     <Compile Include="Assets\Classes\FilmShowing.cs" />
     <Compile Include="Assets\Classes\Floor.cs" />
     <Compile Include="Assets\Classes\FloorTile.cs" />

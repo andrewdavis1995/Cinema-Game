@@ -3,14 +3,22 @@ using System.Collections;
 using Facebook.Unity;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using Facebook.MiniJSON;
+using Assets.Classes;
+using System.Net;
+using System.IO;
 
 public class FBScript : MonoBehaviour {
 
+
+
     //public Text txtUsername;
     //public Image picProfilePic;
-    string firstname;
-    string surname;
-    string id;
+    public string firstname;
+    public string surname;
+    public string id = "";
+    
+    public static FBScript current;
 
     public Button newGame;
     public Button loadGame;
@@ -20,11 +28,14 @@ public class FBScript : MonoBehaviour {
 
     public Text txtLoggedInAs;
 
+    public List<FacebookFriend> friendList = new List<FacebookFriend>();
+
 
     // Use this for initialization
     void Awake()
     {
         FB.Init(SetInit, OnHideUnity);
+        current = this;
     }
 
     void SetInit()
@@ -76,6 +87,7 @@ public class FBScript : MonoBehaviour {
                 Debug.Log("SUCCESS");
 
                 FB.API("/me?fields=first_name,last_name", HttpMethod.GET, DisplayUsername);
+                FB.API("/me/friends?fields=first_name,last_name", HttpMethod.GET, DisplayFriends);
                 //FB.API("me/picture?type=square&height=128&width=128", HttpMethod.GET, DisplayProfilePic);
                 FB.GetAppLink(GetAppLink);
             }
@@ -92,12 +104,57 @@ public class FBScript : MonoBehaviour {
     {
         appLink = result.Url;
     }
-    
+
+
+    // http://answers.unity3d.com/questions/959943/deserialize-facebook-friends-result.html
+    void DisplayFriends(IResult result)
+    {
+
+        current = this;
+
+        var dict = Json.Deserialize(result.RawResult) as Dictionary<string, object>;
+        var friendList = new List<object>();
+        friendList = (List<object>)(dict["data"]);
+
+        int friendCount = friendList.Count;
+        
+        for (int i = 0; i < friendCount; i++)
+        {
+            string friendFBID = GetDataValueForKey((Dictionary<string, object>)(friendList[i]), "id");
+            string first_name = GetDataValueForKey((Dictionary<string, object>)(friendList[i]), "first_name");
+            string last_name = GetDataValueForKey((Dictionary<string, object>)(friendList[i]), "last_name");
+
+            
+            Debug.Log(friendFBID + " --> " + first_name + " " + last_name);
+
+            FacebookFriend fwend = new FacebookFriend();
+            fwend.name = first_name + " " + last_name;
+            fwend.id = friendFBID;
+
+            current.friendList.Add(fwend);
+        }
+
+    }
+
+    // http://answers.unity3d.com/questions/959943/deserialize-facebook-friends-result.html
+    private string GetDataValueForKey(Dictionary<string, object> dict, string key)
+    {
+        object objectForKey;
+        if (dict.TryGetValue(key, out objectForKey))
+        {
+            return (string)objectForKey;
+        }
+        else {
+            return "";
+        }
+    }
+
     void DisplayUsername(IResult result)
     {
         firstname = result.ResultDictionary["first_name"].ToString();
         surname = result.ResultDictionary["last_name"].ToString();
         id = result.ResultDictionary["id"].ToString();
+
         //txtUsername.text = "Welcome back " + result.ResultDictionary["first_name"].ToString() + " " + result.ResultDictionary["last_name"].ToString();
 
         if (firstname != null && !firstname.Equals(""))
@@ -106,6 +163,10 @@ public class FBScript : MonoBehaviour {
             loggedInPanel.SetActive(true);
             facebookPanel.SetActive(false);
         }
+
+
+        newGame.enabled = true;
+        loadGame.enabled = true;
 
     }
 
@@ -128,6 +189,8 @@ public class FBScript : MonoBehaviour {
         facebookPanel.SetActive(true);
         loggedInPanel.SetActive(false);
     }
+
+    
 
 }
 

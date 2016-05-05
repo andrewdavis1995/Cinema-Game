@@ -9,6 +9,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 [System.Serializable]
 public class Controller : MonoBehaviour
@@ -29,6 +30,12 @@ public class Controller : MonoBehaviour
 
     public GameObject[] walls;
 
+
+    public Transform friendObject;
+    public Transform friendList;
+
+
+
     public GameObject pnlClearProjectors;
     public Transform builderPrefab;
 
@@ -38,7 +45,7 @@ public class Controller : MonoBehaviour
     public Sprite[] foodTableSprites;
 
     public Sprite completeFoodAreaSprite;
-    
+
     //public static Sprite profilePicture;
 
     public List<Transform> staffSlot = new List<Transform>();
@@ -135,7 +142,7 @@ public class Controller : MonoBehaviour
     const int height = 40;
 
     public GameObject[,] floorTiles;
-    
+
     public CustomerQueue ticketQueue = new CustomerQueue(11, 38.5f, 6.8f, 0);
     public CustomerQueue foodQueue;
 
@@ -144,15 +151,17 @@ public class Controller : MonoBehaviour
     public GameObject warningPanel;
     public Image warningIcon;
     public Text warningLabel;
-    
+
     List<List<Coordinate>> ticketToScreen = new List<List<Coordinate>>();
     List<Coordinate> ticketToFood = new List<Coordinate>();
     List<List<Coordinate>> foodToScreen = new List<List<Coordinate>>();
     List<Coordinate> exitPath = new List<Coordinate>();
-    
+
     public GameObject staffModel;
     public GameObject staffAppearanceMenu;
-    
+
+    public FacebookFriend facebookProfile;
+
     public int totalCoins = 40000;
     public int numPopcorn = 15;
 
@@ -204,11 +213,26 @@ public class Controller : MonoBehaviour
         }
     }
 
+
+
+
+    //Texture2D profPic;
+
+    //IEnumerator UserImage()
+    //{
+    //    WWW url = new WWW("https://graph.facebook.com/110133299400417/picture?type=large");
+
+    //    Texture2D textFb2 = new Texture2D(128, 128, TextureFormat.DXT1, false); //TextureFormat must be DXT5
+    //    yield return url;
+    //    url.LoadImageIntoTexture(textFb2);
+    //    profPic = textFb2;
+    //}
+
     // Use this for initialization
     void Start()
     {
         postersUnlocked = new bool[2];
-        
+
         #region Find Objects
         theTileManager = GameObject.Find("TileManagement").GetComponent<TileManager>();
         confirmPanel = GameObject.Find("pnlConfirm");
@@ -265,6 +289,56 @@ public class Controller : MonoBehaviour
         OtherObjectScript.showBuildingMenu += ShowBuildingOptions;
         #endregion
 
+        #region Facebook stuff
+        GameObject pnlNoFriends = GameObject.Find("pnlNoFriends");
+
+        try
+        {
+            string fbUserID = FBScript.current.id;
+            if (fbUserID.Length > 0)
+            {
+                facebookProfile = new FacebookFriend();
+                facebookProfile.name = FBScript.current.firstname + " " + FBScript.current.surname;
+                facebookProfile.id = FBScript.current.id;
+                facebookProfile.friends = FBScript.current.friendList;
+
+                if (facebookProfile.friends.Count > 0)
+                {
+                    pnlNoFriends.SetActive(false);
+                }
+                else
+                {
+                    pnlNoFriends.SetActive(true);
+                }
+
+                for (int i = 0; i < facebookProfile.friends.Count; i++)
+                {
+                    GameObject go = (GameObject)Instantiate(friendObject.gameObject, new Vector3(0, 0, 0), Quaternion.identity);
+                    go.transform.SetParent(friendList, false);
+
+                    Text[] textComponents = go.GetComponentsInChildren<Text>();
+                    textComponents[0].text = facebookProfile.friends[i].name;
+
+                    //StartCoroutine(UserImage());
+
+                    //while (profPic == null)
+                    //{
+                    //}
+
+                    //// assign texture
+                    //Image[] images = go.GetComponentsInChildren<Image>();
+                    //images[1].material.mainTexture = profPic;
+                    //profPic = null;
+
+                }
+            }
+            else
+            {
+                pnlNoFriends.SetActive(true);
+            }
+        }
+        catch (Exception) { }
+        #endregion
 
         // this will change depending on starting upgrade levels and other queues etc
 

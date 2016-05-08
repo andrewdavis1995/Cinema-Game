@@ -14,6 +14,7 @@ using System.Collections;
 [System.Serializable]
 public class Controller : MonoBehaviour
 {
+    #region Variables
     public int selectedStaff = -1;
     public int newStatusCode = 0;
 
@@ -23,6 +24,8 @@ public class Controller : MonoBehaviour
 
     public bool[] postersUnlocked = new bool[2];
 
+    public GameObject popupBox;
+
     public GameObject confirmBtn;
 
     public Sprite[] boxOfficeImages;
@@ -30,12 +33,9 @@ public class Controller : MonoBehaviour
 
     public GameObject[] walls;
 
-
     public Transform friendObject;
     public Transform friendList;
-
-
-
+    
     public GameObject pnlClearProjectors;
     public Transform builderPrefab;
 
@@ -45,6 +45,8 @@ public class Controller : MonoBehaviour
     public Sprite[] foodTableSprites;
 
     public Sprite completeFoodAreaSprite;
+
+    List<GameObject> staffMenuList = new List<GameObject>();
 
     //public static Sprite profilePicture;
 
@@ -169,64 +171,17 @@ public class Controller : MonoBehaviour
 
     int numScreens = 1;
 
-    public void OpenShop()
-    {
-        if (statusCode != 2 && statusCode != 8 && statusCode != 9)
-        {
-            HideObjectInfo();
-            statusCode = 5;
-            shopCanvas.SetActive(true);
-        }
-    }
-
-    public void OpenStaffMenu()
-    {
-        if (statusCode == 0)
-        {
-            statusCode = 6;
-            staffMenu.gameObject.SetActiveRecursively(true);
-        }
-    }
-
     public bool paused = false;
 
-    void OnApplicationQuit()
-    {
-        // close off all open threads - memory issues
-        ticketQueue.End();
-    }
 
-    void OnApplicationPause(bool pauseStatus)
-    {
-        paused = pauseStatus;
+    float queueCount = 0;
+    float ticketStaffLevel = 4.5f;
 
-        if (simulationRunning)
-        {
-            if (pauseStatus)
-            {
-                ticketQueue.Pause();
-            }
-            else
-            {
-                ticketQueue.Resume();
-            }
-        }
-    }
+
+    #endregion
 
 
 
-
-    //Texture2D profPic;
-
-    //IEnumerator UserImage()
-    //{
-    //    WWW url = new WWW("https://graph.facebook.com/110133299400417/picture?type=large");
-
-    //    Texture2D textFb2 = new Texture2D(128, 128, TextureFormat.DXT1, false); //TextureFormat must be DXT5
-    //    yield return url;
-    //    url.LoadImageIntoTexture(textFb2);
-    //    profPic = textFb2;
-    //}
 
     // Use this for initialization
     void Start()
@@ -277,10 +232,8 @@ public class Controller : MonoBehaviour
         #endregion
 
         #region Add Delegate references
-        mouseDrag.getStaffListSize += GetStaffSize;
         mouseDrag.getStaffJobById += GetStaffJobById;
         mouseDrag.changeStaffJob += UpdateStaffJob;
-        mouseDrag.getStaffList += GetFullStaffList;
         movementScript.addToQueueTickets += AddToQueueTickets;
         movementScript.getQueueTicketsSize += GetTicketQueueSize;
         movementScript.addToQueueFood += AddToQueueFood;
@@ -681,11 +634,67 @@ public class Controller : MonoBehaviour
 
         dayLabel.text = "DAY: " + currDay.ToString();
         popcornLabel.text = numPopcorn.ToString();
-
-        Save();
-        
+                
+    }
+    
+    /// <summary>
+    /// When the application is closed
+    /// </summary>
+    void OnApplicationQuit()
+    {
+        // close off all open threads - memory issues
+        ticketQueue.End();
     }
 
+    /// <summary>
+    /// When the application is paused
+    /// </summary>
+    /// <param name="pauseStatus">Current paused state of the game</param>
+    void OnApplicationPause(bool pauseStatus)
+    {
+        paused = pauseStatus;
+
+        if (simulationRunning)
+        {
+            if (pauseStatus)
+            {
+                ticketQueue.Pause();
+            }
+            else
+            {
+                ticketQueue.Resume();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Open the shop menu
+    /// </summary>
+    public void OpenShop()
+    {
+        if (statusCode != 2 && statusCode != 8 && statusCode != 9)
+        {
+            HideObjectInfo();
+            statusCode = 5;
+            shopCanvas.SetActive(true);
+        }
+    }
+
+    /// <summary>
+    /// Open the staff menu - list of all staff members
+    /// </summary>
+    public void OpenStaffMenu()
+    {
+        if (statusCode == 0)
+        {
+            statusCode = 6;
+            staffMenu.gameObject.SetActiveRecursively(true);
+        }
+    }
+
+    /// <summary>
+    /// When the food area upgrades have been completed
+    /// </summary>
     public void FoodUpgradesDone()
     {
         statusCode = 0;
@@ -715,15 +724,27 @@ public class Controller : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Get the size of the ticket queue
+    /// </summary>
+    /// <returns>The size of the queue</returns>
     public int GetTicketQueueSize()
     {
         return ticketQueue.GetQueueSize();
     }
+
+    /// <summary>
+    /// Get the size of the food queue
+    /// </summary>
+    /// <returns>The size of the food queue</returns>
     public int GetFoodQueueSize()
     {
         return foodQueue.GetQueueSize();
     }
 
+    /// <summary>
+    /// Hide the popup option
+    /// </summary>
     public void HidePopup()
     {
         popup.SetActive(false);
@@ -748,15 +769,39 @@ public class Controller : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Open the menu for displaying the list of facebook friends
+    /// </summary>
+    public void OpenFacebookFriends()
+    {
+        statusCode = 55;
+        friendList.GetComponentsInParent<Canvas>()[0].enabled = true;
+    }
+
+    /// <summary>
+    /// Get a path to a screen
+    /// </summary>
+    /// <param name="index">Which screen to get a path to</param>
+    /// <returns>The path to the screen</returns>
     public List<Coordinate> GetScreenPath(int index)
     {
         return this.ticketToScreen[index];
     }
+
+    /// <summary>
+    /// Get a path from the food area to a screen
+    /// </summary>
+    /// <param name="index">Which screen to get a path to</param>
+    /// <returns></returns>
     public List<Coordinate> GetFoodToScreenPath(int index)
     {
         return foodToScreen[index];
     }
 
+    /// <summary>
+    /// Get a path to the food area
+    /// </summary>
+    /// <returns></returns>
     public List<Coordinate> GetPathToFood()
     {
         return this.ticketToFood;
@@ -861,14 +906,24 @@ public class Controller : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Create a new builder
+    /// </summary>
+    /// <param name="x">The x position to place the builder in</param>
+    /// <param name="y">The y position to place the builder in</param>
+    /// <param name="screenNum">Which screen the builder is associated with</param>
     public void CreateBuilder(float x, float y, int screenNum)
     {
         GameObject builder = Instantiate(builderPrefab.gameObject, new Vector2(x + 1.8f, 0.8f * y + 0.7f), Quaternion.identity) as GameObject;
         builder.name = "BuilderForScreen#" + screenNum;
     }
-
-    List<GameObject> staffMenuList = new List<GameObject>();
-
+    
+    /// <summary>
+    /// Create a staff member
+    /// </summary>
+    /// <param name="staff">The staff member object associated with the Game Object</param>
+    /// <param name="xPos">The x position of the staff member</param>
+    /// <param name="yPos">The y position of the staff member</param>
     void CreateStaff(StaffMember staff, int xPos, int yPos)
     {
         // get the colours to set the components to
@@ -956,6 +1011,10 @@ public class Controller : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// View staff member information for a specific member
+    /// </summary>
+    /// <param name="staffID">The index of the staff member to view</param>
     public void ViewStaffMemberInfo(int staffID)
     {
         statusCode = 7;
@@ -1017,6 +1076,10 @@ public class Controller : MonoBehaviour
 
     }
     
+    /// <summary>
+    /// Move the camera to the location of the staff member
+    /// </summary>
+    /// <param name="staffID">The ID of the staff member to move to</param>
     public void MoveToStaffLocation(int staffID)
     {
         statusCode = 50;
@@ -1028,6 +1091,10 @@ public class Controller : MonoBehaviour
         Camera.main.GetComponent<CameraControls>().endPos = pos;
     }
 
+    /// <summary>
+    /// Upgrade an attribute of the staff member
+    /// </summary>
+    /// <param name="index">The index of the staff member to upgrade the attribute of</param>
     public void UpgradeStaffAttribute(int index)
     {
         staffMembers[selectedStaff].Upgrade(index);
@@ -1039,6 +1106,14 @@ public class Controller : MonoBehaviour
         imgs[9 + (index * 4)].fillAmount = 0.25f * attributeEffected;
     }
 
+    /// <summary>
+    /// Change the color of components
+    /// </summary>
+    /// <param name="c">Which colour to change to</param>
+    /// <param name="x">The starting x coordinate</param>
+    /// <param name="y">The starting y coordinate</param>
+    /// <param name="width">The number of tiles to alter in the x axis - moving to the right</param>
+    /// <param name="height">The number of tiles to alter in they y axis - moving up</param>
     public void ChangeColour(Color c, int x, int y, int width, int height)
     {
         for (int i = y; i < y + height; i++)
@@ -1051,6 +1126,9 @@ public class Controller : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sell an object 
+    /// </summary>
     public void SellItem()
     {
         if (theScreens.Count > 1 || !objectSelected.Contains("Screen"))
@@ -1078,10 +1156,16 @@ public class Controller : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Get the width of an object
+    /// </summary>
+    /// <returns></returns>
     public int GetWidthOfObject()
     {
+        // switch on the tag of the item that was selected
         switch (tagSelected)
         {
+            // return the appropriate width based on the tag
             case "Screen":
                 return 11;
             case "Vending Machine":
@@ -1093,10 +1177,17 @@ public class Controller : MonoBehaviour
             default: return 0;
         }
     }
+
+    /// <summary>
+    /// Get the height of the object
+    /// </summary>
+    /// <returns>The tag that was selected</returns>
     public int GetHeightOfObject()
     {
+        // swich on the tag that was selected
         switch (tagSelected)
         {
+            // return the approopriate height based on the tag
             case "Screen":
                 return 15;
             case "Vending Machine":
@@ -1108,11 +1199,20 @@ public class Controller : MonoBehaviour
             default: return 0;
         }
     }
+
+    /// <summary>
+    /// Get the position of the of an object
+    /// </summary>
+    /// <returns>The position of the object</returns>
     public Vector2 GetPositionOfObject()
     {
         return GameObject.Find(objectSelected).transform.position;
     }
 
+    /// <summary>
+    /// Calculate how many coins should be returned once an object is sold
+    /// </summary>
+    /// <returns>How many coins should be returned</returns>
     public int GetReturnedCoins()
     {
         int paidMoney = 0;
@@ -1156,6 +1256,9 @@ public class Controller : MonoBehaviour
         return coinsReturned;
     }
 
+    /// <summary>
+    /// Upgrade an object
+    /// </summary>
     public void Upgrade()
     {
         if (objectSelected.Equals("Box Office"))
@@ -1228,6 +1331,14 @@ public class Controller : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// update the state of tiles
+    /// </summary>
+    /// <param name="x">The starting x position</param>
+    /// <param name="y">The starting y position</param>
+    /// <param name="w">The width of the tiles to effect (how many tiles to move x)</param>
+    /// <param name="h">The height of the tiles to effect (how many tiles to move y)</param>
+    /// <param name="newState">Which state to change the tiles to</param>
     public void UpdateTiles(int x, int y, int w, int h, int newState)
     {
         if (updateTileState != null)
@@ -1236,6 +1347,14 @@ public class Controller : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// DUPLICATE OF THE ABOVE
+    /// </summary>
+    /// <param name="newState"></param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
     void SetTiles(int newState, int x, int y, int width, int height)
     {
         Color newColour;
@@ -1247,6 +1366,11 @@ public class Controller : MonoBehaviour
         UpdateTiles(x, y, width, height, newState);
     }
 
+    /// <summary>
+    /// Show the popup box
+    /// </summary>
+    /// <param name="status">The status to return to once the popup has been closed</param>
+    /// <param name="theString">The message to display</param>
     public void ShowPopup(int status, string theString)
     {
         newStatusCode = status;
@@ -1255,6 +1379,9 @@ public class Controller : MonoBehaviour
         texts[1].text = theString;
     }
 
+    /// <summary>
+    /// Hide all menus
+    /// </summary>
     public void HideObjectInfo()
     {
         shopCanvas.SetActive(false);
@@ -1263,6 +1390,7 @@ public class Controller : MonoBehaviour
         staffMenu.gameObject.SetActive(false);
         colourPicker.SetActive(false);
         staffMemberInfo.SetActive(false);
+        friendList.GetComponentsInParent<Canvas>()[0].enabled = false;
 
         statusCode = 0;
         objectSelected = "";
@@ -1270,81 +1398,15 @@ public class Controller : MonoBehaviour
         upgradeLevelSelected = 0;
         selectedStaff = -1;
     }
-
-    void NewColourButton(int row, int column, bool texture)
-    {
-        GameObject gO = new GameObject();
-        gO.name = "ColorCircle~" + row + "~" + column;
-        gO.tag = "Colour Button";
-        gO.AddComponent<Image>();
-
-        if (!texture)
-        {
-            gO.GetComponent<Image>().sprite = colourCircle;
-
-            float r, g, b;
-
-            float columnMultiple = (column * 0.2f);
-
-            if (row == 0)
-            {
-                r = 1 - columnMultiple;
-                g = columnMultiple;
-                b = 0;
-            }
-            else if (row == 1)
-            {
-                r = 0;
-                g = 1 - columnMultiple;
-                b = columnMultiple;
-            }
-            else
-            {
-                r = columnMultiple;
-                g = 0;
-                b = 1 - columnMultiple;
-            }
-            gO.GetComponent<Image>().color = new Color(r, g, b, 100);
-        }
-        else
-        {
-            gO.GetComponent<Image>().sprite = marbleBackground;
-            //gO.tag = "untagged";
-        }
-
-
-        //// create an Image
-        //SpriteRenderer theRenderer = gO.AddComponent<SpriteRenderer>();
-        //theRenderer.sprite = ColourBackground;
-
-        gO.GetComponent<Image>().rectTransform.sizeDelta = new Vector3(15, 15);
-        gO.transform.SetParent(colourPicker.transform);
-
-        gO.transform.localPosition = new Vector3(column * 20 - 60, row * 30, 0);
-
-        gO.AddComponent<Button>();
-        Button btn = gO.GetComponent<Button>();
-        // btn.onClick.AddListener(() => colourClicked(gO.GetComponent<Image>().color, gO.GetComponent<Image>().sprite));
-    }
-
-    void CreateColourPicker()
-    {
-        Image[,] colours = new Image[3, 6];
-
-        for (int row = 0; row < 3; row++)
-        {
-            for (int column = 0; column < 2; column++)
-            {
-                NewColourButton(row, column, false);
-            }
-        }
-
-        NewColourButton(0, 2, true);
-
-    }
-
+    
+    /// <summary>
+    /// Get a colour based on the id of it
+    /// </summary>
+    /// <param name="id">The id to get a colour for</param>
+    /// <returns>The colour associated with the id</returns>
     Color GetColourFromID(int id)
     {
+        // return the relevant colour based on the id
         switch (id)
         {
             case 0: return new Color(0.663f, 0.149f, 0.149f);
@@ -1358,6 +1420,11 @@ public class Controller : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Get a marble floor sprite based on an id
+    /// </summary>
+    /// <param name="id">The id of the required sprite</param>
+    /// <returns>The sprites to use</returns>
     Sprite[] GetSpriteFromID(int id)
     {
         switch (id)
@@ -1367,6 +1434,10 @@ public class Controller : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// When a colour (carpet menu) has been selected)
+    /// </summary>
+    /// <param name="id"></param>
     public void colourClicked(int id)
     {
         carpetColour = GetColourFromID(id);
@@ -1382,12 +1453,18 @@ public class Controller : MonoBehaviour
         CarpetRollScript.current.Begin(carpetColour, this, s);
     }
 
+    /// <summary>
+    /// Show the colour picker menu (carpet)
+    /// </summary>
     public void ShowColourPicker()
     {
         colourPicker.SetActive(!colourPicker.active);
         shopCanvas.SetActive(false);
     }
 
+    /// <summary>
+    /// Reset the position of the staff
+    /// </summary>
     void ResetStaff()
     {
         GameObject[] staffObjects = GameObject.FindGameObjectsWithTag("Staff");
@@ -1417,6 +1494,9 @@ public class Controller : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// Start the business day
+    /// </summary>
     public void StartDay()
     {
         // check if any screens available
@@ -1520,6 +1600,9 @@ public class Controller : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Clear all the projector icons from the screen
+    /// </summary>
     public void ClearAllProjectors()
     {
         GameObject[] projectors = GameObject.FindGameObjectsWithTag("Projector");
@@ -1541,6 +1624,10 @@ public class Controller : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Move on to the next day
+    /// </summary>
+    /// <param name="shouldCollect">Whether or not earnings should be collected for that day</param>
     public void NextDay(bool shouldCollect)
     {
         // update the reputation fields
@@ -1730,11 +1817,17 @@ public class Controller : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// After 7 days, move to next week - new show times etc
+    /// </summary>
     void NextWeek()
     {
         NewShowTimes();
     }
 
+    /// <summary>
+    /// Display the reputation menu
+    /// </summary>
     public void ViewReputation()
     {
         statusCode = 9;
@@ -1760,6 +1853,9 @@ public class Controller : MonoBehaviour
         imageElements[13].fillAmount = (float)reputation.GetStaffRating() / 25f;
     }
 
+    /// <summary>
+    /// Close the reputation menu
+    /// </summary>
     public void CloseReputation()
     {
         reputationPage.SetActive(false);
@@ -1767,6 +1863,10 @@ public class Controller : MonoBehaviour
         statusCode = 0;
     }
 
+    /// <summary>
+    /// Remove the builder guy
+    /// </summary>
+    /// <param name="screenNum">Which screen the builder is associated with</param>
     public void DestroyBuilderByScreenID(int screenNum)
     {
         GameObject[] builders = GameObject.FindGameObjectsWithTag("Builder");
@@ -1781,6 +1881,10 @@ public class Controller : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Calculate the number of coins that were generated today
+    /// </summary>
+    /// <returns>The number of coins earnt</returns>
     private int GetTodaysMoney()
     {
         int totalIntake = customerMoney;
@@ -1821,6 +1925,10 @@ public class Controller : MonoBehaviour
         return totalIntake;
     }
 
+    /// <summary>
+    /// Unlock a pack of posters
+    /// </summary>
+    /// <param name="index">The index of the poster pack (0 or 1)</param>
     public void UnlockPosterPack(int index)
     {
         postersUnlocked[index] = true;
@@ -1837,6 +1945,11 @@ public class Controller : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Get the value of tickets sold for a specific screen
+    /// </summary>
+    /// <param name="screen">The Screen object to get the tickets for</param>
+    /// <returns>The value of tickets sold</returns>
     public int GetTicketsSoldValue(ScreenObject screen)
     {
         UnityEngine.Random ran = new UnityEngine.Random();
@@ -1849,6 +1962,11 @@ public class Controller : MonoBehaviour
         return ticketsSold;
     }
 
+    /// <summary>
+    /// Get a show time for a showing
+    /// </summary>
+    /// <param name="i">First, second, or third showing</param>
+    /// <returns>The time of the showing</returns>
     private TimeTuple GetShowTime(int i)
     {
         int startTime = UnityEngine.Random.Range(0, 5);
@@ -1874,7 +1992,10 @@ public class Controller : MonoBehaviour
         return toReturn;
 
     }
-
+    
+    /// <summary>
+    /// Generate new show times
+    /// </summary>
     public void NewShowTimes()
     {
         allCustomers.Clear();
@@ -1903,9 +2024,10 @@ public class Controller : MonoBehaviour
         }
     }
 
-    float queueCount = 0;
-    float ticketStaffLevel = 4.5f;
-
+    /// <summary>
+    /// When the object move has been complete
+    /// </summary>
+    /// <param name="confirmed">Whether the move was confirmed (true) or cancelled (false)</param>
     public void ObjectMoveComplete(bool confirmed)
     {
         statusCode = 0;
@@ -2168,6 +2290,9 @@ public class Controller : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Show all the building and staff members (after they were hidden while moving objects)
+    /// </summary>
     public void ReShowStaffAndBuildings()
     {
         GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
@@ -2214,6 +2339,10 @@ public class Controller : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Get the cost of adding a ew object
+    /// </summary>
+    /// <returns>The number of coins / popcorn to spend</returns>
     int GetCost()
     {
         switch (objectSelected.ToUpper())
@@ -2227,6 +2356,10 @@ public class Controller : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Get which currency is used for the relevant object type
+    /// </summary>
+    /// <returns>0 for coins, 1 for popcorn</returns>
     String GetCurrency()
     {
         // 0 = coins, 1 = popcorn
@@ -2240,6 +2373,11 @@ public class Controller : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Add a new object to the cinema
+    /// </summary>
+    /// <param name="x">The x position to add it in</param>
+    /// <param name="y">The y position to add it in</param>
     public void AddNewObject(int x, int y)
     {
         confirmMovePanel.SetActive(false);
@@ -2430,6 +2568,9 @@ public class Controller : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Check for paths to all the screens
+    /// </summary>
     public void CheckForPath()
     {
         List<int> unreachableScreens = theTileManager.IsPathAvailable();
@@ -2454,13 +2595,18 @@ public class Controller : MonoBehaviour
         warningPanel.SetActive(false);
     }
 
+    /// <summary>
+    /// Display a warning that one (or more) of the screens are inaccessible
+    /// </summary>
     public void DisplayWarning()
     {
         warningPanel.SetActive(!warningPanel.active);
     }
-
-    public GameObject popupBox;
-
+    
+    /// <summary>
+    /// Check the position of the staff members (after an object move)
+    /// </summary>
+    /// <param name="go">The game object which was moved</param>
     void CheckStaffPosition(GameObject go)
     {
         Bounds objectBounds;
@@ -2593,6 +2739,13 @@ public class Controller : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Shows the popup at the end of the day - displays the days earnings etc
+    /// </summary>
+    /// <param name="todaysMoney">Coins earnt today</param>
+    /// <param name="walkouts">Number of customers who walked out</param>
+    /// <param name="repChange">How much the reputation of the cinema changed</param>
+    /// <param name="numCustomers">The number of customers who were served</param>
     public void ShowEndOfDayPopup(int todaysMoney, int walkouts, int repChange, int numCustomers)
     {
 
@@ -2612,6 +2765,9 @@ public class Controller : MonoBehaviour
 
     }
     
+    /// <summary>
+    /// Move an object
+    /// </summary>
     public void MoveScreen()
     {
 
@@ -2773,6 +2929,11 @@ public class Controller : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Place a new object
+    /// </summary>
+    /// <param name="width">The width of the object (number of tiles)</param>
+    /// <param name="height">The height of the object (number of tiles)</param>
     public void PlaceObject(int width, int height)
     {
 
@@ -2852,6 +3013,13 @@ public class Controller : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Remove an object from the cinema
+    /// </summary>
+    /// <param name="x">The x coordinate of the item to remove</param>
+    /// <param name="y">The y coordinate of the item to remove</param>
+    /// <param name="w">How many tiles wide the item to remove is</param>
+    /// <param name="h">How many tiles high the item to remove is</param>
     public void RemoveObject(int x, int y, int w, int h)
     {
         if (tagSelected.Equals("Food Area"))
@@ -2949,6 +3117,9 @@ public class Controller : MonoBehaviour
         theTileManager.ShowOutput();
     }
 
+    /// <summary>
+    /// Save the current state of the game (both locally, and on Facebook)
+    /// </summary>
     void Save()
     {
         BinaryFormatter formatter = new BinaryFormatter();
@@ -2956,11 +3127,49 @@ public class Controller : MonoBehaviour
 
         PlayerData data = new PlayerData(theScreens, carpetColour, staffMembers, filmShowings, totalCoins, currDay, numPopcorn, otherObjects, hasUnlockedRedCarpet, isMarbleFloor, reputation, boxOfficeLevel, foodArea, postersUnlocked);
 
-
         formatter.Serialize(file, data);
+
         file.Close();
+
+        // save to database
+        if (facebookProfile != null && facebookProfile.id.Length > 0)
+        {
+            byte[] ba = ConvertToByteArray();
+
+            UpdateDetails ud = new UpdateDetails();
+            ud.DoUpdate(facebookProfile.id, ba);
+
+        }
+        
+    }
+    
+    /// <summary>
+    /// Convert the contents of a file to a BLOB
+    /// </summary>
+    /// <returns></returns>
+    byte[] ConvertToByteArray()
+    {
+        byte[] byteArray = null;
+
+        string fileName = Application.persistentDataPath + "/saveState.gd";
+        
+        using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+        {
+            byteArray = new byte[fs.Length];
+
+            int iBytesRead = fs.Read(byteArray, 0, (int)fs.Length);
+        }
+
+        return byteArray;
+
     }
 
+    /// <summary>
+    /// Hiring a new staff member (after the appearance has been selected)
+    /// </summary>
+    /// <param name="name">The staff members name</param>
+    /// <param name="hID">The ID of the hair sprite to use</param>
+    /// <param name="eID">The ID of the extras sprite to use</param>
     public void AddStaffMember(String name, int hID, int eID)
     {
         int id = staffMembers.Count;
@@ -2998,12 +3207,14 @@ public class Controller : MonoBehaviour
         }
         
     }
-
-    public int GetStaffSize()
-    {
-        return staffMembers.Count;
-    }
-
+    
+    /// <summary>
+    /// Update the Job allocated to a staff member
+    /// </summary>
+    /// <param name="index">The index of the staff member</param>
+    /// <param name="job">The job ID to change to</param>
+    /// <param name="posInPost">Which slot in that post they are allocated to</param>
+    /// <param name="add">Whether they are being added (true) or removed (false)</param>
     public void UpdateStaffJob(int index, int job, int posInPost, bool add)
     {
 
@@ -3042,7 +3253,10 @@ public class Controller : MonoBehaviour
         
         //UpdateJobList();
     }
-
+    
+    /// <summary>
+    /// Make the objects semi-transparent (for when moving other objects)
+    /// </summary>
     public void SemiTransparentObjects()
     {
         for (int i = 0; i < screenObjectList.Count; i++)
@@ -3057,12 +3271,23 @@ public class Controller : MonoBehaviour
         redCarpet.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.3f);
     }
 
+    /// <summary>
+    /// An item has been selected from the shop
+    /// </summary>
+    /// <param name="w">The width of the item</param>
+    /// <param name="h">The height of the item</param>
+    /// <param name="type">The type of object selected</param>
     public void ShopItemSelected(int w, int h, string type)
     {
         objectSelected = "NEW " + type;
         PlaceObject(w, h);
     }
 
+    /// <summary>
+    /// Get the description of the job post based on its ID
+    /// </summary>
+    /// <param name="index">The index of the job</param>
+    /// <returns>The string describing the job</returns>
     string JobTextFromID(int index)
     {
         switch (index)
@@ -3076,8 +3301,21 @@ public class Controller : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Get the job ID of a staff member - based on the staff member iD
+    /// </summary>
+    /// <param name="index">The ID of the staff member</param>
+    /// <returns>The Job ID of the staff member</returns>
     public int GetStaffJobById(int index) { return staffMembers[index].GetJobID(); }
 
+    /// <summary>
+    /// Show the building menu (object info)
+    /// </summary>
+    /// <param name="line1">The first line to display</param>
+    /// <param name="line2">The seconf line to display</param>
+    /// <param name="theImage">Which image to use</param>
+    /// <param name="constrDone">How many days of construction have been done</param>
+    /// <param name="constrTotal">How many days of construction were needed to begin with</param>
     void ShowBuildingOptions(string line1, string line2, Sprite theImage, int constrDone, int constrTotal)
     {
         objectInfo.SetActive(true);
@@ -3156,16 +3394,20 @@ public class Controller : MonoBehaviour
         
 
     }
-
-    public List<StaffMember> GetFullStaffList()
-    {
-        return staffMembers;
-    }
-
+    
+    /// <summary>
+    /// Add a customer to the ticket queue
+    /// </summary>
+    /// <param name="customer">The customer to add</param>
     private void AddToQueueTickets(Customer customer)
     {
         ticketQueue.AddCustomer(customer);
     }
+
+    /// <summary>
+    /// Add a customer to the food queue
+    /// </summary>
+    /// <param name="customer">The customer to add</param>
     private void AddToQueueFood(Customer customer)
     {
         foodQueue.AddCustomer(customer);

@@ -4,6 +4,8 @@ using UnityEngine.SceneManagement;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine.UI;
+using System.Net;
+using Assets.Classes;
 
 public class ButtonScript : MonoBehaviour {
 
@@ -39,6 +41,13 @@ public class ButtonScript : MonoBehaviour {
     public void NewGame()
     {
 
+        string fbID = FBScript.current.id;
+
+
+        Login l = new Login();
+        l.DoLogin(fbID);
+
+
         loadImage.enabled = true;
 
         // make the load game details = null
@@ -66,22 +75,33 @@ public class ButtonScript : MonoBehaviour {
     /// <returns>The player details - to load into the game</returns>
     PlayerData Load()
     {
-        // if the file exists
-        if (File.Exists(Application.persistentDataPath + "/saveState.gd"))
+
+        if (FBScript.current.id.Length > 0)
         {
-            // create a Binary Formatter
-            BinaryFormatter formatter = new BinaryFormatter();
+            string fbID = FBScript.current.id;
 
-            // read the contents of the save game file
-            FileStream file = File.Open(Application.persistentDataPath + "/saveState.gd", FileMode.Open);
-            file.Position = 0;
 
-            // deserialise the data and store it
-            PlayerData pd = (PlayerData)formatter.Deserialize(file);
 
-            file.Close();
+        }
+        else { 
+            // if the file exists
+            if (File.Exists(Application.persistentDataPath + "/saveState.gd"))
+            {
+                // create a Binary Formatter
+                BinaryFormatter formatter = new BinaryFormatter();
 
-            return pd;
+                // read the contents of the save game file
+                FileStream file = File.Open(Application.persistentDataPath + "/saveState.gd", FileMode.Open);
+                file.Position = 0;
+
+                // deserialise the data and store it
+                PlayerData pd = (PlayerData)formatter.Deserialize(file);
+
+                file.Close();
+
+                return pd;
+            }
+
         }
 
         return null;

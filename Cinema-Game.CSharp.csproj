@@ -80,12 +80,14 @@
     <Compile Include="Assets\Classes\Floor.cs" />
     <Compile Include="Assets\Classes\FloorTile.cs" />
     <Compile Include="Assets\Classes\FoodArea.cs" />
+    <Compile Include="Assets\Classes\Login.cs" />
     <Compile Include="Assets\Classes\Node.cs" />
     <Compile Include="Assets\Classes\Reputation.cs" />
     <Compile Include="Assets\Classes\SaveableStaff.cs" />
     <Compile Include="Assets\Classes\ScreenObject.cs" />
     <Compile Include="Assets\Classes\StaffMember.cs" />
     <Compile Include="Assets\Classes\TimeTuple.cs" />
+    <Compile Include="Assets\Classes\UpdateDetails.cs" />
     <Compile Include="Assets\FBScript.cs" />
     <Compile Include="Assets\FacebookSDK\Examples\Scripts\ConsoleBase.cs" />
     <Compile Include="Assets\FacebookSDK\Examples\Scripts\LogView.cs" />

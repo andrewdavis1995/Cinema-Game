@@ -282,7 +282,14 @@ public class ConfirmationScript : MonoBehaviour {
                 case 10:
                         mainController.UnlockPosterPack(1);                    
                     break;
-                    #endregion
+                #endregion
+
+                #region Coin Bundle (8000)
+                case 11:
+                    mainController.totalCoins += 8000;
+                    mainController.coinLabel.text = mainController.totalCoins.ToString();
+                    break;
+                #endregion
             }
             #endregion
         }

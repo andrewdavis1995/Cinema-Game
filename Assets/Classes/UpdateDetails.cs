@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using UnityEngine;
 
 namespace Assets.Classes
 {
@@ -13,17 +14,35 @@ namespace Assets.Classes
         {
             
             int blobLength = theBlob.Length;
-            string blobString = System.Text.Encoding.Default.GetString(theBlob);
+            string blobString = System.Text.Encoding.Default.GetString(theBlob, 0, blobLength);
+            string thrh = Encoding.UTF8.GetString(theBlob);
+            string bobTheBlob = Convert.ToString(theBlob);
+            var fileData = Convert.ToBase64String(theBlob, Base64FormattingOptions.InsertLineBreaks);
+            string response3 = System.Text.Encoding.ASCII.GetString(theBlob);
+            string response2 = System.Text.Encoding.UTF8.GetString(theBlob);
+
+            int count = fileData.Length;
+
+            Debug.Log(fileData.Length);
 
             // database stuff
-            string url = "http://silva.computing.dundee.ac.uk/2015-gamesandrewdavis/SaveGame?fbID=" + id + "&theBlob=" + blobString;
+            string url = "http://silva.computing.dundee.ac.uk/2015-gamesandrewdavis/SaveGame?fbID=" + id + "&theBlob=\"" + fileData + "\"";
             
+
+
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = "POST";
             request.ContentType = "text/xml;charset=UTF-8";
 
 
+            request.GetRequestStream().Write(theBlob, 0, theBlob.Length);
+
+
+
+
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+            Debug.Log("POO");
 
         }
 

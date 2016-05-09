@@ -44,8 +44,8 @@ public class ButtonScript : MonoBehaviour {
         string fbID = FBScript.current.id;
 
 
-        Login l = new Login();
-        l.DoLogin(fbID);
+        //Login l = new Login();
+        //l.DoLogin(fbID);
 
 
         loadImage.enabled = true;
@@ -80,8 +80,9 @@ public class ButtonScript : MonoBehaviour {
         {
             string fbID = FBScript.current.id;
 
-
-
+            Login l = new Login();
+            l.DoLogin(fbID);
+            
         }
         else { 
             // if the file exists

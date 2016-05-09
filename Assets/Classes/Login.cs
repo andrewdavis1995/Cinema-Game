@@ -19,97 +19,70 @@ namespace Assets.Classes
             string url = "http://silva.computing.dundee.ac.uk/2015-gamesandrewdavis/Login?fbID=" + id;
 
 
-            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            //request.Method = "POST";
-            //request.ContentType = "text/html;charset=UTF-8";
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "POST";
+            request.ContentType = "text/xml;charset=UTF-8";
+            
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
+            Stream rrr = response.GetResponseStream();
 
-            //request.se
+            StreamReader sr = new StreamReader(rrr);
 
-            // Execute the request
-
-            //HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
-            //Stream rrr = response.GetResponseStream();
-
-            //StreamReader sr = new StreamReader(rrr);
-
-            //string blobData = sr.ReadToEnd();
-
-            Debug.Log("POO");
-
-
-            //string ownerName = "";
-
-            //using (XmlReader reader = XmlReader.Create(new StringReader(xml)))
-            //{
-
-            //    string type = "";
-
-            //    // Parse the file and display each of the nodes.
-            //    while (reader.Read())
-            //    {
-
-
-            //        switch (reader.NodeType)
-            //        {
-            //            case XmlNodeType.Element:
-            //                type = reader.Name;
-            //                break;
-            //            case XmlNodeType.Text:
-            //                if (type.Equals("owner"))
-            //                {
-            //                    ownerName = reader.Value;
-            //                }
-            //                break;
-            //        }
-            //    }
-            //}
-
-            //Debug.Log(ownerName);
+            string blobData = sr.ReadToEnd();
 
 
 
 
+            XmlDocument document = new XmlDocument();
+            document.LoadXml(blobData);
+
+
+            XmlNodeList cinemaData = document.GetElementsByTagName("data");
+
+            string code = cinemaData[0].InnerText;
 
 
 
 
+            int mod4 = code.Length % 4;
+
+            if (mod4 > 0)
+            {
+                code += new string('=', 4-mod4);
+            }
+
+            
+            byte[] bytes = System.Convert.FromBase64String(code);
+            //System.IO.File.WriteAllBytes(Application.persistentDataPath + "/test.test", bytes);
 
 
+            //System.IO.StreamWriter file2 = new System.IO.StreamWriter("C:/Users/asuth/Documents/test.icles", false);
+
+            //StreamWriter sw = new StreamWriter(Application.persistentDataPath + "/test.icles");
+            //sw.Write(bytes);
+
+            //file2.Write(bytes);
 
 
+            System.IO.File.WriteAllBytes(Application.persistentDataPath + "/test.icles", bytes);
 
-            // write to test
-
-
-
-            string ggg = "ÿÿÿÿAssembly-CSharpPlayerDatatheScreenscarpetColourstaffMembersfilmShowingstotalCoinsnumPopcorncurrentDayotherObjectshasRedCarpetmarbleFloorreputationboxOfficeLevelfoodAreapostersScreenObject[]Assets.Classes.SaveableStaff[]FilmShowing[]OtherObject[]Assets.Classes.ReputationAssets.Classes.FoodArea 			@œ			ScreenObject	oƒ:×£°>^º)?€?Assets.Classes.SaveableStaffFilmShowing			OtherObjectAssets.Classes.Reputationoverall publicitystaffspeedfacilitiestotalSpeedValuesnumCustomersServedhighestReputationtotalCoinIncometotalQuestionCountcurrDay	ScreenObject screenNumbercapacityupgradeLevelconstructionInProgressconstructionTimeRemainingprojectorClicksRemainingcurrBrokenCountpointXpointYFilmShowingscreeningID screenNumticketsSoldtimeHtimeMtheFloorAssets.Classes.Floor			Assets.Classes.FloorfloorTileswidthheightAssets.Classes.FloorTile[,] P((PAssets.Classes.FloorTile																	!	\"";
-
-
-            System.IO.File.WriteAllText(Application.persistentDataPath + "/test.test", ggg);
-
-
-
+            //sw.Close();
+            //file2.Close();
 
 
             // create a Binary Formatter
             BinaryFormatter formatter = new BinaryFormatter();
 
             // read the contents of the save game file
-            FileStream file = File.Open(Application.persistentDataPath + "/test.test", FileMode.Open);
+            //FileStream file = File.Open(Application.persistentDataPath + "/test.icles", FileMode.Open);
+            FileStream file = File.Open(Application.persistentDataPath + "/test.icles", FileMode.Open);
             file.Position = 0;
 
             // deserialise the data and store it
             PlayerData pd = (PlayerData)formatter.Deserialize(file);
-
-
+            
             Debug.Log("dfgfdg");
-
-
-
-
-
 
         }            
 

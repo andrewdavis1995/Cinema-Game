@@ -143,7 +143,7 @@ public class ShopScript : MonoBehaviour
                 }
                 break;
             #endregion
-                
+
             #region Posters 2
             case 9: // posters 2
                 if (!mainController.postersUnlocked[1])
@@ -154,6 +154,12 @@ public class ShopScript : MonoBehaviour
                 {
                     mainController.ShowPopup(5, "You already own this item!");
                 }
+                break;
+            #endregion
+
+            #region Coin bundle (8000)
+            case 10: // posters 2
+                ConfirmationScript.OptionSelected(11, new string[] { "buy this bundle?", "6", "1" }, "This will cost: ");
                 break;
                 #endregion
         }
@@ -183,14 +189,15 @@ public class ShopScript : MonoBehaviour
         {
             Image[] images = shopTabs[i].GetComponentsInChildren<Image>();
 
-            if (!shopTabs[i].name.Equals(shopTabs[index].name))
+            if (shopTabs[i].name.Equals(shopTabs[index].name))
             {
-                images[1].color = new Color(1, 0.8353f, 0);
+                images[1].color = new Color(0.796f, 0, 0);
             }
             else
             {
-                images[1].color = new Color(1, 0.5176f, 0);
+                images[1].color = new Color(0.529f, 0, 0);
             }
+
         }
 
         // put the close buttom above all 'panes'

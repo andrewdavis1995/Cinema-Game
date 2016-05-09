@@ -82,6 +82,8 @@
     <Compile Include="Assets\Classes\FoodArea.cs" />
     <Compile Include="Assets\Classes\Login.cs" />
     <Compile Include="Assets\Classes\Node.cs" />
+    <Compile Include="Assets\Classes\OtherObject.cs" />
+    <Compile Include="Assets\Classes\PlayerData.cs" />
     <Compile Include="Assets\Classes\Reputation.cs" />
     <Compile Include="Assets\Classes\SaveableStaff.cs" />
     <Compile Include="Assets\Classes\ScreenObject.cs" />

@@ -15,6 +15,7 @@ using System.Collections;
 public class Controller : MonoBehaviour
 {
     #region Variables
+    
     public int selectedStaff = -1;
     public int newStatusCode = 0;
 
@@ -28,10 +29,10 @@ public class Controller : MonoBehaviour
 
     public GameObject confirmBtn;
 
+    public GameObject[] walls;
+
     public Sprite[] boxOfficeImages;
     public int boxOfficeLevel = 0;
-
-    public GameObject[] walls;
 
     public Transform friendObject;
     public Transform friendList;
@@ -74,7 +75,6 @@ public class Controller : MonoBehaviour
     GameObject shopCanvas;
     GameObject steps;
     public GameObject closeInfo;
-    public GameObject closeColourPicker;
     GameObject moveButtons;
 
     public GameObject popup;
@@ -145,7 +145,7 @@ public class Controller : MonoBehaviour
 
     public GameObject[,] floorTiles;
 
-    public CustomerQueue ticketQueue = new CustomerQueue(11, 38.5f, 6.8f, 0);
+    public CustomerQueue ticketQueue;
     public CustomerQueue foodQueue;
 
     public bool simulationRunning = false;
@@ -183,6 +183,8 @@ public class Controller : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        ticketQueue = new CustomerQueue(11, 38.5f, 6.8f, 0);
+
         postersUnlocked = new bool[2];
 
         #region Find Objects
@@ -742,7 +744,7 @@ public class Controller : MonoBehaviour
     {
         return foodQueue.GetQueueSize();
     }
-
+    
     /// <summary>
     /// Hide the popup option
     /// </summary>
@@ -1236,9 +1238,48 @@ public class Controller : MonoBehaviour
                     {
                         ShowPopup(3, "Construction on this Screen is already in progress!");
                     }
+                    else
+                    {
+                        ShowPopup(3, "This Screen is already fully upgraded!");
+                    }
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Finish the construction of a screen - spend popcorn
+    /// </summary>
+    public void CompleteConstructionNow()
+    {
+        GameObject go = GameObject.Find(objectSelected);
+
+        ScreenObject so = go.GetComponent<Screen_Script>().theScreen;
+        so.UpgradeComplete();
+        //change image
+        go.GetComponent<SpriteRenderer>().sprite = screenImages[so.GetUpgradeLevel()];
+        HideObjectInfo();
+
+        DestroyBuilderByScreenID(so.GetScreenNumber());
+
+        NewShowTimes();
+    }
+
+    public void FinishConstruction()
+    {
+        GameObject go = GameObject.Find(objectSelected);
+
+        Screen_Script ss = go.GetComponent<Screen_Script>();
+
+        ScreenObject so = ss.theScreen;
+
+
+        int total = ss.GetUpgradeTime(so.GetUpgradeLevel());
+        int done = total - so.GetDaysOfConstruction();
+        
+        int cost = (int)(1.5 * (total - done));
+
+        ConfirmationScript.OptionSelected(12, new string[] {"Finish the work on this Screen now?", cost.ToString(), "1"}, "This will cost: ");
     }
 
     /// <summary>
@@ -1710,8 +1751,6 @@ public class Controller : MonoBehaviour
                         currentCount += filmShowings[j].GetTicketsSold();
                     }
 
-                    //List<Customer> tmp = filmShowings[k].CreateCustomerList(currentCount, this);
-                    //allCustomers.AddRange(tmp);
 
                     DestroyBuilderByScreenID(filmShowings[k].GetScreenNumber());
 
@@ -1732,9 +1771,7 @@ public class Controller : MonoBehaviour
             {
                 currentCount += filmShowings[j].GetTicketsSold();
             }
-
-            //List<Customer> tmp = filmShowings[i].CreateCustomerList(currentCount, this);
-            //allCustomers.AddRange(tmp);
+            
         }
 
         // update day output 
@@ -1785,7 +1822,7 @@ public class Controller : MonoBehaviour
         textElements[2].text = reputation.GetTotalCoins().ToString();
         textElements[4].text = reputation.GetOverall().ToString() + "%";
         textElements[5].text = reputation.GetTotalCustomers().ToString();
-        textElements[6].text = reputation.GetHighestRep().ToString();
+        textElements[6].text = reputation.GetHighestRep().ToString() + "%";
 
         textElements[9].text = (4 * reputation.GetSpeedRating()).ToString();
         textElements[11].text = (4 * reputation.GetPublicityRating()).ToString();
@@ -1904,7 +1941,7 @@ public class Controller : MonoBehaviour
         int max = screen.GetNumSeats();
         int ticketsSold = UnityEngine.Random.Range(min, max);
         float repMultiplier = reputation.GetMultiplier();
-        ticketsSold = (int)(ticketsSold * repMultiplier);
+        ticketsSold = 3 + (int)(ticketsSold * repMultiplier);
 
         return ticketsSold;
     }
@@ -2284,6 +2321,8 @@ public class Controller : MonoBehaviour
             }
         }
 
+        statusCode = 0;
+
     }
 
     /// <summary>
@@ -2659,7 +2698,7 @@ public class Controller : MonoBehaviour
     /// <param name="walkouts">Number of customers who walked out</param>
     /// <param name="repChange">How much the reputation of the cinema changed</param>
     /// <param name="numCustomers">The number of customers who were served</param>
-    public void ShowEndOfDayPopup(int todaysMoney, int walkouts, int repChange, int numCustomers, int popcornEarnt)
+    public void ShowEndOfDayPopup(int todaysMoney, int walkouts, int repChange, int numCustomers, int popcornEarned)
     {
 
         // get values here - pass some as parameters
@@ -2678,16 +2717,16 @@ public class Controller : MonoBehaviour
 
         popupBox.SetActiveRecursively(true);
 
-        if (popcornEarnt > 0)
+        if (popcornEarned > 0)
         {
-            GameObject.Find("pnlPopcornEarnt").SetActive(true);
+            GameObject go = GameObject.Find("pnlPopcornEarned");
+            go.SetActive(true);
+            Text[] lbls = go.GetComponentsInChildren<Text>();
+            lbls[0].text = "You have earned " + popcornEarned + " today";
         }
         else
         {
-            GameObject go = GameObject.Find("pnlPopcornEarnt");
-            go.SetActive(false);
-            Text[] lbls = go.GetComponentsInChildren<Text>();
-            lbls[0].text = "You have earnt " + popcornEarnt + " today";
+            GameObject.Find("pnlPopcornEarned").SetActive(false);
         }
 
     }
@@ -3254,8 +3293,7 @@ public class Controller : MonoBehaviour
         labels[0].text = line1;
         labels[1].text = line2;
         Image[] images = objectInfo.gameObject.GetComponentsInChildren<Image>();
-
-
+            
 
         images[3].sprite = theImage;
 
@@ -3312,6 +3350,13 @@ public class Controller : MonoBehaviour
 
             labels[2].text = constrDone + "/" + constrTotal;
 
+            // finish now
+            images[7].enabled = true;
+            images[8].enabled = true;
+            labels[4].enabled = true;
+            labels[4].text = "Finish work now for " + (int)(1.5*(constrTotal - constrDone)) + " popcorn";
+
+
         }
         else
         {
@@ -3320,6 +3365,12 @@ public class Controller : MonoBehaviour
             images[5].enabled = false;
             labels[3].enabled = false;
             labels[2].enabled = false;
+
+            // finish now
+            images[7].enabled = false;
+            images[8].enabled = false;
+            labels[4].enabled = false;
+
         }
 
 

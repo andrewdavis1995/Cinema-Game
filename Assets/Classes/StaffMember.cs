@@ -90,7 +90,7 @@ namespace Assets.Classes
         /// </summary>
         public void QuestionRaised()
         {
-            questionClicksRemaining += 15;
+            questionClicksRemaining += 9;
         }
 
         /// <summary>

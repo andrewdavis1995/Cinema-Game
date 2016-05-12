@@ -33,7 +33,7 @@ public class ConfirmationScript : MonoBehaviour {
     /// <summary>
     /// When the user has selected an option
     /// </summary>
-    /// <param name="code">The action code representing the action they wish to happen (0 = Add new item, 1 = Upgrade staff, 2 = Hire staff, 3 = Upgrade screen, 4 = Buy red carpet, 5 = Upgrade Box Office, 6 = Sell Object, 7 = Clear all projectors, 8 = Food Area unlocked)</param>
+    /// <param name="code">The action code representing the action they wish to happen (0 = Add new item, 1 = Upgrade staff, 2 = Hire staff, 3 = Upgrade screen, 4 = Buy red carpet, 5 = Upgrade Box Office, 6 = Sell Object, 7 = Clear all projectors, 8 = Food Area unlocked, 9 & 10 = Posters, 11 = Coin Bundle, 12 = Finish Construction)</param>
     /// <param name="p">The parameters associated with the action ([0] = Action string, [1] = cost, [2] = currency, [3->] = extras)</param>
     /// <param name="inOrOut"></param>
     public static void OptionSelected(int code, string[] p, string inOrOut)
@@ -290,6 +290,12 @@ public class ConfirmationScript : MonoBehaviour {
                     mainController.coinLabel.text = mainController.totalCoins.ToString();
                     break;
                 #endregion
+
+                #region Finish Construction
+                case 12:
+                    mainController.CompleteConstructionNow();
+                    break;
+                    #endregion
             }
             #endregion
         }

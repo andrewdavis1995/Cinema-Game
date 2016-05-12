@@ -37,7 +37,7 @@ namespace Assets.Classes
         public void Initialise()
         {
             // initial values
-            publicity = 5;
+            publicity = 0;
             staff = 2;
             speed = 8;
             facilities = 1;
@@ -61,7 +61,7 @@ namespace Assets.Classes
         public int GetFacilitiesRating() { return facilities; }
         public float GetMultiplier()
         {
-            return (float)overall / (float)75f;
+            return (float)overall / (float)50f;
         }
         #endregion
 
@@ -69,7 +69,7 @@ namespace Assets.Classes
         public void SetOverall()
         {
             // calculate the overall rating
-            overall = (int)((0.7f * (float)publicity) + (1.3f * (float)staff) + (0.6 * (float)speed) + facilities);
+            overall = (int)((0.5f * (float)publicity) + staff + (0.5 * (float)speed) + facilities);
 
             // cap at 100 - just in case
             if (overall > 100)

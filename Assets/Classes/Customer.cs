@@ -21,6 +21,7 @@ public class Customer
     public bool leaving;
     public bool hasLeftTheBuilding = false;
     public bool isBored = false;
+    public bool playSound = false;
     #endregion
 
     int index;
@@ -388,7 +389,7 @@ public class Customer
         transform.GetComponent<SpriteRenderer>().sortingLayerName = "Front";
         transform.GetComponent<SpriteRenderer>().sortingOrder = 70;
 
-        if (y > 1)
+        if (y > 0)
         {
             pointsToVisit = TileManager.floor.FindPath(x, y, 42, y - 1);
         }

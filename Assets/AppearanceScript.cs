@@ -116,6 +116,10 @@ public class AppearanceScript : MonoBehaviour {
 
     }
 
+    /// <summary>
+    /// Load the colours into local variables
+    /// </summary>
+    /// <param name="col"></param>
     public void LoadColours(Color[] col)
     {
         colours[2] = col[2];
@@ -125,6 +129,38 @@ public class AppearanceScript : MonoBehaviour {
         hands.color = col[2];
         head.color = col[2];
         extras.color = col[1];
+    }
+
+    /// <summary>
+    /// When the user changes the name in the text field
+    /// </summary>
+    public void NameChanged()
+    {
+        string fullName = txtName.text;
+        char[] chars = fullName.ToCharArray();
+
+        string output = "";
+
+        for(int i = 0; i < chars.Length; i++)
+        {
+            bool valid = false;
+
+            if (char.ToLower(chars[i]) >= 'a' && char.ToLower(chars[i]) <= 'z')
+            {
+                valid = true;
+            }
+            else if (chars[i] == '-' || chars[i] == ' ' || chars[i] == '(' || chars[i] == ')' || chars[i] == '\'' || chars[i] == '.' || chars[i] == ',')
+            {
+                valid = true;
+            }
+
+
+            if (valid) { output += chars[i]; }
+
+        }
+
+        txtName.text = output;
+
     }
 
     /// <summary>
@@ -253,7 +289,6 @@ public class AppearanceScript : MonoBehaviour {
                 // show all staff
                 mainController.ReShowStaffAndBuildings();
 
-                mainController.statusCode = 0;
             }
 
         }

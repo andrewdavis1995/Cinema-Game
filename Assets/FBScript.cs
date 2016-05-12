@@ -22,6 +22,7 @@ public class FBScript : MonoBehaviour {
 
     public Button newGame;
     public Button loadGame;
+    public Button rulesButton;
 
     public GameObject facebookPanel;
     public GameObject loggedInPanel;
@@ -66,6 +67,8 @@ public class FBScript : MonoBehaviour {
     {
         newGame.enabled = false;
         loadGame.enabled = false;
+        rulesButton.enabled = false;
+        gameObject.SetActive(false);
 
         List<string> permissions = new List<string>();
         permissions.Add("public_profile");
@@ -167,6 +170,8 @@ public class FBScript : MonoBehaviour {
 
         newGame.enabled = true;
         loadGame.enabled = true;
+        rulesButton.enabled = true;
+        gameObject.SetActive(true);
 
     }
 

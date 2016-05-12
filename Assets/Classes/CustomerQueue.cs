@@ -21,6 +21,7 @@ namespace Assets.Classes
         Thread patienceThread;        // the first parameter is the slot, the second is the speed
 
         bool running = false;         // whether or not the day is running
+        
 
         // CONSTRUCTOR for the class
         public CustomerQueue(int sO, float x, float y, int type)
@@ -246,6 +247,19 @@ namespace Assets.Classes
                     // decrease the patience values of each customer in the queue
                     theQueue[i].DecreasePatience(value);
 
+
+                    //System.Random rand = new System.Random();
+                    //int r = rand.Next(0, 80);
+                    
+                    //Debug.Log(r.ToString());
+
+                    //if (r == 4)
+                    //{
+                    //    // set a status variable in Customer = true
+                    //    theQueue[i].playSound = true;
+                    //}
+
+
                     // check if patience has run out
                     if (theQueue[i].GetPatience() < 1)
                     {
@@ -394,6 +408,8 @@ namespace Assets.Classes
                 }
             }
         }
+
+        
 
     }
 }

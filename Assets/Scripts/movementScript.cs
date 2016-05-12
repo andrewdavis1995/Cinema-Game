@@ -20,7 +20,10 @@ public class movementScript : MonoBehaviour {
     
     public delegate int GetFoodQueueSize();
     public static event GetFoodQueueSize getQueueFoodSize;
-    
+
+    public AudioClip boredSound;
+    public AudioClip neutralSound;
+
     Controller mainController;
 
     public static GameObject customerStatus;
@@ -91,7 +94,7 @@ public class movementScript : MonoBehaviour {
 
                 float theX = transform.position.x;
                 float theY = transform.position.y;
-                
+
 
                 if (customer.goingToSeats)
                 {
@@ -175,6 +178,11 @@ public class movementScript : MonoBehaviour {
                     transform.Translate(movementVector);
                 }
             }
+            else if (customer.leaving)
+            {
+                Vector2 movementVector = customer.MovementVector * Time.deltaTime * moveSpeed;
+                transform.Translate(movementVector);
+            }
 
 
             if (customer.queueDoneWith != -1)
@@ -224,32 +232,42 @@ public class movementScript : MonoBehaviour {
                 // they have left the building!
                 transform.gameObject.SetActive(false);
             }
+
+            if (patienceCount < 1 && transform.position.x > 44)
+            {
+                transform.GetComponent<Animator>().SetTrigger("down");
+                customer.MovementVector = new Vector3(0, -1, 0);
+            }
+
+            //if (customer.playSound)
+            //{
+            //    customer.playSound = false;
+
+            //    AudioSource srcPlayer = transform.gameObject.GetComponent<AudioSource>();
+
+            //    if (customer.GetPatience() > 152)
+            //    {
+            //        srcPlayer.clip = neutralSound;
+            //    }
+            //    else
+            //    {
+            //        srcPlayer.clip = boredSound;
+            //    }
+
+            //    srcPlayer.Play();
+            //}
+
+            if (customer.leaving && customer.MovementVector.Equals(new Vector2(0, 0)))
+            {
+                customer.MovementVector = new Vector2(0, -1);
+                transform.GetComponent<Animator>().SetTrigger("down");
+            }
+
         }
 
 
     }
-
-    IEnumerator showPatienceBar()
-    {
-        if (imgs != null)
-        {
-            int patienceVal = customer.GetPatience();
-
-            float val = (float)patienceVal / 1000;
-
-            if (val > 1) { val = 1; }
-
-            // this will be affected by the patience level
-            imgs[1].fillAmount = val;
-            imgs[1].color = new Color(1 - (float)(val), (float)(val), 0);
-
-            yield return new WaitForSeconds(2.5f);
-        
-			customerStatus.SetActive (false);
-        }
-
-    }
-
+    
 
     void OnMouseDown()
     {

@@ -8,8 +8,9 @@ namespace Assets.Scripts
     public class ObjectPool : MonoBehaviour
     {
         public static ObjectPool current;   // a static instance of the class for easy access
-        
+
         public GameObject[] objectsToPool;     // the type of object to pull. i.e. Customer prefab
+        public AudioClip[] audioFiles;     // the sounds to play on walkout
         public List<GameObject> pooledObjects;     // the list of objects that are stored in the pool
         int poolSize = 25;      // the size of the pool
         
@@ -35,8 +36,7 @@ namespace Assets.Scripts
             {
                 int randomIndex = Random.Range(0, 3);
 
-                GameObject go = (GameObject)Instantiate(objectsToPool[randomIndex]);      // create a new game object
-                go.SetActive(false);        // disable the object while it is not in use
+                GameObject go = AddNewItem();
                 pooledObjects.Add(go);      // add the new object to the list of pooled objects
             }
 
@@ -70,8 +70,13 @@ namespace Assets.Scripts
         public GameObject AddNewItem()
         { 
             // if there are no available objects, see if we should create a new one    
-            int randIndex = Random.Range(0, 3);
+            int randIndex = Random.Range(0, 4);
             GameObject go = (GameObject)Instantiate(objectsToPool[randIndex]);      // create a new game object
+            AudioSource aSource = go.GetComponent<AudioSource>();
+
+            int rand = Random.Range(0, audioFiles.Length);
+
+            aSource.clip = audioFiles[rand];
             go.SetActive(false);        // disable the object while it is not in use
             return go;
         }

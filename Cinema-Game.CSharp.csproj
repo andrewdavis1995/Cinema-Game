@@ -13,13 +13,11 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile>
-    </CompilerResponseFile>
+    <CompilerResponseFile></CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>iOS:9</UnityBuildTarget>
     <UnityVersion>5.3.4f1</UnityVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <LangVersion Condition=" '$(VisualStudioVersion)' != '10.0' ">4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -184,6 +182,7 @@
     <Compile Include="Assets\FacebookSDK\SDK\Scripts\Utils\IFacebookLogger.cs" />
     <Compile Include="Assets\FacebookSDK\SDK\Scripts\Utils\MiniJson.cs" />
     <Compile Include="Assets\FacebookSDK\SDK\Scripts\Utils\Utilities.cs" />
+    <Compile Include="Assets\Popup_Controller.cs" />
     <Compile Include="Assets\Scripts\ButtonScript.cs" />
     <Compile Include="Assets\Scripts\CameraControls.cs" />
     <Compile Include="Assets\Scripts\CarpetRollScript.cs" />
@@ -192,8 +191,8 @@
     <Compile Include="Assets\Scripts\FoodAreaScript.cs" />
     <Compile Include="Assets\Scripts\ObjectPool.cs" />
     <Compile Include="Assets\Scripts\OtherObjectScript.cs" />
-    <Compile Include="Assets\Scripts\QuestionScript.cs" />
     <Compile Include="Assets\Scripts\ProjectorScript.cs" />
+    <Compile Include="Assets\Scripts\QuestionScript.cs" />
     <Compile Include="Assets\Scripts\Screen_Script.cs" />
     <Compile Include="Assets\Scripts\ShopScript.cs" />
     <Compile Include="Assets\Scripts\TileManager.cs" />

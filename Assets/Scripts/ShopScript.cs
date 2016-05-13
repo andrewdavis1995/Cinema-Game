@@ -7,8 +7,11 @@ using UnityEngine.UI;
 public class ShopScript : MonoBehaviour
 {
     Controller mainController;      // the instance of Controller to use
+    ShopController shopController;      
     GameObject closeBtn;            // the button to close the shop
     public GameObject[] shopTabs;   // the tabs for the shop
+
+    public Popup_Controller popupController;
 
     // used to initialise the variables
     void Start()
@@ -16,6 +19,7 @@ public class ShopScript : MonoBehaviour
         // find and set the variables
         closeBtn = GameObject.Find("Close Shop");
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
+        shopController = GameObject.Find("ShopController").GetComponent<ShopController>();
     }
 
     /// <summary>
@@ -34,16 +38,16 @@ public class ShopScript : MonoBehaviour
             #region Screen
             case 0:
 
-                if (Controller.theScreens.Count < 8)
+                if (ShopController.theScreens.Count < 8)
                 {
                     // go to placement of item
                     mainController.ShopItemSelected(11, 15, "SCREEN");
                     // 'ghost' other objects
-                    mainController.SemiTransparentObjects();
+                    shopController.SemiTransparentObjects();
                 }
                 else
                 {
-                    mainController.ShowPopup(5, "Sorry, you have reached the maximum number of Screens permitted (8)");
+                    popupController.ShowPopup(5, "Sorry, you have reached the maximum number of Screens permitted (8)");
                 }
                 break;
             #endregion
@@ -57,7 +61,7 @@ public class ShopScript : MonoBehaviour
                 }
                 else
                 {
-                    mainController.ShowPopup(5, "Sorry. You are only allowed to have 18 Staff Members hired.");
+                    popupController.ShowPopup(5, "Sorry. You are only allowed to have 18 Staff Members hired.");
                 }
                 break;
             #endregion
@@ -67,7 +71,7 @@ public class ShopScript : MonoBehaviour
                 // go to placement of item
                 mainController.ShopItemSelected(1, 1, "PLANT");
                 // ghost other objects
-                mainController.SemiTransparentObjects();
+                shopController.SemiTransparentObjects();
                 break;
             #endregion
 
@@ -76,7 +80,7 @@ public class ShopScript : MonoBehaviour
                 // go to placement of item
                 mainController.ShopItemSelected(2, 3, "BUST");
                 // ghost other objects
-                mainController.SemiTransparentObjects();
+                shopController.SemiTransparentObjects();
                 break;
             #endregion
 
@@ -91,14 +95,14 @@ public class ShopScript : MonoBehaviour
                 // go to placement of item
                 mainController.ShopItemSelected(3, 3, "VENDING MACHINE");
                 // ghost other objects
-                mainController.SemiTransparentObjects();
+                shopController.SemiTransparentObjects();
                 break;
             #endregion
 
             #region Red Carpet
             case 6: // Red Carpet
                 // check that it has not already been purchased
-                if (!mainController.hasUnlockedRedCarpet)
+                if (!shopController.hasUnlockedRedCarpet)
                 {
                     ConfirmationScript.OptionSelected(4, new string[] { " unlock the Red Carpet?", "800", "0" }, "This will cost: ");
                 }
@@ -106,7 +110,7 @@ public class ShopScript : MonoBehaviour
                 {
                     // inform the user that the Red Carpet has already been purchased
                     Debug.Log("Already Got it you silly sausage!");
-                    mainController.ShowPopup(5, "You already own this object!");
+                    popupController.ShowPopup(5, "You already own this object!");
                 }
                 break;
             #endregion
@@ -119,40 +123,40 @@ public class ShopScript : MonoBehaviour
                     // go to placement of item
                     mainController.ShopItemSelected(10, 18, "FOOD AREA");
                     // 'ghost' the other objects
-                    mainController.SemiTransparentObjects();
+                    shopController.SemiTransparentObjects();
 
                 }
                 else
                 {
                     // inform the user that they have already purchased the Food Area
                     Debug.Log("Already Got it you stupid sausage!");
-                    mainController.ShowPopup(5, "You already own this object!");
+                    popupController.ShowPopup(5, "You already own this object!");
                 }
                 break;
             #endregion
 
             #region Posters 1
             case 8: // posters 1
-                if (!mainController.postersUnlocked[0])
+                if (!shopController.postersUnlocked[0])
                 {
                     ConfirmationScript.OptionSelected(9, new string[] { "buy this poster pack", "750", "0" }, "This will cost: ");
                 }
                 else
                 {
-                    mainController.ShowPopup(5, "You already own this item!");
+                    popupController.ShowPopup(5, "You already own this item!");
                 }
                 break;
             #endregion
 
             #region Posters 2
             case 9: // posters 2
-                if (!mainController.postersUnlocked[1])
+                if (!shopController.postersUnlocked[1])
                 {
                     ConfirmationScript.OptionSelected(10, new string[] { "buy this poster pack", "750", "0" }, "This will cost: ");
                 }
                 else
                 {
-                    mainController.ShowPopup(5, "You already own this item!");
+                    popupController.ShowPopup(5, "You already own this item!");
                 }
                 break;
             #endregion
@@ -214,7 +218,7 @@ public class ShopScript : MonoBehaviour
         string benefit = GetBenefitString(index);
         
         // display the benefit in a popup
-        mainController.ShowPopup(5, benefit);
+        popupController.ShowPopup(5, benefit);
     }
 
     /// <summary>

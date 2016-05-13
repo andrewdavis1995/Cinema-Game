@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 public class ProjectorScript : MonoBehaviour
 {
+
+    public GameObject pnlClearProjectors;
+
     public Controller mainController;   // the instance of Controller to use
     public Transform projector;     // the prefab of the projector icon (clickable)
     public static int numVisible = 0;   // how many projectors are visible
@@ -18,14 +21,14 @@ public class ProjectorScript : MonoBehaviour
         if (runGeneration && mainController.simulationRunning)
         {
             // for each of the screens...
-            for (int i = 0; i < Controller.theScreens.Count; i++)
+            for (int i = 0; i < ShopController.theScreens.Count; i++)
             {
                 // if the screen is suitable for having its projector broken
-                if (!Controller.theScreens[i].ConstructionInProgress() && Controller.theScreens[i].GetClicksRemaining() < 1)
+                if (!ShopController.theScreens[i].ConstructionInProgress() && ShopController.theScreens[i].GetClicksRemaining() < 1)
                 {
                     // get an upper bound for the random number generation
                     int upperRange = 6000;
-                    upperRange += (Controller.theScreens[i].GetUpgradeLevel() - 1) * 4000;
+                    upperRange += (ShopController.theScreens[i].GetUpgradeLevel() - 1) * 4000;
 
                     if (upperRange == 18000)
                     {
@@ -39,7 +42,7 @@ public class ProjectorScript : MonoBehaviour
                     if (randomValue == 0)
                     {
                         // create a new projector icon to click
-                        Controller.theScreens[i].ProjectorBroke();
+                        ShopController.theScreens[i].ProjectorBroke();
                         CreateNew(i);
                     }
                 }
@@ -55,7 +58,7 @@ public class ProjectorScript : MonoBehaviour
     void CreateNew(int index)
     {
         #region Create a projector icon
-        Vector3 position = mainController.screenObjectList[index].transform.position + new Vector3(5.16f, 8.76f, -1);
+        Vector3 position = mainController.shopController.screenObjectList[index].transform.position + new Vector3(5.16f, 8.76f, -1);
         numVisible++;
 
         GameObject proj = Instantiate(projector.gameObject, position, Quaternion.identity) as GameObject;
@@ -63,8 +66,8 @@ public class ProjectorScript : MonoBehaviour
         #endregion
 
         // display options to clear all
-        mainController.pnlClearProjectors.SetActive(true);
-        Text[] texts = mainController.pnlClearProjectors.GetComponentsInChildren<Text>();
+        pnlClearProjectors.SetActive(true);
+        Text[] texts = pnlClearProjectors.GetComponentsInChildren<Text>();
 
         texts[1].text = numVisible.ToString();
 
@@ -100,7 +103,7 @@ public class ProjectorScript : MonoBehaviour
         int id = int.Parse(gameObject.name.Split('#')[1]);
 
         // get the current clicks remaining for the associated screen
-        int prevClicks = Controller.theScreens[id - 1].GetClicksRemaining();
+        int prevClicks = ShopController.theScreens[id - 1].GetClicksRemaining();
 
 
 
@@ -110,7 +113,7 @@ public class ProjectorScript : MonoBehaviour
 
 
         // update the clicks
-        int remaining = Controller.theScreens[id - 1].ProjectorClicked();
+        int remaining = ShopController.theScreens[id - 1].ProjectorClicked();
 
         // if that was the last click... FIXED!!!
         if (prevClicks == 1)
@@ -135,5 +138,31 @@ public class ProjectorScript : MonoBehaviour
         }
 
     }
-    
+
+
+    /// <summary>
+    /// Clear all the projector icons from the screen
+    /// </summary>
+    public void ClearAllProjectors()
+    {
+        GameObject[] projectors = GameObject.FindGameObjectsWithTag("Projector");
+
+        for (int i = 0; i < projectors.Length; i++)
+        {
+            Destroy(projectors[i]);
+        }
+
+        for (int i = 0; i < ShopController.theScreens.Count; i++)
+        {
+            ShopController.theScreens[i].ResetClicks();
+        }
+
+        // clear the panel
+        pnlClearProjectors.SetActive(false);
+
+        ProjectorScript.numVisible = 0;
+
+    }
+
+
 }

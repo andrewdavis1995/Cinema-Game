@@ -36,7 +36,7 @@ public class TimeController : MonoBehaviour
         if (mainController.simulationRunning)
         {
             // get the list of cusomers
-            allCustomers = mainController.allCustomers;
+            allCustomers = mainController.customerController.allCustomers;
             // set simulation running to true
             simulationRunning = true;
         }

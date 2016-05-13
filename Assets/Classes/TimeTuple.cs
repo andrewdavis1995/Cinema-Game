@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Assets.Scripts
+namespace Assets.Classes
 {
     [System.Serializable]
-    class TimeTuple
+    public class TimeTuple
     {
         // store both the time elements (hours and minutes)
         public int hours;

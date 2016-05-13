@@ -15,16 +15,16 @@ namespace Assets.Classes
         public void DoUpdate(string id, byte[] theBlob)
         {
 
-            //var fileData = Convert.ToBase64String(theBlob, Base64FormattingOptions.InsertLineBreaks);
+            var fileData = Convert.ToBase64String(theBlob, Base64FormattingOptions.InsertLineBreaks);
 
             // database stuff
-            string url = "http://silva.computing.dundee.ac.uk/2015-gamesandrewdavis/SaveGame/fbID=" + id;
+            string url = "http://silva.computing.dundee.ac.uk/2015-gamesandrewdavis/SaveGame";
             
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.SendChunked = true;
             request.Method = "POST";
 
-            request.ContentType = "multipart/form-data";
+            request.ContentType = "text/xml;charset=UTF-8";
             //request.ContentLength = theBlob.Length;
            
             
@@ -33,17 +33,52 @@ namespace Assets.Classes
 
 
             Stream newStream = request.GetRequestStream();
-            newStream.Write(theBlob, 0, theBlob.Length);
-            newStream.Close();
+            
+            string byteput = "theBlob=";
+
+            byte[] chars = Encoding.GetEncoding("UTF-8").GetBytes(byteput.ToCharArray());
+
+            id = id + "%26";
+
+            byte[] idThings = Encoding.GetEncoding("UTF-8").GetBytes(id.ToCharArray());
+
+            byte[] blobBytes = Encoding.GetEncoding("UTF-8").GetBytes(fileData.ToCharArray());
+
+            
+
+            IEnumerable<byte> rwerwer = theBlob.Take(150);
+
+            byte[] result = rwerwer.ToArray();
 
 
-            System.IO.File.WriteAllBytes("C:/Users/asuth/Documents/baba.txt", theBlob);
 
+            byte[] toSend = new byte[id.Length + byteput.Length + blobBytes.Length];
+            chars.CopyTo(toSend, 0);
+            idThings.CopyTo(toSend, chars.Length);
+            blobBytes.CopyTo(toSend, chars.Length + idThings.Length);
+
+
+            IEnumerable<byte> ewfewfewfewf = toSend.Take(150);
+
+            byte[] result2222222 = ewfewfewfewf.ToArray();
+
+
+            newStream.Write(toSend, 0, toSend.Length);
+
+            //newStream.Close();
+            
+            //System.IO.File.WriteAllBytes("C:/Users/asuth/Documents/baba.txt", theBlob);
             
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            
 
-            Debug.Log("POO");
+            Stream rrr = response.GetResponseStream();
+
+            StreamReader sr = new StreamReader(rrr);
+
+            string blobData = sr.ReadToEnd();
+            
+            Debug.Log("POOADFADFADFADF");
+            Debug.Log(blobData);
 
         }
 

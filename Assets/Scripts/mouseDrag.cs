@@ -50,11 +50,13 @@ public class mouseDrag : MonoBehaviour
     public StaffMember staffMember;
 
     Controller mainController;
+    ShopController shopController;
 
     void Start()
     {
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
-        
+        shopController = GameObject.Find("ShopController").GetComponent<ShopController>();
+
         animator = GetComponent<Animator>();
 
         attributeImages = staffAttributePanel.GetComponentsInChildren<Image>();
@@ -271,7 +273,7 @@ public class mouseDrag : MonoBehaviour
             handimator.SetTrigger("land");
 
             // check if in an invalid place - in middle of screen or object - sort layer accordingly
-            GameObject hidden = CheckHiddenBehind(staffBounds, mainController.gameObjectList, mainController.screenObjectList);           
+            GameObject hidden = CheckHiddenBehind(staffBounds, shopController.gameObjectList, shopController.screenObjectList);           
 
 
             for (int i = 0; i < mainController.staffSlot.Count; i++)
@@ -506,7 +508,7 @@ public class mouseDrag : MonoBehaviour
                 if (bTop.Intersects(staffBounds)) { toHideBehind = screenObjectList[i]; break; }
                 if (bBottom.Intersects(staffBounds)) { toHideBehind = screenObjectList[i]; break; }
 
-                if (b1.Intersects(staffBounds) && Controller.theScreens[i].ConstructionInProgress())
+                if (b1.Intersects(staffBounds) && ShopController.theScreens[i].ConstructionInProgress())
                 {
                     toHideBehind = screenObjectList[i];
                     break;
@@ -558,9 +560,9 @@ public class mouseDrag : MonoBehaviour
     {
         Bounds charBounds = transform.GetComponent<Renderer>().bounds;
 
-        for (int i = 0; i < mainController.screenObjectList.Count; i++)
+        for (int i = 0; i < shopController.screenObjectList.Count; i++)
         {
-            Bounds screenWallBounds1 = mainController.screenObjectList[i].GetComponent<Renderer>().bounds;
+            Bounds screenWallBounds1 = shopController.screenObjectList[i].GetComponent<Renderer>().bounds;
             Bounds b1 = new Bounds(new Vector3(screenWallBounds1.center.x - screenWallBounds1.extents.x + 0.1f, screenWallBounds1.center.y, screenWallBounds1.center.z), 2 * new Vector3(0.1f, screenWallBounds1.extents.y, screenWallBounds1.extents.z));
             Bounds b2 = new Bounds(new Vector3(screenWallBounds1.center.x + screenWallBounds1.extents.x - 0.1f, screenWallBounds1.center.y, screenWallBounds1.center.z), 2 * new Vector3(0.1f, screenWallBounds1.extents.y, screenWallBounds1.extents.z));
 

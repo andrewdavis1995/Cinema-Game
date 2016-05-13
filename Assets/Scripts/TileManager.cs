@@ -31,6 +31,7 @@ public class TileManager : MonoBehaviour
     public int fullHeight = -1;
 
     static Controller mainController;
+    public Popup_Controller popupController;
 
     Vector3 currentPosition = new Vector3(0, 0, 0);
     Vector3 previousPosition = new Vector3(0, 0, 0);
@@ -176,18 +177,18 @@ public class TileManager : MonoBehaviour
         List<int> unreachableScreens = new List<int>();
 
         // loop through all screens
-        for (int i = 0; i < Controller.theScreens.Count; i++)
+        for (int i = 0; i < ShopController.theScreens.Count; i++)
         {
             // check that it is possible to reach them from the start point - i.e. ticket office
-            int screenX = Controller.theScreens[i].GetX() + 5;
-            int screenY = Controller.theScreens[i].GetY();
+            int screenX = ShopController.theScreens[i].GetX() + 5;
+            int screenY = ShopController.theScreens[i].GetY();
 
             List<Coordinate> path = floor.FindPath(40, 5, screenX, screenY);
 
             // if it finds one that isn't reachable, set bool to false and break
             if (path == null)
             {
-                unreachableScreens.Add(Controller.theScreens[i].GetScreenNumber());
+                unreachableScreens.Add(ShopController.theScreens[i].GetScreenNumber());
             }
         }
 
@@ -302,7 +303,7 @@ public class TileManager : MonoBehaviour
     {
         validMove = CheckValidity(x, y, fullWidth, fullHeight);
         Color col;
-        if (validMove) { col = Color.green; mainController.confirmPanel.SetActive(true); } else { col = Color.red; mainController.confirmPanel.SetActive(false); }
+        if (validMove) { col = Color.green; popupController.confirmPanel.SetActive(true); } else { col = Color.red; popupController.confirmPanel.SetActive(false); }
 
         ColourAllTiles(x, y, col);
 
@@ -328,7 +329,7 @@ public class TileManager : MonoBehaviour
     void UpdateColumn(int x, int y, bool newState, int direction)
     {
 
-        mainController.confirmPanel.SetActive(validMove);
+        popupController.confirmPanel.SetActive(validMove);
 
         if (!newState)
         {
@@ -380,7 +381,7 @@ public class TileManager : MonoBehaviour
 
     void UpdateRow(int x, int y, bool newState, int direction)
     {
-        mainController.confirmPanel.SetActive(validMove);
+        popupController.confirmPanel.SetActive(validMove);
 
         if (!newState)
         {
@@ -409,7 +410,7 @@ public class TileManager : MonoBehaviour
             if (validMove != previousValidMove)
             {
                 ColourAllTiles(toMoveX, toMoveY + direction, newColour);
-                mainController.confirmPanel.SetActive(validMove);
+                popupController.confirmPanel.SetActive(validMove);
             }
             else
             {

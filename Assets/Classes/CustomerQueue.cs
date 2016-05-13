@@ -130,7 +130,7 @@ namespace Assets.Classes
                 {
                     servingSlots[pos].inQueue = true;
                     theQueue.Insert(0, servingSlots[pos]);
-                    servingSlots[pos] = new Customer(null, -1, null, null);
+                    servingSlots[pos] = new Customer(null, -1, null, null, null);
 
                     // move customer back into queue
                     theQueue[0].transform.position = new UnityEngine.Vector3(queuePosX, queuePosY, 0);
@@ -322,7 +322,7 @@ namespace Assets.Classes
                 }
 
                 // clear the serving slot - dummy value
-                servingSlots[i] = new Customer(null, -1, null, null);
+                servingSlots[i] = new Customer(null, -1, null, null, null);
 
             }
 

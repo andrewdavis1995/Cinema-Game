@@ -17,6 +17,7 @@ public class CameraControls : MonoBehaviour
     GameObject[] staff;
 
     public Controller mainController;
+    public Popup_Controller popupController;
 
     float vertExtent;
     float horizExtent;
@@ -53,7 +54,7 @@ public class CameraControls : MonoBehaviour
             {
                 transform.position = Vector3.Lerp(transform.position, endPos, Time.deltaTime * 5);
             }
-            else if (mainController.statusCode == 50 && !mainController.staffList.gameObject.active)
+            else if (mainController.statusCode == 50 && !popupController.staffList.gameObject.active)
             {
                 mainController.statusCode = 6;
             }
@@ -84,8 +85,8 @@ public class CameraControls : MonoBehaviour
             }
 
 
-            mainController.objectInfo.SetActive(false);
-            mainController.closeInfo.SetActive(false);
+            popupController.objectInfo.SetActive(false);
+            popupController.closeInfo.SetActive(false);
 
             /// pinch zoom controls
             if (Input.touchCount == 2)

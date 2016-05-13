@@ -35,7 +35,7 @@ public class FilmShowing
         for (int i = 0; i < ticketsSold; i++)     // ticketsSold
         {
             // create a new Customer object and add it to the list
-            customers.Add(new Customer(this, (currentCount + i), theFloor, c));
+            customers.Add(new Customer(this, (currentCount + i), theFloor, c, c.customerController));
         }
         
         // return the list of Customer objects

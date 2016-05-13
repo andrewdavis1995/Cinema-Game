@@ -7,10 +7,13 @@ public class OtherObjectScript : MonoBehaviour {
     static Controller mainController;       // the instance of Controller to use
     public delegate void ShowBuildingOptions(string screen, string upgrade, Sprite s, int constrDone, int constrTotal); //      delegate call back to Controller
     public static event ShowBuildingOptions showBuildingMenu;
+    
+    static Popup_Controller popupController;
 
     // Use this for initialization
     void Start () {
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
+        popupController = GameObject.Find("PopupController").GetComponent<Popup_Controller>();
     }
 	
     /// <summary>
@@ -50,7 +53,7 @@ public class OtherObjectScript : MonoBehaviour {
         sr.sprite = mainController.boxOfficeImages[mainController.boxOfficeLevel - 1];
 
         // hide the object info menu
-        mainController.HideObjectInfo();
+        popupController.HideObjectInfo();
 
 
     }
@@ -88,23 +91,20 @@ public class OtherObjectScript : MonoBehaviour {
             message = "";
         }
         #endregion
+        
+        // get the object sprite
+        Sprite s = transform.GetComponent<SpriteRenderer>().sprite;
 
-        // if the delegate has been initialised...
-        if (showBuildingMenu != null)
-        {
-            // get the object sprite
-            Sprite s = transform.GetComponent<SpriteRenderer>().sprite;
+        // TODO: if box office or food court, change the sprite
 
-            // TODO: if box office or food court, change the sprite
+        //call the delegate
+        popupController.ShowBuildingOptions(tag, message, s, -1, -1);
 
-            //call the delegate
-            showBuildingMenu(tag, message, s, -1, -1);
-
-            // reset the status variables
-            mainController.statusCode = 3;
-            mainController.objectSelected = name;
-            mainController.tagSelected = tag;
-        }
+        // reset the status variables
+        mainController.statusCode = 3;
+        mainController.objectSelected = name;
+        mainController.tagSelected = tag;
+        
     }
 
 }

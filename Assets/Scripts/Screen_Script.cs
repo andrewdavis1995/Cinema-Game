@@ -11,6 +11,8 @@ public class Screen_Script : MonoBehaviour {
     public delegate void ShowBuildingOptions(string screen, string upgrade, Sprite s, int constrDone, int constrTotal);     // delegate call back to Controller
     public static event ShowBuildingOptions showBuildingMenu;
 
+    Popup_Controller popupController;
+
     Controller theController;       // the instance of Controller to use
 
     // Use this for initialization
@@ -18,6 +20,7 @@ public class Screen_Script : MonoBehaviour {
     {
         // set the Controller up
         theController = GameObject.Find("Central Controller").GetComponent<Controller>();
+        popupController = GameObject.Find("PopupController").GetComponent<Popup_Controller>();
     }    
 
     /// <summary>
@@ -37,45 +40,42 @@ public class Screen_Script : MonoBehaviour {
     /// </summary>
     void ShowMenu()
     {
-        // if the delegate is not null
-        if (showBuildingMenu != null)
+        string screenNum = "Screen " + theScreen.GetScreenNumber();
+        string level;
+
+        // get the right message - depending on whether or not construction is taking place
+        if (!theScreen.ConstructionInProgress())
         {
-            string screenNum = "Screen " + theScreen.GetScreenNumber();
-            string level;
-
-            // get the right message - depending on whether or not construction is taking place
-            if (!theScreen.ConstructionInProgress())
-            {
-                level = "Level " + theScreen.GetUpgradeLevel();
-            }
-            else
-            {
-                level = "(Level " + (theScreen.GetUpgradeLevel() - 1) + " >>> Level " + theScreen.GetUpgradeLevel() + ")";
-            }
-
-            // get the sprite of the object
-            Sprite s = transform.GetComponent<SpriteRenderer>().sprite;
-
-            // calculate days done / needed
-            int done = -1;
-            int total = -1;
-
-            // if construction is in progress, calculate how many days it will take and how many have been done
-            if (theScreen.ConstructionInProgress())
-            {
-                total = GetUpgradeTime(theScreen.GetUpgradeLevel());
-                done = total - theScreen.GetDaysOfConstruction();
-            }
-
-            // show the menu
-            showBuildingMenu(screenNum, level, s, done, total);
-
-            // reset status variables
-            theController.statusCode = 3;
-            theController.objectSelected = name;
-            theController.tagSelected = tag;
-            theController.upgradeLevelSelected = theScreen.GetUpgradeLevel();
+            level = "Level " + theScreen.GetUpgradeLevel();
         }
+        else
+        {
+            level = "(Level " + (theScreen.GetUpgradeLevel() - 1) + " >>> Level " + theScreen.GetUpgradeLevel() + ")";
+        }
+
+        // get the sprite of the object
+        Sprite s = transform.GetComponent<SpriteRenderer>().sprite;
+
+        // calculate days done / needed
+        int done = -1;
+        int total = -1;
+
+        // if construction is in progress, calculate how many days it will take and how many have been done
+        if (theScreen.ConstructionInProgress())
+        {
+            total = GetUpgradeTime(theScreen.GetUpgradeLevel());
+            done = total - theScreen.GetDaysOfConstruction();
+        }
+
+        // show the menu
+        popupController.ShowBuildingOptions(screenNum, level, s, done, total);
+
+        // reset status variables
+        theController.statusCode = 3;
+        theController.objectSelected = name;
+        theController.tagSelected = tag;
+        theController.upgradeLevelSelected = theScreen.GetUpgradeLevel();
+        
     }
 
     /// <summary>

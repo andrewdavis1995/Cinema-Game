@@ -6,6 +6,8 @@ public class FoodAreaScript : MonoBehaviour {
     public int index;       // which component the script represents (0 = hot food, 1 = popcorn, 2 = ice-cream, -1 = unassigned)
     static Controller mainController;       // the Controller instance to read from
 
+    public Popup_Controller popupController;
+
     // called once at startup
     void Start()
     {
@@ -56,7 +58,7 @@ public class FoodAreaScript : MonoBehaviour {
             // if the item has already been unlocked, tell the user
             if (unlocked)
             {
-                mainController.ShowPopup(10, "You already purchased the " + component + " Component!");
+                popupController.ShowPopup(10, "You already purchased the " + component + " Component!");
             }
             // otherwise, ask them to confirm their purchase
             else

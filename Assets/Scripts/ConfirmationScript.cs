@@ -11,8 +11,13 @@ public class ConfirmationScript : MonoBehaviour {
 
     // references to the instances of other scripts to use
     static Controller mainController;
+    static Finance_Controller financeController;
+    static ShopController shopController;
     static ShopScript theShop;
     static GameObject theConfirmPanel;
+
+    static Popup_Controller popupController;
+    public ProjectorScript projectorController;
 
     // the elements of the confirmation popups
     static Text[] textElements;
@@ -24,8 +29,11 @@ public class ConfirmationScript : MonoBehaviour {
     {
         // set up all variables
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
+        shopController = GameObject.Find("ShopController").GetComponent<ShopController>();
+        popupController = GameObject.Find("PopupController").GetComponent<Popup_Controller>();
+        financeController = GameObject.Find("FinanceController").GetComponent<Finance_Controller>();
         theShop = GameObject.Find("Shop Canvas").GetComponent<ShopScript>();
-        theConfirmPanel = mainController.confirmationPanel;
+        theConfirmPanel = popupController.confirmationPanel;
         textElements = theConfirmPanel.GetComponentsInChildren<Text>();
         imageElements = theConfirmPanel.GetComponentsInChildren<Image>();
     }
@@ -41,7 +49,7 @@ public class ConfirmationScript : MonoBehaviour {
         // set the status code of main controller
         mainController.statusCode = 8;
         // show the conirmation panel
-        mainController.confirmationPanel.SetActive(true);
+        popupController.confirmationPanel.SetActive(true);
         
         actionCode = code;
         parameters = p;
@@ -50,7 +58,7 @@ public class ConfirmationScript : MonoBehaviour {
         textElements[4].text = "Are you sure you wish to " + p[0];
         textElements[3].text = p[1];
         textElements[2].text = inOrOut;
-        imageElements[4].sprite = mainController.confirmationPanel.GetComponentInChildren<ConfirmationScript>().currencyImages[int.Parse(p[2])];
+        imageElements[4].sprite = popupController.confirmationPanel.GetComponentInChildren<ConfirmationScript>().currencyImages[int.Parse(p[2])];
     }
 
     /// <summary>
@@ -86,7 +94,7 @@ public class ConfirmationScript : MonoBehaviour {
         }
         else
         {
-            mainController.ShowPopup(7, "This attribute is already fully upgraded!");
+            popupController.ShowPopup(7, "This attribute is already fully upgraded!");
         }
     }
 
@@ -120,7 +128,7 @@ public class ConfirmationScript : MonoBehaviour {
     public void Cancel()
     {
         // hide the panel and return to the original status code
-        mainController.confirmationPanel.SetActive(false);
+        popupController.confirmationPanel.SetActive(false);
         mainController.statusCode = mainController.newStatusCode;
     }
 
@@ -133,10 +141,10 @@ public class ConfirmationScript : MonoBehaviour {
         int cost = int.Parse(parameters[1]);
 
         // if the user has enough coins / popcorn to afford the action
-        if ((mainController.totalCoins >= cost && parameters[2].Equals("0")) || (mainController.numPopcorn >= cost && parameters[2].Equals("1")) || actionCode == 6)
+        if ((financeController.GetNumCoins() >= cost && parameters[2].Equals("0")) || (financeController.GetNumPopcorn() >= cost && parameters[2].Equals("1")) || actionCode == 6)
         {
             // hide the panel
-            mainController.confirmationPanel.SetActive(false);
+            popupController.confirmationPanel.SetActive(false);
 
             #region Remove money / Add Money (if selling item)
             // depending on which currency is to be used, remove the necessary amount from the players balance
@@ -144,18 +152,16 @@ public class ConfirmationScript : MonoBehaviour {
             {
                 if (actionCode != 6)
                 {
-                    mainController.totalCoins -= cost;;
+                    financeController.RemoveCoins(cost);
                 }
                 else
                 {
-                    mainController.totalCoins += cost;
+                    financeController.AddCoins(cost);
                 }
-                mainController.coinLabel.text = mainController.totalCoins.ToString();
             }
             else
             {
-                mainController.numPopcorn -= int.Parse(parameters[1]);
-                mainController.popcornLabel.text = mainController.numPopcorn.ToString();
+                financeController.RemovePopcorn(cost);
             }
             #endregion
 
@@ -204,22 +210,22 @@ public class ConfirmationScript : MonoBehaviour {
                     // get the index of the screen to upgrade
                     int screenIndex = int.Parse(parameters[3]);
                     // get the actual screen object
-                    ScreenObject theScreen = mainController.screenObjectList[screenIndex].GetComponent<Screen_Script>().theScreen;
+                    ScreenObject theScreen = shopController.screenObjectList[screenIndex].GetComponent<Screen_Script>().theScreen;
                     // upgrade the screen
                     theScreen.Upgrade();
                     // change the image to the contruction image
-                    mainController.screenObjectList[screenIndex].GetComponent<SpriteRenderer>().sprite = mainController.screenImages[0];
+                    shopController.screenObjectList[screenIndex].GetComponent<SpriteRenderer>().sprite = shopController.screenImages[0];
 
                     // hide the object info info menu
-                    mainController.objectInfo.SetActive(false);
-                    mainController.closeInfo.SetActive(false);
+                    popupController.objectInfo.SetActive(false);
+                    popupController.closeInfo.SetActive(false);
 
                     // generate new show times
                     mainController.NewShowTimes();
                     mainController.statusCode = 0;
 
                     // create a builder for the screen
-                    mainController.CreateBuilder(theScreen.GetX(), theScreen.GetY(), theScreen.GetScreenNumber());
+                    shopController.CreateBuilder(theScreen.GetX(), theScreen.GetY(), theScreen.GetScreenNumber());
 
                     break;
                 #endregion
@@ -227,9 +233,10 @@ public class ConfirmationScript : MonoBehaviour {
                 #region Red carpet
                 case 4:
                     // show the carpet
-                    mainController.redCarpet.SetActive(true);
-                    mainController.hasUnlockedRedCarpet = true;
+                    shopController.redCarpet.SetActive(true);
+                    shopController.hasUnlockedRedCarpet = true;
                     mainController.statusCode = 5;
+                    popupController.HideObjectInfo();
                     break;
                 #endregion
 
@@ -257,7 +264,7 @@ public class ConfirmationScript : MonoBehaviour {
 
                 #region Clear all projectors
                 case 7:
-                    mainController.ClearAllProjectors();
+                    projectorController.ClearAllProjectors();
                     mainController.statusCode = 0;
                     break;
                 #endregion
@@ -274,20 +281,19 @@ public class ConfirmationScript : MonoBehaviour {
 
                 #region Purchase Poster pack 1
                 case 9:
-                        mainController.UnlockPosterPack(0);
+                        shopController.UnlockPosterPack(0);
                     break;
                 #endregion
 
                 #region Purchase Poster pack 2
                 case 10:
-                        mainController.UnlockPosterPack(1);                    
+                        shopController.UnlockPosterPack(1);                    
                     break;
                 #endregion
 
                 #region Coin Bundle (8000)
                 case 11:
-                    mainController.totalCoins += 8000;
-                    mainController.coinLabel.text = mainController.totalCoins.ToString();
+                    financeController.AddCoins(8000);
                     break;
                 #endregion
 
@@ -301,7 +307,7 @@ public class ConfirmationScript : MonoBehaviour {
         }
         else
         {
-            mainController.ShowPopup(5, "You do not have enough money for this purchase. You can buy more in the shop");
+            popupController.ShowPopup(5, "You do not have enough money for this purchase. You can buy more in the shop");
         }
     }
 

@@ -13,11 +13,13 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>iOS:9</UnityBuildTarget>
     <UnityVersion>5.3.4f1</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <LangVersion Condition=" '$(VisualStudioVersion)' != '10.0' ">4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -73,6 +75,7 @@
     <Compile Include="Assets\Classes\Coordinate.cs" />
     <Compile Include="Assets\Classes\Customer.cs" />
     <Compile Include="Assets\Classes\CustomerQueue.cs" />
+    <Compile Include="Assets\Classes\DimensionTuple.cs" />
     <Compile Include="Assets\Classes\FacebookFriend.cs" />
     <Compile Include="Assets\Classes\FilmShowing.cs" />
     <Compile Include="Assets\Classes\Floor.cs" />
@@ -88,6 +91,7 @@
     <Compile Include="Assets\Classes\StaffMember.cs" />
     <Compile Include="Assets\Classes\TimeTuple.cs" />
     <Compile Include="Assets\Classes\UpdateDetails.cs" />
+    <Compile Include="Assets\Customer_Controller.cs" />
     <Compile Include="Assets\FBScript.cs" />
     <Compile Include="Assets\FacebookSDK\Examples\Scripts\ConsoleBase.cs" />
     <Compile Include="Assets\FacebookSDK\Examples\Scripts\LogView.cs" />
@@ -188,12 +192,14 @@
     <Compile Include="Assets\Scripts\CarpetRollScript.cs" />
     <Compile Include="Assets\Scripts\ConfirmationScript.cs" />
     <Compile Include="Assets\Scripts\Controller.cs" />
+    <Compile Include="Assets\Scripts\Finance_Controller.cs" />
     <Compile Include="Assets\Scripts\FoodAreaScript.cs" />
     <Compile Include="Assets\Scripts\ObjectPool.cs" />
     <Compile Include="Assets\Scripts\OtherObjectScript.cs" />
     <Compile Include="Assets\Scripts\ProjectorScript.cs" />
     <Compile Include="Assets\Scripts\QuestionScript.cs" />
     <Compile Include="Assets\Scripts\Screen_Script.cs" />
+    <Compile Include="Assets\Scripts\ShopController.cs" />
     <Compile Include="Assets\Scripts\ShopScript.cs" />
     <Compile Include="Assets\Scripts\TileManager.cs" />
     <Compile Include="Assets\Scripts\TimeController.cs" />

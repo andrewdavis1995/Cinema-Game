@@ -30,6 +30,7 @@ public class Customer
 
     public Transform transform;
     public Controller mainController;
+    public Customer_Controller customerController;
     public Animator animator;
     
     int hourDue;
@@ -65,12 +66,13 @@ public class Customer
         this.travellingToY = y;
     }
 
-    public Customer(FilmShowing fs, int ID, Floor f, Controller c)
+    public Customer(FilmShowing fs, int ID, Floor f, Controller c, Customer_Controller cc)
     {
 
         pointsToVisit = new List<Coordinate>();
         theFloor = f;
         mainController = c;
+        customerController = cc;
 
         filmShowing = fs;
 
@@ -268,7 +270,7 @@ public class Customer
             if (patience > 0)
             {
                 // the path gets set here
-                List<Coordinate> copy = mainController.GetPathToFood();
+                List<Coordinate> copy = customerController.GetPathToFood();
 
                 for (int i = 0; i < copy.Count; i++)
                 {
@@ -299,11 +301,11 @@ public class Customer
                 // the path gets set here
                 if (foodDesired == -1)
                 {
-                    copy = mainController.GetScreenPath(targetScreen - 1);
+                    copy = customerController.GetScreenPath(targetScreen - 1);
                 }
                 else
                 {
-                    copy = mainController.GetFoodToScreenPath(targetScreen - 1);
+                    copy = customerController.GetFoodToScreenPath(targetScreen - 1);
                 }
 
                 for (int i = 0; i < copy.Count; i++)
@@ -326,14 +328,14 @@ public class Customer
         {
             // arrived at screen - FINISHED
 
-            int price = (int)(1.5 + (1.5 * Controller.theScreens[0].GetUpgradeLevel()));
-            mainController.customerMoney += price;
-            mainController.customersServed++;
+            int price = (int)(1.5 + (1.5 * ShopController.theScreens[0].GetUpgradeLevel()));
+            customerController.customerMoney += price;
+            customerController.customersServed++;
 
             transform.gameObject.SetActive(false);
 
             // update the speed portion of the Reputation
-            mainController.reputation.UpdateSpeedRating(GetPatience());
+            customerController.reputation.UpdateSpeedRating(GetPatience());
         }
         else if (patience < 1)
         {
@@ -399,7 +401,7 @@ public class Customer
             pointsToVisit = new List<Coordinate>();
         }
 
-        mainController.numWalkouts++;
+        customerController.numWalkouts++;
         //mainController.allCustomers.RemoveAt(ind);
        
     }

@@ -212,7 +212,7 @@ public class movementScript : MonoBehaviour {
             {
                 transform.GetComponent<Animator>().SetTrigger("right");
                 customer.WalkOut();
-                mainController.reputation.Walkout();
+                customer.customerController.reputation.Walkout();
                 customer.walkingAway = false;
                 customer.leaving = true;
             }

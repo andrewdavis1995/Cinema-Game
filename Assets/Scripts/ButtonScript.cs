@@ -81,8 +81,9 @@ public class ButtonScript : MonoBehaviour {
             string fbID = FBScript.current.id;
 
             Login l = new Login();
-            l.DoLogin(fbID);
-            
+            loadGame = l.DoLogin(fbID);
+            Debug.Log("Loaded");
+            return loadGame;
         }
         else { 
             // if the file exists

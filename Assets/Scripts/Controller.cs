@@ -291,6 +291,8 @@ public class Controller : MonoBehaviour
 
             #region Floor Tiles
             // initialise the floor tiles
+            floorTiles = new GameObject[40, 80];
+
             for (int i = 0; i < tmpArray.Length; i++)
             {
                 string name = tmpArray[i].name;

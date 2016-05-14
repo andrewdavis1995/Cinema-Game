@@ -14,7 +14,7 @@ namespace Assets.Classes
     class Login
     {
 
-        public void DoLogin(string id)
+        public PlayerData DoLogin(string id)
         {
             string url = "http://silva.computing.dundee.ac.uk/2015-gamesandrewdavis/Login?fbID=" + id;
 
@@ -81,8 +81,10 @@ namespace Assets.Classes
 
             // deserialise the data and store it
             PlayerData pd = (PlayerData)formatter.Deserialize(file);
-            
+                        
             Debug.Log("dfgfdg");
+
+            return pd;
 
         }            
 

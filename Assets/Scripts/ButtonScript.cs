@@ -6,17 +6,28 @@ using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine.UI;
 using System.Net;
 using Assets.Classes;
+using System;
 
 public class ButtonScript : MonoBehaviour {
 
     public static PlayerData loadGame;      // the data to be loaded (if load is selected)
+    public static PlayerData friendData;      // data to load from the friend's cinema
+    public static PlayerData dataCopy;      // data to load from the friend's cinema
+
+    public static string owner;
+    
     Button loadButton;      // the button to load a game
     public Image loadImage;
+    public GameObject popup;
      
     void Start()
     {
         // find the button for loading
-        loadButton = (Button)GameObject.Find("LoadButton").GetComponent<Button>();
+        try
+        {
+            loadButton = (Button)GameObject.Find("LoadButton").GetComponent<Button>();
+        }
+        catch (Exception) { }
         // check if a game has been saved (and is loadable)
         CheckIfLoadExists();
     }
@@ -34,26 +45,24 @@ public class ButtonScript : MonoBehaviour {
             loadButton.image.color = Color.grey;
         }
     }
+
+    /// <summary>
+    /// Screw you guys...
+    /// </summary>
+    public void GoHome()
+    {
+        loadGame = dataCopy;
+        friendData = null;
+        dataCopy = null;
+        SceneManager.LoadScene(1);
+    }
     
     /// <summary>
     /// Start a new game
     /// </summary>
     public void NewGame()
     {
-
-        string fbID = FBScript.current.id;
-
-
-        //Login l = new Login();
-        //l.DoLogin(fbID);
-
-
-        loadImage.enabled = true;
-
-        // make the load game details = null
-        loadGame = null;
-        // load the other scene
-        SceneManager.LoadScene("main screen");
+        popup.SetActive(true);
     }
 
     /// <summary>
@@ -65,6 +74,7 @@ public class ButtonScript : MonoBehaviour {
 
         // get the details to load
         loadGame = Load();
+        
         // open the other scene
         SceneManager.LoadScene("main screen");
     }
@@ -124,5 +134,26 @@ public class ButtonScript : MonoBehaviour {
     {
         SceneManager.LoadScene(3);
     }
+
+    public void WarningConfirmed()
+    {
+        popup.SetActive(false);
+
+        string fbID = FBScript.current.id;
+        
+        loadImage.enabled = true;
+
+        // make the load game details = null
+        loadGame = null;
+        
+        // load the other scene
+        SceneManager.LoadScene("main screen");
+    }
+
+    public void WarningCancelled()
+    {
+        popup.SetActive(false);
+    }
+
 }
 

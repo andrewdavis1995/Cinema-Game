@@ -35,8 +35,11 @@ namespace Assets.Classes
 
 
             XmlDocument document = new XmlDocument();
-            document.LoadXml(blobData);
-
+            try
+            {
+                document.LoadXml(blobData);
+            }
+            catch (Exception) { return null; }
 
             XmlNodeList cinemaData = document.GetElementsByTagName("data");
 
@@ -80,12 +83,17 @@ namespace Assets.Classes
             file.Position = 0;
 
             // deserialise the data and store it
-            PlayerData pd = (PlayerData)formatter.Deserialize(file);
-                        
-            Debug.Log("dfgfdg");
+            try {
+                PlayerData pd = (PlayerData)formatter.Deserialize(file);
 
-            return pd;
+                Debug.Log("Success");
 
+                return pd;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }            
 
     }

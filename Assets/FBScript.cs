@@ -9,9 +9,7 @@ using System.Net;
 using System.IO;
 
 public class FBScript : MonoBehaviour {
-
-
-
+    
     //public Text txtUsername;
     //public Image picProfilePic;
     public string firstname;
@@ -108,7 +106,6 @@ public class FBScript : MonoBehaviour {
         appLink = result.Url;
     }
 
-
     // http://answers.unity3d.com/questions/959943/deserialize-facebook-friends-result.html
     void DisplayFriends(IResult result)
     {
@@ -173,6 +170,13 @@ public class FBScript : MonoBehaviour {
         rulesButton.enabled = true;
         gameObject.SetActive(true);
 
+        // save who was logged in to a local file - to 'remember' them for next time
+        Toggle remMe = GameObject.Find("rememberMe").GetComponent<Toggle>();
+        
+        remMe.gameObject.SetActive(false);
+
+        ButtonScript.owner = firstname + " " + surname;
+
     }
 
     //void DisplayProfilePic(IGraphResult result)
@@ -193,9 +197,7 @@ public class FBScript : MonoBehaviour {
         id = "";
         facebookPanel.SetActive(true);
         loggedInPanel.SetActive(false);
-    }
-
-    
+    }   
 
 }
 

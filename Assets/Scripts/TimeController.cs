@@ -83,7 +83,7 @@ public class TimeController : MonoBehaviour
                 if (hours > 22)
                 {
                     EndDay();
-                    mainController.NextDay(true);
+                    mainController.NextDay(true, true);
                 }
             }
 

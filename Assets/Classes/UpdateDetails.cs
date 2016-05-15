@@ -23,7 +23,7 @@ namespace Assets.Classes
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.SendChunked = true;
             request.Method = "POST";
-
+            request.Timeout = 90000;
             request.ContentType = "text/xml;charset=UTF-8";
             //request.ContentLength = theBlob.Length;
            

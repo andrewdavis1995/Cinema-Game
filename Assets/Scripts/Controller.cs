@@ -11,29 +11,32 @@ using System.Text;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Linq;
+using System.Threading;
 
 [System.Serializable]
 public class Controller : MonoBehaviour
 {
     #region Variables
-    
+
     public GameObject confirmBtn;
 
     public int selectedStaff = -1;
     public int newStatusCode = 0;
-    
+
     public Popup_Controller popupController;
     public ProjectorScript projectorController;
     public Customer_Controller customerController;
     public ShopController shopController;
-
+    
     public GameObject[] walls;
+
+    public GameObject cmdFriends;
 
     public Sprite[] boxOfficeImages;
     public int boxOfficeLevel = 0;
 
     public Transform friendObject;
-        
+
     public Sprite[] validityTiles;
     public Sprite[] foodTableSprites;
 
@@ -48,21 +51,21 @@ public class Controller : MonoBehaviour
     public Transform slotPrefab;
 
     public Transform staffInfoObject;
-    
+
     public int itemToAddID = -1;
 
     public GameObject startDayButton;
     public float mouseSensitivity = 1.0f;
 
     GameObject steps;
-    
+
     const string warning1 = "WARNING! \n\nThe Following Screen(s) are inaccessible to Customers:\n\n";
     const string warning2 = "\nYou have built objects which block the path to these Screens. If you do not move them, the customers for these screens will leave and you will not get money from them! Plus, your reputation will be ruined!";
 
     public string objectSelected = "";
     public string tagSelected = "";
     public int upgradeLevelSelected = 0;
-    
+
 
     public int statusCode = 99;     // 0 = free, 1 = dragging staff, 2 = moving object, 3 = in menu, 4 = moving camera, 5 = shop, 6 = staff menu, 7 = staff member info, 8 = Confirmation page, 9 = popup, 10 = upgrade food area
 
@@ -108,18 +111,18 @@ public class Controller : MonoBehaviour
     public bool simulationRunning = false;
 
     public Finance_Controller financeController;
-    
+
     public GameObject staffModel;
     public GameObject staffAppearanceMenu;
 
     public FacebookFriend facebookProfile;
-    
+
     public int currDay = 0;
 
     int numScreens = 1;
 
     public bool paused = false;
-    
+
     float queueCount = 0;
     float ticketStaffLevel = 4.5f;
 
@@ -130,10 +133,10 @@ public class Controller : MonoBehaviour
     void Start()
     {
         ticketQueue = new CustomerQueue(11, 38.5f, 6.8f, 0);
-        
+
         #region Find Objects
         theTileManager = GameObject.Find("TileManagement").GetComponent<TileManager>();
-        
+
         GameObject custStatus = GameObject.Find("Customer Status");
         movementScript.customerStatus = custStatus;
         GameObject[] tmpArray = GameObject.FindGameObjectsWithTag("Floor Tile");
@@ -145,14 +148,10 @@ public class Controller : MonoBehaviour
 
         #region Hide Objects on Start
         custStatus.SetActive(false);
-    
+
         shopController.redCarpet.SetActive(false);
         mouseDrag.staffAttributePanel.SetActive(false);
         #endregion
-
-
-        // if the user has not logged into Facebook, hide the facebook friends button
-        GameObject.Find("cmdFBFriends").SetActive(false);
 
         #region Add Delegate references
         mouseDrag.getStaffJobById += GetStaffJobById;
@@ -171,6 +170,7 @@ public class Controller : MonoBehaviour
             string fbUserID = FBScript.current.id;
             if (fbUserID.Length > 0)
             {
+                cmdFriends.SetActive(true);
                 facebookProfile = new FacebookFriend();
                 facebookProfile.name = FBScript.current.firstname + " " + FBScript.current.surname;
                 facebookProfile.id = FBScript.current.id;
@@ -193,22 +193,18 @@ public class Controller : MonoBehaviour
                     Text[] textComponents = go.GetComponentsInChildren<Text>();
                     textComponents[0].text = facebookProfile.friends[i].name;
 
-                    //StartCoroutine(UserImage());
-
-                    //while (profPic == null)
-                    //{
-                    //}
-
-                    //// assign texture
-                    //Image[] images = go.GetComponentsInChildren<Image>();
-                    //images[1].material.mainTexture = profPic;
-                    //profPic = null;
+                    Button[] buttonComponents = go.GetComponentsInChildren<Button>();
+                    string idToSend = facebookProfile.friends[i].id;
+                    string nameToSend = facebookProfile.friends[i].name;
+                    buttonComponents[0].onClick.AddListener(() => ViewFriendsCinema(idToSend, nameToSend));
 
                 }
             }
             else
             {
                 pnlNoFriends.SetActive(true);
+                // if the user has not logged into Facebook, hide the facebook friends button
+                cmdFriends.SetActive(false);
             }
         }
         catch (Exception) { }
@@ -217,6 +213,21 @@ public class Controller : MonoBehaviour
         // this will change depending on starting upgrade levels and other queues etc
 
         #region Load / New Game
+
+
+        if (ButtonScript.friendData != null)
+        {
+            GameObject.Find("Bottom Panel").SetActive(false);
+            GameObject.Find("lblOwnerName").GetComponent<Text>().text = ButtonScript.owner + "'s Cinema";           
+            ButtonScript.dataCopy = ButtonScript.loadGame;
+            ButtonScript.loadGame = ButtonScript.friendData;
+            ButtonScript.friendData = null;
+        }
+        else
+        {
+            GameObject.Find("FriendPanel").SetActive(false);
+        }
+        
         // get Player data. If not null, load game
         if (ButtonScript.loadGame == null)
         {
@@ -259,7 +270,7 @@ public class Controller : MonoBehaviour
             ShopController.theScreens[0].UpgradeComplete();
             // NYAH
 
-            NextDay(false);
+            NextDay(false, false);
 
             // do staff intro thing here
             popupController.ShowPopup(99, "Welcome!!! This is your cinema!\nLets get started by hiring some staff shall we?");
@@ -276,7 +287,7 @@ public class Controller : MonoBehaviour
             carpetColour = new Color(data.carpetColour[0], data.carpetColour[1], data.carpetColour[2]);
 
             shopController.LoadDecorations(data.hasRedCarpet, data.posters);
-            
+
             isMarbleFloor = data.marbleFloor;
             customerController.reputation = data.reputation;
             foodArea = data.foodArea;
@@ -374,7 +385,7 @@ public class Controller : MonoBehaviour
             ShopController.otherObjects = new List<OtherObject>(data.otherObjects);
 
 
-            NextDay(false);
+            NextDay(false, false);
             currDay--; // needed for some reason
 
 
@@ -405,6 +416,7 @@ public class Controller : MonoBehaviour
             shopController.ShowPosters(1);
 
         }
+        
         #endregion
 
         // create some test screens
@@ -420,7 +432,7 @@ public class Controller : MonoBehaviour
             pos.y += 0.8f;
 
             shopController.AddScreen(ShopController.theScreens[i], pos, height);
-            
+
             SetTiles(2, (int)(ShopController.theScreens[i].GetX()), (int)(ShopController.theScreens[i].GetY()), 11, 15);
         }
 
@@ -447,7 +459,7 @@ public class Controller : MonoBehaviour
             updateTileState(33, 16, 14, 4, 2, true);
         }
 
-        
+
 
 
         GameObject[] pointers = GameObject.FindGameObjectsWithTag("Pointer");
@@ -491,7 +503,7 @@ public class Controller : MonoBehaviour
             }
         }
     }
-        
+
     /// <summary>
     /// When the food area upgrades have been completed
     /// </summary>
@@ -563,6 +575,31 @@ public class Controller : MonoBehaviour
         Camera.main.transform.position = new Vector3(32.68f, 0, 1);
         Camera.main.orthographicSize = 14;
 
+    }
+
+    /// <summary>
+    /// Open the cinema for the selected friend
+    /// </summary>
+    public void ViewFriendsCinema(string fbid, string name)
+    {
+        Debug.Log(fbid);
+
+        Login l = new Login();
+        PlayerData friendData = l.DoLogin(fbid);
+
+        if (friendData != null)
+        {
+
+            ButtonScript.owner = name;
+
+            ButtonScript.friendData = friendData;
+
+            SceneManager.LoadScene(1);
+        }
+        else
+        {
+            popupController.ShowPopup(55, "No cinema data available for " + name);
+        }
     }
 
     /// <summary>
@@ -640,7 +677,7 @@ public class Controller : MonoBehaviour
 
 
     }
-    
+
     /// <summary>
     /// Create a staff member
     /// </summary>
@@ -887,7 +924,7 @@ public class Controller : MonoBehaviour
     {
         return GameObject.Find(objectSelected).transform.position;
     }
-    
+
     /// <summary>
     /// Upgrade an object
     /// </summary>
@@ -977,10 +1014,10 @@ public class Controller : MonoBehaviour
 
         int total = ss.GetUpgradeTime(so.GetUpgradeLevel());
         int done = total - so.GetDaysOfConstruction();
-        
+
         int cost = (int)(1.5 * (total - done));
 
-        ConfirmationScript.OptionSelected(12, new string[] {"Finish the work on this Screen now?", cost.ToString(), "1"}, "This will cost: ");
+        ConfirmationScript.OptionSelected(12, new string[] { "Finish the work on this Screen now?", cost.ToString(), "1" }, "This will cost: ");
     }
 
     /// <summary>
@@ -1017,7 +1054,7 @@ public class Controller : MonoBehaviour
 
         UpdateTiles(x, y, width, height, newState);
     }
-        
+
     /// <summary>
     /// Get a colour based on the id of it
     /// </summary>
@@ -1071,7 +1108,7 @@ public class Controller : MonoBehaviour
 
         CarpetRollScript.current.Begin(carpetColour, this, s);
     }
-    
+
     /// <summary>
     /// Reset the position of the staff
     /// </summary>
@@ -1126,7 +1163,7 @@ public class Controller : MonoBehaviour
         {
             popupController.ShowPopup(0, "None of your screens are available today - they are all under construction. No customers will arrive and you will receive 0 coins for this day");
 
-            NextDay(false);
+            NextDay(false, true);
             return;
         }
         else
@@ -1137,6 +1174,8 @@ public class Controller : MonoBehaviour
                 // start the running of the 'day'
                 simulationRunning = true;
             }
+
+            cmdFriends.SetActive(false);
 
             ticketQueue.Begin();
 
@@ -1215,7 +1254,7 @@ public class Controller : MonoBehaviour
     /// Move on to the next day
     /// </summary>
     /// <param name="shouldCollect">Whether or not earnings should be collected for that day</param>
-    public void NextDay(bool shouldCollect)
+    public void NextDay(bool shouldCollect, bool shouldSave)
     {
         // update the reputation fields
 
@@ -1274,7 +1313,7 @@ public class Controller : MonoBehaviour
 
             financeController.AddCoins(money);
             customerController.reputation.AddCoins(money);
-            
+
             int popcorn = 0;
 
             // work out if popcorn should be added
@@ -1286,7 +1325,7 @@ public class Controller : MonoBehaviour
                 {
 
                     int randVal = UnityEngine.Random.Range(0, 100);
-                    
+
                     if (randVal < 8)
                     {
                         popcorn = 3;
@@ -1318,9 +1357,9 @@ public class Controller : MonoBehaviour
         simulationRunning = false;
 
         queueCount = 0;
-        
+
         //ticketQueue.Clear();
-        
+
         // reset the layer of each customer transform 
         for (int i = 0; i < ObjectPool.current.pooledObjects.Count; i++)
         {
@@ -1329,14 +1368,12 @@ public class Controller : MonoBehaviour
             sr.sortingLayerName = "Front";
             sr.sortingOrder = 70;
         }
-        
+
         customerController.allCustomers.Clear();
 
         startDayButton.SetActive(true);
         shopButton.gameObject.SetActive(true);
         staffMenuButton.gameObject.SetActive(true);
-
-
 
 
         currDay++;
@@ -1369,7 +1406,7 @@ public class Controller : MonoBehaviour
                     {
                         currentCount += filmShowings[j].GetTicketsSold();
                     }
-                    
+
                     shopController.DestroyBuilderByScreenID(filmShowings[k].GetScreenNumber());
 
                 }
@@ -1389,7 +1426,7 @@ public class Controller : MonoBehaviour
             {
                 currentCount += filmShowings[j].GetTicketsSold();
             }
-            
+
         }
 
         // update day output 
@@ -1399,7 +1436,10 @@ public class Controller : MonoBehaviour
 
         //statusCode = 0;
 
-
+        if (facebookProfile != null && facebookProfile.id.Length > 0)
+        {
+            cmdFriends.SetActive(true);
+        }
 
         ResetStaff();
 
@@ -1412,8 +1452,21 @@ public class Controller : MonoBehaviour
 
         customerController.ResetCounts();
 
-        Save();
+        if (shouldSave)
+        {
+            string persPath = Application.persistentDataPath;
+            Thread thr = new Thread(() => Save(persPath));
+            thr.Start();
+        }
 
+    }
+
+    /// <summary>
+    /// TEMPORARY - for the admin test button
+    /// </summary>
+    public void SkipDay()
+    {
+        NextDay(false, true);
     }
 
     /// <summary>
@@ -1423,7 +1476,7 @@ public class Controller : MonoBehaviour
     {
         NewShowTimes();
     }
-    
+
     /// <summary>
     /// Calculate the number of coins that were generated today
     /// </summary>
@@ -1637,12 +1690,12 @@ public class Controller : MonoBehaviour
             }
             else
             {
-                
+
                 Vector3 pos = new Vector3(x, y * 0.8f, 0);
 
-                ShopController.otherObjects[id-1].xPos = x;
-                ShopController.otherObjects[id-1].yPos = y;
-                
+                ShopController.otherObjects[id - 1].xPos = x;
+                ShopController.otherObjects[id - 1].yPos = y;
+
                 GameObject theObject = shopController.AddObject(pos, id, height, itemToAddID, false);
 
                 SpriteRenderer[] subImages = theObject.GetComponentsInChildren<SpriteRenderer>();
@@ -1808,7 +1861,7 @@ public class Controller : MonoBehaviour
         }
 
         shopController.ReShowObjects();
-        
+
         GameObject foodPlace = GameObject.FindGameObjectWithTag("Food Area");
         if (foodPlace != null)
         {
@@ -1835,7 +1888,7 @@ public class Controller : MonoBehaviour
 
         Vector3 pos = new Vector3(x, y * 0.8f, 0);
 
-        
+
         //float xCorrection = 0;
         //float yCorrection = 0;
 
@@ -1867,7 +1920,7 @@ public class Controller : MonoBehaviour
             }
         }
         else {
-            
+
             if (itemToAddID == 7)
             {
                 foodArea = new FoodArea();
@@ -1876,7 +1929,7 @@ public class Controller : MonoBehaviour
                 foodQueue = new CustomerQueue(70, x + 3, ((y + 4) * 0.8f) - 1, 1);
 
             }
-            
+
             OtherObject oo = new OtherObject(x, y, itemToAddID, ShopController.otherObjects.Count + 1);
 
             ShopController.otherObjects.Add(oo);
@@ -1983,7 +2036,7 @@ public class Controller : MonoBehaviour
         }
         popupController.warningPanel.SetActive(false);
     }
-    
+
     /// <summary>
     /// Check the position of the staff members (after an object move)
     /// </summary>
@@ -2119,7 +2172,7 @@ public class Controller : MonoBehaviour
 
 
     }
-    
+
     /// <summary>
     /// Move an object
     /// </summary>
@@ -2424,10 +2477,10 @@ public class Controller : MonoBehaviour
     /// <summary>
     /// Save the current state of the game (both locally, and on Facebook)
     /// </summary>
-    void Save()
+    void Save(string persPath)
     {
         BinaryFormatter formatter = new BinaryFormatter();
-        FileStream file = File.Create(Application.persistentDataPath + "/saveState.gd");
+        FileStream file = File.Create(persPath + "/saveState.gd");
 
         PlayerData data = new PlayerData(ShopController.theScreens, carpetColour, staffMembers, filmShowings, financeController.GetNumCoins(), currDay, financeController.GetNumPopcorn(), ShopController.otherObjects, shopController.hasUnlockedRedCarpet, isMarbleFloor, customerController.reputation, boxOfficeLevel, foodArea, shopController.postersUnlocked);
 
@@ -2438,19 +2491,16 @@ public class Controller : MonoBehaviour
         // save to database
         if (facebookProfile != null && facebookProfile.id.Length > 0)
         {
-            byte[] ba = ConvertToByteArray();
-            
-            System.IO.File.WriteAllBytes(Application.persistentDataPath + "/tes2.cles", ba);
-            
+            byte[] ba = ConvertToByteArray(persPath);
+
+            System.IO.File.WriteAllBytes(persPath + "/tes2.cles", ba);
+
             string outputting = System.Text.Encoding.UTF8.GetString(ba);
-
-
-            IEnumerable<byte> ewfewfewfewf = ba.Take(150);
-
-            byte[] result = ewfewfewfewf.ToArray();
-
+            
             UpdateDetails ud = new UpdateDetails();
             ud.DoUpdate(facebookProfile.id, ba);
+
+            Debug.Log("Saved to Database");
 
         }
 
@@ -2460,14 +2510,14 @@ public class Controller : MonoBehaviour
     /// Convert the contents of a file to a BLOB
     /// </summary>
     /// <returns></returns>
-    byte[] ConvertToByteArray()
+    byte[] ConvertToByteArray(string persPath)
     {
         byte[] byteArray = null;
 
-        string fileName = Application.persistentDataPath + "/saveState.gd";
-        
+        string fileName = persPath + "/saveState.gd";
+
         byteArray = File.ReadAllBytes(fileName);
-        
+
         return byteArray;
 
     }
@@ -2598,7 +2648,7 @@ public class Controller : MonoBehaviour
     /// <param name="index">The ID of the staff member</param>
     /// <returns>The Job ID of the staff member</returns>
     public int GetStaffJobById(int index) { return staffMembers[index].GetJobID(); }
-       
+
     /// <summary>
     /// Add a customer to the ticket queue
     /// </summary>

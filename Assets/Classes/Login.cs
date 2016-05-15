@@ -18,7 +18,6 @@ namespace Assets.Classes
         {
             string url = "http://silva.computing.dundee.ac.uk/2015-gamesandrewdavis/Login?fbID=" + id;
 
-
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = "POST";
             request.ContentType = "text/xml;charset=UTF-8";
@@ -30,9 +29,6 @@ namespace Assets.Classes
             StreamReader sr = new StreamReader(rrr);
 
             string blobData = sr.ReadToEnd();
-
-
-
 
             XmlDocument document = new XmlDocument();
             try
@@ -81,7 +77,7 @@ namespace Assets.Classes
             //FileStream file = File.Open(Application.persistentDataPath + "/test.icles", FileMode.Open);
             FileStream file = File.Open(Application.persistentDataPath + "/test.icles", FileMode.Open);
             file.Position = 0;
-
+            
             // deserialise the data and store it
             try {
                 PlayerData pd = (PlayerData)formatter.Deserialize(file);

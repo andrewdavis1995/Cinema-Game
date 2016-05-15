@@ -13,7 +13,7 @@ public class ConfirmationScript : MonoBehaviour {
     static Controller mainController;
     static Finance_Controller financeController;
     static ShopController shopController;
-    static ShopScript theShop;
+    public ShopScript theShop;
     static GameObject theConfirmPanel;
 
     static Popup_Controller popupController;
@@ -32,7 +32,6 @@ public class ConfirmationScript : MonoBehaviour {
         shopController = GameObject.Find("ShopController").GetComponent<ShopController>();
         popupController = GameObject.Find("PopupController").GetComponent<Popup_Controller>();
         financeController = GameObject.Find("FinanceController").GetComponent<Finance_Controller>();
-        theShop = GameObject.Find("Shop Canvas").GetComponent<ShopScript>();
         theConfirmPanel = popupController.confirmationPanel;
         textElements = theConfirmPanel.GetComponentsInChildren<Text>();
         imageElements = theConfirmPanel.GetComponentsInChildren<Image>();

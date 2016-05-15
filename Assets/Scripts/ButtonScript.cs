@@ -41,8 +41,8 @@ public class ButtonScript : MonoBehaviour {
         if (!File.Exists(Application.persistentDataPath + "/saveState.gd"))
         {
             // disable the load button
-            loadButton.enabled = false;
-            loadButton.image.color = Color.grey;
+            //loadButton.enabled = false;
+            //loadButton.image.color = Color.grey;
         }
     }
 
@@ -62,7 +62,35 @@ public class ButtonScript : MonoBehaviour {
     /// </summary>
     public void NewGame()
     {
-        popup.SetActive(true);
+        // check if game/user exists - check_if_exists - get player data. if not null, give warning. otherwise, create a new user (insert_new) and continue
+        if (FBScript.current.id.Length > 0)
+        {
+            Login l = new Login();
+            PlayerData pd = l.DoLogin(FBScript.current.id);
+
+            if (pd != null)
+            {
+                popup.SetActive(true);
+            }
+            else
+            {
+                // add new user - if already in table but just null, then call will fail - which is fine
+                AddUser au = new AddUser();
+                string id = FBScript.current.id;
+                string name = FBScript.current.firstname + " " + FBScript.current.surname;
+                au.AddTheUser(id, name);
+
+                SceneManager.LoadScene(1);
+            }
+        }
+        else {
+
+            // if the local file does not exist...
+            if (File.Exists(Application.persistentDataPath + "/saveState.gd"))
+            {
+                popup.SetActive(true);
+            }
+        }
     }
 
     /// <summary>
@@ -74,9 +102,12 @@ public class ButtonScript : MonoBehaviour {
 
         // get the details to load
         loadGame = Load();
-        
-        // open the other scene
-        SceneManager.LoadScene("main screen");
+
+        if (loadGame != null)
+        {
+            // open the other scene
+            SceneManager.LoadScene("main screen");
+        }
     }
 
     /// <summary>
@@ -92,7 +123,12 @@ public class ButtonScript : MonoBehaviour {
 
             Login l = new Login();
             loadGame = l.DoLogin(fbID);
-            Debug.Log("Loaded");
+
+            if (loadGame == null)
+            {
+                popup.SetActive(true);
+            }
+
             return loadGame;
         }
         else { 

@@ -109,20 +109,21 @@ public class FBScript : MonoBehaviour {
     // http://answers.unity3d.com/questions/959943/deserialize-facebook-friends-result.html
     void DisplayFriends(IResult result)
     {
+        friendList.Clear();
 
         current = this;
 
         var dict = Json.Deserialize(result.RawResult) as Dictionary<string, object>;
-        var friendList = new List<object>();
-        friendList = (List<object>)(dict["data"]);
+        var theList = new List<object>();
+        theList = (List<object>)(dict["data"]);
 
-        int friendCount = friendList.Count;
+        int friendCount = theList.Count;
         
         for (int i = 0; i < friendCount; i++)
         {
-            string friendFBID = GetDataValueForKey((Dictionary<string, object>)(friendList[i]), "id");
-            string first_name = GetDataValueForKey((Dictionary<string, object>)(friendList[i]), "first_name");
-            string last_name = GetDataValueForKey((Dictionary<string, object>)(friendList[i]), "last_name");
+            string friendFBID = GetDataValueForKey((Dictionary<string, object>)(theList[i]), "id");
+            string first_name = GetDataValueForKey((Dictionary<string, object>)(theList[i]), "first_name");
+            string last_name = GetDataValueForKey((Dictionary<string, object>)(theList[i]), "last_name");
 
             
             Debug.Log(friendFBID + " --> " + first_name + " " + last_name);

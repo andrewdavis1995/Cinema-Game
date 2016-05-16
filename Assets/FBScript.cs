@@ -42,6 +42,7 @@ public class FBScript : MonoBehaviour {
         if (FB.IsLoggedIn)
         {
             Debug.Log("LOGGED IN ALREADY");
+            FB.LogOut();
         }
         else
         {

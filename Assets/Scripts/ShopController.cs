@@ -315,7 +315,7 @@ public class ShopController : MonoBehaviour
     /// <param name="screenNum">Which screen the builder is associated with</param>
     public void CreateBuilder(float x, float y, int screenNum)
     {
-        GameObject builder = Instantiate(builderPrefab.gameObject, new Vector2(x + 1.8f, 0.8f * y + 0.7f), Quaternion.identity) as GameObject;
+        GameObject builder = Instantiate(builderPrefab.gameObject, new Vector2(x + 1.8f, 0.8f * y + 0.82f), Quaternion.identity) as GameObject;
         builder.name = "BuilderForScreen#" + screenNum;
     }
 

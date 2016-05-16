@@ -196,6 +196,7 @@ public class ConfirmationScript : MonoBehaviour {
                     mainController.staffModel.SetActive(true);
                     mainController.staffAppearanceMenu.SetActive(true);
                     theShop.gameObject.SetActive(false);
+                    popupController.bottomPanel.SetActive(false);
 
                     // move the camera into place
                     Camera.main.transform.position = new Vector3(32.68f, 0, 1);

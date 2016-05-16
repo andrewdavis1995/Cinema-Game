@@ -97,11 +97,12 @@ public class OtherObjectScript : MonoBehaviour {
 
         // TODO: if box office or food court, change the sprite
 
+        // reset the status variables
+        mainController.statusCode = 3;
+
         //call the delegate
         popupController.ShowBuildingOptions(tag, message, s, -1, -1);
 
-        // reset the status variables
-        mainController.statusCode = 3;
         mainController.objectSelected = name;
         mainController.tagSelected = tag;
         

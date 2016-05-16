@@ -86,8 +86,9 @@ namespace Assets.Classes
 
                 return pd;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Debug.Log(ex.Message);
                 return null;
             }
         }            

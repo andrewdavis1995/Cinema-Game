@@ -129,7 +129,7 @@ public class mouseDrag : MonoBehaviour
     
     void OnMouseDown()
     {
-        if ((mainController.statusCode < 2) && staffMember.GetClicksRemaining() < 1)
+        if ((mainController.statusCode < 2) && staffMember.GetClicksRemaining() < 1 && Controller.isOwned)
         {
             dragging = true;
 
@@ -220,7 +220,7 @@ public class mouseDrag : MonoBehaviour
             Camera.main.orthographicSize = 6.5f;
             transform.GetComponent<SpriteRenderer>().color = staffMember.GetColourByIndex(0);
             transform.localScale = new Vector3(2f, 2f, 2f);
-            changeStaffJob(staffMember.GetIndex(), staffMember.GetJobID(), posInPost, false);
+            mainController.UpdateStaffJob(staffMember.GetIndex(), staffMember.GetJobID(), posInPost, false);
 
             for (int i = 0; i < mainController.staffSlot.Count; i++)
             {
@@ -334,7 +334,7 @@ public class mouseDrag : MonoBehaviour
                                 transform.Translate(0, 0.27f, 0);
                             }
 
-                            changeStaffJob(staffMember.GetIndex(), target, posInPost, true);
+                            mainController.UpdateStaffJob(staffMember.GetIndex(), target, posInPost, true);
                         }
                     }
                     else
@@ -343,7 +343,7 @@ public class mouseDrag : MonoBehaviour
                         {
                             transform.position = new Vector3(transform.position.x, transform.position.y + 2, 0);
                         }
-                        changeStaffJob(staffMember.GetIndex(), 0, 0, false);
+                        mainController.UpdateStaffJob(staffMember.GetIndex(), 0, 0, false);
                     }
                 }
             }
@@ -525,7 +525,7 @@ public class mouseDrag : MonoBehaviour
     {
         if (hidden == null)
         {
-            transform.GetComponent<SpriteRenderer>().sortingOrder = TileManager.floor.height;
+            transform.GetComponent<SpriteRenderer>().sortingOrder = TileManager.floor.height + 6;
 
 
             //transform.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
@@ -550,6 +550,7 @@ public class mouseDrag : MonoBehaviour
 
             Transform pi3 = transform.FindChild("hiddenPointer");
             pi3.GetComponent<SpriteRenderer>().enabled = true;
+            pi3.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
 
         }
         

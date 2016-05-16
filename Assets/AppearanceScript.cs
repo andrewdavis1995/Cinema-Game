@@ -44,6 +44,7 @@ public class AppearanceScript : MonoBehaviour {
 
 
     public Controller mainController;      // the instance of Controller to use
+    public Popup_Controller popupController;      // the instance of Controller to use
 
     void Start()
     {
@@ -284,6 +285,7 @@ public class AppearanceScript : MonoBehaviour {
             {
                 // hide modeller
                 mainController.staffModel.SetActive(false);
+                popupController.bottomPanel.SetActive(true);
                 // close menu 
                 mainController.staffAppearanceMenu.SetActive(false);
                 // show all staff

@@ -47,10 +47,11 @@ public class ButtonScript : MonoBehaviour {
     }
 
     /// <summary>
-    /// Screw you guys...
+    /// ET...
     /// </summary>
     public void GoHome()
     {
+        Controller.isOwned = true;
         loadGame = dataCopy;
         friendData = null;
         dataCopy = null;
@@ -98,8 +99,6 @@ public class ButtonScript : MonoBehaviour {
     /// </summary>
     public void LoadSavedGame()
     {
-        loadImage.enabled = true;
-
         // get the details to load
         loadGame = Load();
 
@@ -116,6 +115,8 @@ public class ButtonScript : MonoBehaviour {
     /// <returns>The player details - to load into the game</returns>
     PlayerData Load()
     {
+
+        loadImage.enabled = true;
 
         if (FBScript.current.id.Length > 0)
         {

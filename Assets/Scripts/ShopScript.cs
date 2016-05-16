@@ -195,7 +195,7 @@ public class ShopScript : MonoBehaviour
 
             if (shopTabs[i].name.Equals(shopTabs[index].name))
             {
-                images[1].color = new Color(0.796f, 0, 0);
+                images[1].color = new Color(1, 0.310f, 0);
             }
             else
             {

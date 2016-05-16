@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿ using UnityEngine;
 using System.Collections;
 using System;
 
@@ -63,19 +63,19 @@ public class CarpetRollScript : MonoBehaviour {
             // move the carpet image
             try
             {
-                carpet.transform.Translate(Time.deltaTime * 16f, 0, 0);
-                carpet.transform.localScale = carpet.transform.lossyScale - new Vector3(Time.deltaTime * 0.8f, 0, 0);
+                current.carpet.transform.Translate(Time.deltaTime * 16f, 0, 0);
+                current.carpet.transform.localScale = carpet.transform.lossyScale - new Vector3(Time.deltaTime * 0.8f, 0, 0);
             }
             catch (Exception) { }
 
             // stop the animation when the carpet reaches the edge of the screen
-            if (carpet.transform.position.x > 80)
+            if (current.carpet.transform.position.x > 80)
             {
                 shouldRun = false;
             }
 
             // update the image of all tiles
-            int x = (int)(carpet.transform.position.x);
+            int x = (int)(current.carpet.transform.position.x);
 
             for (int i = 0; i < TileManager.floor.height; i++)
             {
@@ -96,7 +96,7 @@ public class CarpetRollScript : MonoBehaviour {
 
     public void FinishPlacement()
     {
-        int x = (int)(carpet.transform.position.x) - 1;
+        int x = (int)(current.carpet.transform.position.x) - 1;
 
         for (int i = x; i < 80; i++)
         {
@@ -105,8 +105,12 @@ public class CarpetRollScript : MonoBehaviour {
                 // generate a random index for the texture to use (for marble purposes)
                 int index = UnityEngine.Random.Range(0, current.texture.Length);
 
-                current.mainController.floorTiles[j, i].GetComponent<SpriteRenderer>().color = current.colour;
-                current.mainController.floorTiles[j, i].GetComponent<SpriteRenderer>().sprite = current.texture[index];
+                try
+                {
+                    current.mainController.floorTiles[j, i].GetComponent<SpriteRenderer>().color = current.colour;
+                    current.mainController.floorTiles[j, i].GetComponent<SpriteRenderer>().sprite = current.texture[index];
+                }
+                catch (Exception) { }
             }
         }
 

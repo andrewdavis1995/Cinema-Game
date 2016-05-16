@@ -68,10 +68,12 @@ public class Screen_Script : MonoBehaviour {
         }
 
         // show the menu
-        popupController.ShowBuildingOptions(screenNum, level, s, done, total);
 
         // reset status variables
         theController.statusCode = 3;
+
+        popupController.ShowBuildingOptions(screenNum, level, s, done, total);
+
         theController.objectSelected = name;
         theController.tagSelected = tag;
         theController.upgradeLevelSelected = theScreen.GetUpgradeLevel();

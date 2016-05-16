@@ -20,6 +20,8 @@ public class Controller : MonoBehaviour
 
     public GameObject confirmBtn;
 
+    public static bool isOwned = true;
+
     public int selectedStaff = -1;
     public int newStatusCode = 0;
 
@@ -132,6 +134,9 @@ public class Controller : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+
+        ConfirmationScript[] sdsdfd = GameObject.FindObjectsOfType<ConfirmationScript>();
+
         ticketQueue = new CustomerQueue(11, 38.5f, 6.8f, 0);
 
         #region Find Objects
@@ -446,7 +451,7 @@ public class Controller : MonoBehaviour
 
             DimensionTuple t = shopController.GetBounds(itemToAddID);
 
-            shopController.AddObject(pos, i, height, itemToAddID, true);
+            shopController.AddObject(pos, i, height, ShopController.otherObjects[i].type, true);
 
             SetTiles(2, (int)(ShopController.otherObjects[i].xPos), (int)(ShopController.otherObjects[i].yPos), t.width, t.height);
         }
@@ -473,7 +478,7 @@ public class Controller : MonoBehaviour
         dayLabel.text = "DAY: " + currDay.ToString();
 
     }
-
+    
     /// <summary>
     /// When the application is closed
     /// </summary>
@@ -568,7 +573,7 @@ public class Controller : MonoBehaviour
         // show the necessary menus / objects
         staffModel.SetActive(true);
         staffAppearanceMenu.SetActive(true);
-
+        popupController.bottomPanel.SetActive(false);
         popupController.staffMemberInfo.SetActive(false);
 
         // move the camera into place
@@ -583,6 +588,8 @@ public class Controller : MonoBehaviour
     public void ViewFriendsCinema(string fbid, string name)
     {
         Debug.Log(fbid);
+
+        Controller.isOwned = false;
 
         Login l = new Login();
         PlayerData friendData = l.DoLogin(fbid);
@@ -768,6 +775,7 @@ public class Controller : MonoBehaviour
         b2.onClick.AddListener(() => ViewStaffMemberInfo(staff.GetIndex()));
 
         staffMenuList.Add(go);
+        DontDestroyOnLoad(go);
 
     }
 
@@ -980,6 +988,19 @@ public class Controller : MonoBehaviour
 
             shopController.UpgradeScreen(objectSelected, popupController);
         }
+    }
+
+    void Update()
+    {
+        try
+        {
+            if (staffMenuList[0] == null)
+            {
+                staffMenuList = GameObject.FindGameObjectsWithTag("StaffInfoItem").ToList();
+                Debug.Log("FIXED!!!");
+            }
+        }
+        catch (Exception) { }
     }
 
     /// <summary>
@@ -1454,6 +1475,8 @@ public class Controller : MonoBehaviour
 
         if (shouldSave)
         {
+            saveState = 0;
+            DisplaySave.Begin();
             string persPath = Application.persistentDataPath;
             Thread thr = new Thread(() => Save(persPath));
             thr.Start();
@@ -1668,7 +1691,7 @@ public class Controller : MonoBehaviour
                     {
                         if (builders[i].name.Contains(temp.GetScreenNumber().ToString()))
                         {
-                            builders[i].transform.position = new Vector2(temp.GetX() + 1.8f, 0.7f + (0.8f * temp.GetY()));
+                            builders[i].transform.position = new Vector2(temp.GetX() + 1.8f, 0.82f + (0.8f * temp.GetY()));
                         }
                     }
                 }
@@ -2068,7 +2091,7 @@ public class Controller : MonoBehaviour
 
                     if (hiddenBehind == null)
                     {
-                        staffMembers[i].GetTransform().GetComponent<Renderer>().sortingOrder = 40;
+                        staffMembers[i].GetTransform().GetComponent<Renderer>().sortingOrder = 47;
 
                         // sort the colours
                         SpriteRenderer[] subImages = staffMembers[i].GetTransform().GetComponentsInChildren<SpriteRenderer>();
@@ -2111,7 +2134,7 @@ public class Controller : MonoBehaviour
             {
 
                 bTop = new Bounds(new Vector3(b1.center.x, (b1.center.y - b1.extents.y + 8.8f), 0), 2 * new Vector3(b1.extents.x, 1.8f, 0.125f));
-                bBottom = new Bounds(new Vector3(b1.center.x, (b1.center.y - b1.extents.y + 0.9f), 0), 2 * new Vector3(b1.extents.x, 0.65f, 0.1f));
+                bBottom = new Bounds(new Vector3(b1.center.x, (b1.center.y - b1.extents.y + 0.9f), 0), 2 * new Vector3(b1.extents.x, 0.75f, 0.1f));
             }
             else
             {
@@ -2139,7 +2162,7 @@ public class Controller : MonoBehaviour
 
                     if (hiddenBehind == null)
                     {
-                        staffMembers[i].GetTransform().GetComponent<Renderer>().sortingOrder = 40;
+                        staffMembers[i].GetTransform().GetComponent<Renderer>().sortingOrder = 47;
 
 
                         // sort the colours
@@ -2474,6 +2497,7 @@ public class Controller : MonoBehaviour
         theTileManager.ShowOutput();
     }
 
+    public static int saveState = 2;    // saved = 2, display = 1, done = 0
     /// <summary>
     /// Save the current state of the game (both locally, and on Facebook)
     /// </summary>
@@ -2502,8 +2526,11 @@ public class Controller : MonoBehaviour
 
             Debug.Log("Saved to Database");
 
+            saveState = 1;
+
         }
 
+        
     }
 
     /// <summary>

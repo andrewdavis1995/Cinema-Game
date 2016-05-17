@@ -18,6 +18,8 @@ public class Controller : MonoBehaviour
 {
     #region Variables
 
+    public static string friendID = "";
+
     public GameObject confirmBtn;
     public CarpetRollScript carpetController;
 
@@ -612,6 +614,8 @@ public class Controller : MonoBehaviour
             ButtonScript.owner = name;
 
             ButtonScript.friendData = friendData;
+
+            Controller.friendID = fbid;
 
             SceneManager.LoadScene(1);
         }
@@ -1580,16 +1584,16 @@ public class Controller : MonoBehaviour
     /// <summary>
     /// Get a show time for a showing
     /// </summary>
-    /// <param name="i">First, second, or third showing</param>
+    /// <param name="i">First, second, or third showing of the day</param>
     /// <returns>The time of the showing</returns>
     private TimeTuple GetShowTime(int i)
     {
-        int startTime = UnityEngine.Random.Range(0, 5);
+        int startTime = UnityEngine.Random.Range(0, 8);
 
         int hours;
         int minutes;
 
-        int totalMinutes = 30 * startTime;
+        int totalMinutes = 20 * startTime;
 
         hours = 10 + (totalMinutes / 60);
         minutes = totalMinutes - ((hours - 10) * 60);
@@ -1599,9 +1603,7 @@ public class Controller : MonoBehaviour
 
         hours += hoursToAdd;
         minutes += minutesToAddOn - (hoursToAdd * 60);
-
-
-
+        
         TimeTuple toReturn = new TimeTuple(hours, minutes);
 
         return toReturn;

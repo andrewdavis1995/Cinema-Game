@@ -82,6 +82,7 @@
     <Compile Include="Assets\Classes\Floor.cs" />
     <Compile Include="Assets\Classes\FloorTile.cs" />
     <Compile Include="Assets\Classes\FoodArea.cs" />
+    <Compile Include="Assets\Classes\Gifting.cs" />
     <Compile Include="Assets\Classes\Login.cs" />
     <Compile Include="Assets\Classes\Node.cs" />
     <Compile Include="Assets\Classes\Options.cs" />

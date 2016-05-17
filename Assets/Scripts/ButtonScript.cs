@@ -47,11 +47,12 @@ public class ButtonScript : MonoBehaviour {
     }
 
     /// <summary>
-    /// ET...
+    /// Screw you guys...
     /// </summary>
     public void GoHome()
     {
         Controller.isOwned = true;
+        Controller.friendID = "";
         loadGame = dataCopy;
         friendData = null;
         dataCopy = null;

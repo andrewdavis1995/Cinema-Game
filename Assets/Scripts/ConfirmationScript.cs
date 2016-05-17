@@ -314,6 +314,13 @@ public class ConfirmationScript : MonoBehaviour {
                     mainController.CompleteConstructionNow();
                     mainController.DoAutosave();
                     break;
+                #endregion
+
+                #region Send Gift
+                case 13:
+                    Gifting g = new Gifting();
+                    g.SendGift(parameters[3], parameters[4]);       // TODO: Actual values
+                    break;
                     #endregion
             }
             #endregion

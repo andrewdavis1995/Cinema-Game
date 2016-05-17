@@ -101,7 +101,7 @@ public class Customer
             }
         }
 
-        int minutesEarly = Random.Range(20, 80);
+        int minutesEarly = Random.Range(35, 95);
 
         try
         {

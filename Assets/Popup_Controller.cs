@@ -394,4 +394,12 @@ public class Popup_Controller : MonoBehaviour
 
         mainController.options.UpdateDetails(music, fx, auto);
     }
+
+    public void SendGift()
+    {
+        string userID = FBScript.current.id;
+        string friendID = Controller.friendID;
+
+        ConfirmationScript.OptionSelected(13, new string[] { "send 1 popcorn to this friend?", "0", "1", userID, friendID }, "This will cost you: ");     // 3 = user ID, 4 = friend ID
+    }
 }

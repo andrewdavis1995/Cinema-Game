@@ -42,12 +42,12 @@ public class FBScript : MonoBehaviour {
         if (FB.IsLoggedIn)
         {
             Debug.Log("LOGGED IN ALREADY");
-            FB.LogOut();
         }
         else
         {
             Debug.Log("NOT YET LOGGED IN");
         }
+        FB.LogOut();
     }
 
     void OnHideUnity(bool isGameShown)
@@ -64,6 +64,8 @@ public class FBScript : MonoBehaviour {
 
     public void FBLogin()
     {
+
+        FB.LogOut();
         newGame.enabled = false;
         loadGame.enabled = false;
         rulesButton.enabled = false;

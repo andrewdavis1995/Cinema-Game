@@ -1131,14 +1131,19 @@ public class Controller : MonoBehaviour
         carpetColour = GetColourFromID(id);
         Sprite[] s = GetSpriteFromID(id);
 
-        // check if the script is already running
-        if (carpetController.shouldRun)
-        {
-            // if so, finish the current placement
-            carpetController.FinishPlacement();
-        }
+        carpetController = GameObject.Find("CarpetController").GetComponent<CarpetRollScript>();
 
-        carpetController.Begin(carpetColour, this, s);
+        if (carpetController != null)
+        {
+            // check if the script is already running
+            if (carpetController.shouldRun)
+            {
+                // if so, finish the current placement
+                carpetController.FinishPlacement();
+            }
+
+            carpetController.Begin(carpetColour, this, s);
+        }
     }
 
     /// <summary>

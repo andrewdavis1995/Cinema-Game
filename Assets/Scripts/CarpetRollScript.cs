@@ -100,8 +100,11 @@ public class CarpetRollScript : MonoBehaviour {
 
                 try
                 {
-                    mainController.floorTiles[j, i].GetComponent<SpriteRenderer>().color = colour;
-                    mainController.floorTiles[j, i].GetComponent<SpriteRenderer>().sprite = texture[index];
+                    if (i > -1)
+                    {
+                        mainController.floorTiles[j, i].GetComponent<SpriteRenderer>().color = colour;
+                        mainController.floorTiles[j, i].GetComponent<SpriteRenderer>().sprite = texture[index];
+                    }
                 }
                 catch (Exception) { }
             }

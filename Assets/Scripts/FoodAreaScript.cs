@@ -13,6 +13,7 @@ public class FoodAreaScript : MonoBehaviour {
     {
         // find and set the controller
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
+        popupController = GameObject.Find("PopupController").GetComponent<Popup_Controller>();
     }
 
     /// <summary>

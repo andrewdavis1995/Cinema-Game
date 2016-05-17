@@ -286,12 +286,15 @@ public class AppearanceScript : MonoBehaviour {
                 // hide modeller
                 mainController.staffModel.SetActive(false);
                 popupController.bottomPanel.SetActive(true);
+                popupController.settingsButton.SetActive(true);
                 // close menu 
                 mainController.staffAppearanceMenu.SetActive(false);
                 // show all staff
                 mainController.ReShowStaffAndBuildings();
 
             }
+            
+            mainController.DoAutosave();          
 
         }
     }

@@ -19,6 +19,9 @@ public class Controller : MonoBehaviour
     #region Variables
 
     public GameObject confirmBtn;
+    public CarpetRollScript carpetController;
+
+    public Options options;
 
     public static bool isOwned = true;
 
@@ -134,6 +137,7 @@ public class Controller : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        options = new Options();
 
         ConfirmationScript[] sdsdfd = GameObject.FindObjectsOfType<ConfirmationScript>();
 
@@ -219,7 +223,6 @@ public class Controller : MonoBehaviour
 
         #region Load / New Game
 
-
         if (ButtonScript.friendData != null)
         {
             GameObject.Find("Bottom Panel").SetActive(false);
@@ -297,6 +300,10 @@ public class Controller : MonoBehaviour
             customerController.reputation = data.reputation;
             foodArea = data.foodArea;
 
+            options.Load(data.options);
+            
+
+
             int boxLevel = data.boxOfficeLevel;
             OtherObjectScript.CreateStaffSlot(1, new Vector3(37.8f, 12.3f, 0));
 
@@ -369,8 +376,7 @@ public class Controller : MonoBehaviour
                 {
                     c[colID] = new Color(cols[colID, 0], cols[colID, 1], cols[colID, 2]);
                 }
-
-                // TODO: set colours and hair style
+                
                 StaffMember newStaff = new StaffMember(id, name, transform, dayHired, tID, hairSprite);
                 newStaff.SetColours(c, hair, extras);
                 newStaff.SetSprites(hairSprite, extraSprite);
@@ -429,11 +435,7 @@ public class Controller : MonoBehaviour
         {
             Vector3 pos = new Vector3(ShopController.theScreens[i].GetX(), ShopController.theScreens[i].GetY() * 0.8f, 0);
 
-            //// align to grid - +/- 1 to move by one tile horizontally, 0.8 for vertical movement
-            //pos.x += 4.6f;
-            //pos.y += 6.05f;
-
-            //// change pos and element here
+            // change pos and element here
             pos.y += 0.8f;
 
             shopController.AddScreen(ShopController.theScreens[i], pos, height);
@@ -445,10 +447,7 @@ public class Controller : MonoBehaviour
         for (int i = 0; i < ShopController.otherObjects.Count; i++)
         {
             Vector3 pos = new Vector3(ShopController.otherObjects[i].xPos, ShopController.otherObjects[i].yPos * 0.8f, 0);
-
-            //float xCorrection = 0;
-            //float yCorrection = 0;
-
+            
             DimensionTuple t = shopController.GetBounds(itemToAddID);
 
             shopController.AddObject(pos, i, height, ShopController.otherObjects[i].type, true);
@@ -463,9 +462,7 @@ public class Controller : MonoBehaviour
             updateTileState(33, 0, 14, 16, 1, true);
             updateTileState(33, 16, 14, 4, 2, true);
         }
-
-
-
+        
 
         GameObject[] pointers = GameObject.FindGameObjectsWithTag("Pointer");
 
@@ -473,7 +470,6 @@ public class Controller : MonoBehaviour
         {
             pointers[i].GetComponent<Transform>().GetComponent<SpriteRenderer>().enabled = false;
         }
-
 
         dayLabel.text = "DAY: " + currDay.ToString();
 
@@ -560,6 +556,21 @@ public class Controller : MonoBehaviour
     }
 
     /// <summary>
+    /// Autosave after each purchase
+    /// </summary>
+    public void DoAutosave()
+    {
+        if (options.GetAutosave())
+        {
+            saveState = 0;
+            DisplaySave.Begin();
+            string persPath = Application.persistentDataPath;
+            Thread thr = new Thread(() => Save(persPath));
+            thr.Start();
+        }
+    }
+
+    /// <summary>
     /// Opens the editing menu for the staff member
     /// </summary>
     public void EditStaff()
@@ -574,6 +585,7 @@ public class Controller : MonoBehaviour
         staffModel.SetActive(true);
         staffAppearanceMenu.SetActive(true);
         popupController.bottomPanel.SetActive(false);
+        popupController.settingsButton.SetActive(false);
         popupController.staffMemberInfo.SetActive(false);
 
         // move the camera into place
@@ -775,7 +787,6 @@ public class Controller : MonoBehaviour
         b2.onClick.AddListener(() => ViewStaffMemberInfo(staff.GetIndex()));
 
         staffMenuList.Add(go);
-        DontDestroyOnLoad(go);
 
     }
 
@@ -1121,13 +1132,13 @@ public class Controller : MonoBehaviour
         Sprite[] s = GetSpriteFromID(id);
 
         // check if the script is already running
-        if (CarpetRollScript.shouldRun)
+        if (carpetController.shouldRun)
         {
             // if so, finish the current placement
-            CarpetRollScript.current.FinishPlacement();
+            carpetController.FinishPlacement();
         }
 
-        CarpetRollScript.current.Begin(carpetColour, this, s);
+        carpetController.Begin(carpetColour, this, s);
     }
 
     /// <summary>
@@ -1308,7 +1319,7 @@ public class Controller : MonoBehaviour
         ticketQueue.End();
         ticketQueue.Clear();
 
-        if (foodArea != null)
+        if (foodArea != null && foodQueue != null)
         {
             foodQueue.End();
             foodQueue.Clear();
@@ -1591,7 +1602,7 @@ public class Controller : MonoBehaviour
         return toReturn;
 
     }
-
+    
     /// <summary>
     /// Generate new show times
     /// </summary>
@@ -1857,6 +1868,9 @@ public class Controller : MonoBehaviour
             tagSelected = "";
             upgradeLevelSelected = 0;
         }
+
+        DoAutosave();
+
     }
 
     /// <summary>
@@ -2506,7 +2520,7 @@ public class Controller : MonoBehaviour
         BinaryFormatter formatter = new BinaryFormatter();
         FileStream file = File.Create(persPath + "/saveState.gd");
 
-        PlayerData data = new PlayerData(ShopController.theScreens, carpetColour, staffMembers, filmShowings, financeController.GetNumCoins(), currDay, financeController.GetNumPopcorn(), ShopController.otherObjects, shopController.hasUnlockedRedCarpet, isMarbleFloor, customerController.reputation, boxOfficeLevel, foodArea, shopController.postersUnlocked);
+        PlayerData data = new PlayerData(ShopController.theScreens, carpetColour, staffMembers, filmShowings, financeController.GetNumCoins(), currDay, financeController.GetNumPopcorn(), ShopController.otherObjects, shopController.hasUnlockedRedCarpet, isMarbleFloor, customerController.reputation, boxOfficeLevel, foodArea, shopController.postersUnlocked, options);
 
         formatter.Serialize(file, data);
 
@@ -2515,10 +2529,16 @@ public class Controller : MonoBehaviour
         // save to database
         if (facebookProfile != null && facebookProfile.id.Length > 0)
         {
+            FileStream fbFile = File.Create(persPath + "/facebook.gd");
+
+            PlayerData fbData = new PlayerData(ShopController.theScreens, carpetColour, staffMembers, filmShowings, financeController.GetNumCoins(), currDay, financeController.GetNumPopcorn(), ShopController.otherObjects, shopController.hasUnlockedRedCarpet, isMarbleFloor, customerController.reputation, boxOfficeLevel, foodArea, shopController.postersUnlocked, options);
+
+            formatter.Serialize(fbFile, fbData);
+
+            fbFile.Close();
+
             byte[] ba = ConvertToByteArray(persPath);
-
-            System.IO.File.WriteAllBytes(persPath + "/tes2.cles", ba);
-
+            
             string outputting = System.Text.Encoding.UTF8.GetString(ba);
             
             UpdateDetails ud = new UpdateDetails();
@@ -2541,7 +2561,7 @@ public class Controller : MonoBehaviour
     {
         byte[] byteArray = null;
 
-        string fileName = persPath + "/saveState.gd";
+        string fileName = persPath + "/facebook.gd";
 
         byteArray = File.ReadAllBytes(fileName);
 
@@ -2692,6 +2712,5 @@ public class Controller : MonoBehaviour
     private void AddToQueueFood(Customer customer)
     {
         foodQueue.AddCustomer(customer);
-        Debug.Log("FOOD: " + foodQueue.GetQueueSize());
     }
 }

@@ -9,6 +9,8 @@ public class ShopController : MonoBehaviour
     public bool[] postersUnlocked = new bool[2];
     public Sprite[] screenImages;
 
+    public Controller mainController;
+
     public Transform plantPrefab;
     public Transform bustPrefab;
     public Transform vendingMachinePrefab;
@@ -273,7 +275,6 @@ public class ShopController : MonoBehaviour
 
         if (itemToAddID == 7)
         {
-
             Popup_Controller puc = GameObject.Find("PopupController").GetComponent<Popup_Controller>();
 
             FoodAreaScript[] scripts = instance.GetComponentsInChildren<FoodAreaScript>();
@@ -281,8 +282,30 @@ public class ShopController : MonoBehaviour
             {
                 script.popupController = null;
             }
-        }
 
+            mainController.foodQueue = new CustomerQueue(70, pos.x + 3, (((pos.y / 0.8f) + 4) * 0.8f) - 1, 1);
+            OtherObjectScript.CreateStaffSlot(2, pos + new Vector3(3, 7.95f, 0));
+
+
+            bool one = Controller.foodArea.hasHotFood;
+            bool two = Controller.foodArea.hasIceCream;
+            bool three = Controller.foodArea.hasPopcorn;
+
+            int level = Controller.foodArea.tableStatus;
+
+            GameObject foodArea = GameObject.FindGameObjectWithTag("Food Area");
+
+            SpriteRenderer[] srs = foodArea.GetComponentsInChildren<SpriteRenderer>();
+
+            Debug.Log(one + "|" + two + "|" + three);
+
+            srs[1].enabled = one;
+            srs[3].enabled = two;
+            srs[2].enabled = three;
+
+            srs[4].sprite = mainController.foodTableSprites[level];
+
+        }
 
         gameObjectList.Add(instance);
         return instance;

@@ -21,8 +21,9 @@ public class PlayerData
     public int boxOfficeLevel;
     public FoodArea foodArea;
     public bool[] posters;
+    public Options options;
 
-    public PlayerData(List<ScreenObject> screens, Color col, List<StaffMember> staff, List<FilmShowing> films, int coins, int day, int popcorn, List<OtherObject> others, bool redCarpet, bool marble, Reputation rep, int boxOffice, FoodArea fa, bool[] poster)
+    public PlayerData(List<ScreenObject> screens, Color col, List<StaffMember> staff, List<FilmShowing> films, int coins, int day, int popcorn, List<OtherObject> others, bool redCarpet, bool marble, Reputation rep, int boxOffice, FoodArea fa, bool[] poster, Options opt)
     {
         theScreens = screens.ToArray();
         carpetColour = new float[4] { col.r, col.g, col.b, col.a };
@@ -46,6 +47,8 @@ public class PlayerData
         reputation = rep;
         boxOfficeLevel = boxOffice;
         posters = poster;
+        foodArea = fa;
+        options = opt;
     }
 
 }

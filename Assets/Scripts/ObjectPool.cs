@@ -9,6 +9,7 @@ namespace Assets.Scripts
     {
         public static ObjectPool current;   // a static instance of the class for easy access
 
+        public int audioVolume = 3;
         public GameObject[] objectsToPool;     // the type of object to pull. i.e. Customer prefab
         public AudioClip[] audioFiles;     // the sounds to play on walkout
         public List<GameObject> pooledObjects;     // the list of objects that are stored in the pool
@@ -77,6 +78,7 @@ namespace Assets.Scripts
             int rand = Random.Range(0, audioFiles.Length);
 
             aSource.clip = audioFiles[rand];
+            aSource.volume = audioVolume;
             go.SetActive(false);        // disable the object while it is not in use
             return go;
         }

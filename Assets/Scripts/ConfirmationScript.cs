@@ -171,6 +171,7 @@ public class ConfirmationScript : MonoBehaviour {
                 case 0:
                     mainController.AddNewObject(int.Parse(parameters[3]), int.Parse(parameters[4]));
                     mainController.statusCode = 0;
+                    mainController.DoAutosave();
                     break;
                 #endregion
 
@@ -180,6 +181,7 @@ public class ConfirmationScript : MonoBehaviour {
                     int index = int.Parse(parameters[3]);
                     mainController.UpgradeStaffAttribute(index);
                     mainController.statusCode = 7;
+                    mainController.DoAutosave();
                     break;
                 #endregion
 
@@ -197,6 +199,7 @@ public class ConfirmationScript : MonoBehaviour {
                     mainController.staffAppearanceMenu.SetActive(true);
                     theShop.gameObject.SetActive(false);
                     popupController.bottomPanel.SetActive(false);
+                    popupController.settingsButton.SetActive(false);
 
                     // move the camera into place
                     Camera.main.transform.position = new Vector3(32.68f, 0, 1);
@@ -227,6 +230,8 @@ public class ConfirmationScript : MonoBehaviour {
                     // create a builder for the screen
                     shopController.CreateBuilder(theScreen.GetX(), theScreen.GetY(), theScreen.GetScreenNumber());
 
+                    mainController.DoAutosave();
+
                     break;
                 #endregion
 
@@ -237,6 +242,7 @@ public class ConfirmationScript : MonoBehaviour {
                     shopController.hasUnlockedRedCarpet = true;
                     mainController.statusCode = 5;
                     popupController.HideObjectInfo();
+                    mainController.DoAutosave();
                     break;
                 #endregion
 
@@ -244,6 +250,7 @@ public class ConfirmationScript : MonoBehaviour {
                 case 5:
                     OtherObjectScript.UpgradeBoxOffice();
                     mainController.statusCode = 0;
+                    mainController.DoAutosave();
                     break;
                 #endregion
 
@@ -259,6 +266,7 @@ public class ConfirmationScript : MonoBehaviour {
                     // remove the object
                     mainController.RemoveObject(xPos, yPos, width, height);
                     mainController.statusCode = 0;
+                    mainController.DoAutosave();
                     break;
                 #endregion
 
@@ -276,30 +284,35 @@ public class ConfirmationScript : MonoBehaviour {
                     // unlock the component
                     FoodAreaScript.ComponentUnlocked(theIndex);
                     mainController.statusCode = 10;
+                    mainController.DoAutosave();
                     break;
                 #endregion
 
                 #region Purchase Poster pack 1
                 case 9:
-                        shopController.UnlockPosterPack(0);
+                    shopController.UnlockPosterPack(0);
+                    mainController.DoAutosave();
                     break;
                 #endregion
 
                 #region Purchase Poster pack 2
                 case 10:
-                        shopController.UnlockPosterPack(1);                    
+                    shopController.UnlockPosterPack(1);
+                    mainController.DoAutosave();
                     break;
                 #endregion
 
                 #region Coin Bundle (8000)
                 case 11:
                     financeController.AddCoins(8000);
+                    mainController.DoAutosave();
                     break;
                 #endregion
 
                 #region Finish Construction
                 case 12:
                     mainController.CompleteConstructionNow();
+                    mainController.DoAutosave();
                     break;
                     #endregion
             }

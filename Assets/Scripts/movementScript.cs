@@ -192,6 +192,7 @@ public class movementScript : MonoBehaviour {
                     transform.Translate(0, -1, 0);
                 }
                 transform.GetComponent<SpriteRenderer>().sortingOrder = 40 - (int)(transform.position.y / 0.8f) - 1;
+                customer.transform.GetComponent<Animator>().enabled = true;
                 customer.queueDoneWith = -1;
             }
             if (customer.inQueue && customer.shouldMoveUp > 0)
@@ -224,6 +225,7 @@ public class movementScript : MonoBehaviour {
             }
             if (customer.isBored)
             {
+                customer.transform.GetComponent<Animator>().enabled = true;
                 transform.GetComponent<Animator>().SetTrigger("bored");
                 customer.isBored = false;
             }
@@ -318,34 +320,6 @@ public class movementScript : MonoBehaviour {
 
         return 0;
     }
-
-    public void ShowBuildingOptions()
-    {
-
-    }
-
-
-    //public void SortQueuePosition()
-    //{
-    //    if (customer.inQueue)
-    //    {
-    //        transform.position = transform.position + new Vector3(0, 0.8f, 0);
-    //    }
-    //    else
-    //    {
-    //        // finished with Queue
-    //        // set trigger
-    //        //Vector3 tmp = transform.position;
-    //        //tmp.y = customer.getTravellingToY();
-    //        customer.goingToSeats = true;
-    //        customer.SetTravellingTo(38.5f + (3 * customer.servingSlot), (11 * 0.8f));
-    //        customer.servingSlot = -1;
-    //        customer.pointsToVisit.Clear();
-    //        //customer.nextPoint(false);
-    //        //customer.SetTravellingTo(customer.getTravellingToX(), customer.getTravellingToY() / 0.8f);
-    //        //transform.position = tmp;
-
-    //    }
-    //}
+        
 
 }

@@ -5,12 +5,19 @@ using UnityEngine.UI;
 public class Popup_Controller : MonoBehaviour
 {
     public GameObject popupBox;
-    
-    public Transform friendList;    // the menu to disaply the Facebook friends
+
+    public Slider musicVal;
+    public Slider fxVal;
+    public Toggle autosave;
+
+    public Transform friendList;    // the menu to display the Facebook friends
     public GameObject bottomPanel;
 
     public Transform staffMenu;
     public Transform staffList;
+
+    public GameObject settingsPage;
+    public GameObject settingsButton;
 
     public GameObject reputationPage;
 
@@ -34,6 +41,8 @@ public class Popup_Controller : MonoBehaviour
     public GameObject warningPanel;
     public Image warningIcon;
     public Text warningLabel;
+
+    public Sprite boxOfficeIcon;
 
 
     // controllers
@@ -129,6 +138,7 @@ public class Popup_Controller : MonoBehaviour
             Camera.main.orthographicSize = 14;
             mainController.staffAppearanceMenu.SetActive(true);
             bottomPanel.SetActive(false);
+            settingsButton.SetActive(false);
             mainController.staffModel.SetActive(true);
         }
 
@@ -351,11 +361,37 @@ public class Popup_Controller : MonoBehaviour
 
     }
 
+    public void ShowSettings()
+    {
+        HideObjectInfo();
+
+        mainController.statusCode = 73;
+        settingsPage.SetActive(true);
+
+        // set values based on current options selected
+        musicVal.value = mainController.options.GetMusicLevel();
+        fxVal.value = mainController.options.GetFXLevel();
+        autosave.isOn = mainController.options.GetAutosave();
+
+    }
+
     /// <summary>
     /// Display a warning that one (or more) of the screens are inaccessible
     /// </summary>
     public void DisplayWarning()
     {
         warningPanel.SetActive(!warningPanel.active);
+    }
+
+    public void SaveSettings()
+    {
+        mainController.statusCode = 0;
+        settingsPage.SetActive(false);
+
+        int music = (int)musicVal.value;
+        int fx = (int)fxVal.value;
+        bool auto = autosave.isOn;
+
+        mainController.options.UpdateDetails(music, fx, auto);
     }
 }

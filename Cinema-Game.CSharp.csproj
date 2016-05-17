@@ -13,11 +13,13 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>iOS:9</UnityBuildTarget>
     <UnityVersion>5.3.4f1</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <LangVersion Condition=" '$(VisualStudioVersion)' != '10.0' ">4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -82,6 +84,7 @@
     <Compile Include="Assets\Classes\FoodArea.cs" />
     <Compile Include="Assets\Classes\Login.cs" />
     <Compile Include="Assets\Classes\Node.cs" />
+    <Compile Include="Assets\Classes\Options.cs" />
     <Compile Include="Assets\Classes\OtherObject.cs" />
     <Compile Include="Assets\Classes\PlayerData.cs" />
     <Compile Include="Assets\Classes\Reputation.cs" />

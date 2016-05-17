@@ -80,7 +80,7 @@ public class OtherObjectScript : MonoBehaviour {
         string message = "No purpose";
         if (tag.Equals("Bust"))
         {
-            message = "Thanks for playing!";
+            message = "Thanks for playing!\nMusic and sound effects Credit - Lewis Davie";
         }
         else if (tag.Equals("Box Office"))
         {
@@ -91,9 +91,17 @@ public class OtherObjectScript : MonoBehaviour {
             message = "";
         }
         #endregion
-        
-        // get the object sprite
-        Sprite s = transform.GetComponent<SpriteRenderer>().sprite;
+
+        // get the object sprite 
+        Sprite s;
+        if (!tag.Equals("Box Office"))
+        {
+            s = transform.GetComponent<SpriteRenderer>().sprite;
+        }
+        else
+        {
+            s = popupController.boxOfficeIcon;
+        }
 
         // TODO: if box office or food court, change the sprite
 

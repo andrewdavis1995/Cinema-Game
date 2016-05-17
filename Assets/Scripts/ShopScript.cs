@@ -237,6 +237,9 @@ public class ShopScript : MonoBehaviour
             case 3: return "Customers will visit the food area to buy food. Earns coins";
             case 4: return "Posters will raise awareness of your cinemas and entice more customers to come";
             case 5: return "Posters will raise awareness of your cinemas and entice more customers to come";
+            case 6: return "Purely for decoration. Look good though!";
+            case 7: return "Put my face in your game! Purely for decoration";
+            case 8: return "Give your cinema a fancy entrance! Improves reputation";
             default: return "No information available";
         }
     }

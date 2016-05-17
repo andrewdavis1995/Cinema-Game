@@ -152,7 +152,7 @@ public class CameraControls : MonoBehaviour
         float x = currPos.x;
         float y = currPos.y;
 
-        if (mainController.statusCode != 10 && mainController.statusCode != 8)
+        if (mainController.statusCode != 10 && mainController.statusCode != 8 && mainController.statusCode != 73)
         {
             if (x < minX)
             {

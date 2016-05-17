@@ -38,12 +38,12 @@ public class ButtonScript : MonoBehaviour {
     void CheckIfLoadExists()
     {
         // if a file does not exist...
-        if (!File.Exists(Application.persistentDataPath + "/saveState.gd"))
-        {
+        //if (!File.Exists(Application.persistentDataPath + "/saveState.gd"))
+        //{
             // disable the load button
             //loadButton.enabled = false;
             //loadButton.image.color = Color.grey;
-        }
+        //}
     }
 
     /// <summary>

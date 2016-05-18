@@ -27,7 +27,7 @@ public class CarpetRollScript : MonoBehaviour {
         mainController = con;
         texture = t;
         shouldRun = true;
-
+        
         // change the colour of the carpet image
         carpet.GetComponent<SpriteRenderer>().color = c;
         carpet.transform.position = new Vector3(-2.62f, 17.97f, 0);

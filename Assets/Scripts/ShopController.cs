@@ -275,6 +275,9 @@ public class ShopController : MonoBehaviour
 
         if (itemToAddID == 7)
         {
+
+            instance.GetComponent<SpriteRenderer>().sortingOrder = height - (int)(pos.y / 0.8f) - 10;
+
             Popup_Controller puc = GameObject.Find("PopupController").GetComponent<Popup_Controller>();
 
             FoodAreaScript[] scripts = instance.GetComponentsInChildren<FoodAreaScript>();
@@ -284,7 +287,7 @@ public class ShopController : MonoBehaviour
             }
 
             mainController.foodQueue = new CustomerQueue(70, pos.x + 3, (((pos.y / 0.8f) + 4) * 0.8f) - 1, 1);
-            OtherObjectScript.CreateStaffSlot(2, pos + new Vector3(3, 7.95f, 0));
+            //OtherObjectScript.CreateStaffSlot(2, pos + new Vector3(3, 7.95f, 0));
 
 
             bool one = Controller.foodArea.hasHotFood;

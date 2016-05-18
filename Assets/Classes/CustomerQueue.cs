@@ -201,7 +201,6 @@ namespace Assets.Classes
             // sort the visual elements of the customer - sorting order etc
             c.transform.GetComponent<SpriteRenderer>().sortingLayerName = "Queue";
             c.transform.GetComponent<SpriteRenderer>().sortingOrder = theQueue.Count;
-            c.transform.GetComponent<Animator>().enabled = false;
             c.MovementVector = new Vector2(0, 0);
 
             // loop through all slots

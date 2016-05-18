@@ -125,7 +125,6 @@ public class movementScript : MonoBehaviour {
                         // delay here - QUEUE
                         if (addToQueueFood != null)
                         {
-
                             addToQueueFood(customer);
                             customer.inQueue = true;
                             customer.pointsToVisit.Clear();
@@ -189,10 +188,9 @@ public class movementScript : MonoBehaviour {
             {
                 if (customer.queueDoneWith == 1)
                 {
-                    transform.Translate(0, -1, 0);
+                    //transform.Translate(0, -1, 0);
                 }
                 transform.GetComponent<SpriteRenderer>().sortingOrder = 40 - (int)(transform.position.y / 0.8f) - 1;
-                customer.transform.GetComponent<Animator>().enabled = true;
                 customer.queueDoneWith = -1;
             }
             if (customer.inQueue && customer.shouldMoveUp > 0)
@@ -225,7 +223,6 @@ public class movementScript : MonoBehaviour {
             }
             if (customer.isBored)
             {
-                customer.transform.GetComponent<Animator>().enabled = true;
                 transform.GetComponent<Animator>().SetTrigger("bored");
                 customer.isBored = false;
             }
@@ -235,7 +232,7 @@ public class movementScript : MonoBehaviour {
                 transform.gameObject.SetActive(false);
             }
 
-            if (patienceCount < 1 && transform.position.x > 44)
+            if (patienceCount < 1 && transform.position.x > 42)
             {
                 transform.GetComponent<Animator>().SetTrigger("down");
                 customer.MovementVector = new Vector3(0, -1, 0);

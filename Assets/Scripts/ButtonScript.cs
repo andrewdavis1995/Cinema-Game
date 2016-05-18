@@ -74,6 +74,8 @@ public class ButtonScript : MonoBehaviour {
             if (pd != null)
             {
                 popup.SetActive(true);
+                Text[] t = popup.GetComponentsInChildren<Text>();
+                t[2].text = "Sorry, No Data found. Start a new game?";
             }
             else
             {
@@ -88,10 +90,16 @@ public class ButtonScript : MonoBehaviour {
         }
         else {
 
-            // if the local file does not exist...
+            // if the local file does exist...
             if (File.Exists(Application.persistentDataPath + "/saveState.gd"))
             {
                 popup.SetActive(true);
+                Text[] t = popup.GetComponentsInChildren<Text>();
+                t[2].text = "Warning!\nStarting a new game will automatically overwrite the existing saved game.\n\nDo you wish to continue?";
+            }
+            else
+            {
+                SceneManager.LoadScene(1);
             }
         }
     }
@@ -130,6 +138,8 @@ public class ButtonScript : MonoBehaviour {
             if (loadGame == null)
             {
                 popup.SetActive(true);
+                Text[] t = popup.GetComponentsInChildren<Text>();
+                t[2].text = "Sorry, No Data found. Start a new game?";
             }
 
             return loadGame;

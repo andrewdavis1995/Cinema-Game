@@ -71,7 +71,7 @@ public class FBScript : MonoBehaviour {
         newGame.enabled = false;
         loadGame.enabled = false;
         rulesButton.enabled = false;
-        gameObject.SetActive(false);
+        //gameObject.SetActive(false);
 
         List<string> permissions = new List<string>();
         permissions.Add("public_profile");
@@ -86,6 +86,9 @@ public class FBScript : MonoBehaviour {
         {
             // display error popup
             popup.SetActive(true);
+            newGame.enabled = true;
+            loadGame.enabled = true;
+            rulesButton.enabled = true;
         }
         else
         {
@@ -100,6 +103,9 @@ public class FBScript : MonoBehaviour {
             {
                 // display error popup
                 popup.SetActive(true);
+                newGame.enabled = true;
+                loadGame.enabled = true;
+                rulesButton.enabled = true;
             }
         }
     }

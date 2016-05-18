@@ -212,6 +212,7 @@ public class Controller : MonoBehaviour
                     string idToSend = facebookProfile.friends[i].id;
                     string nameToSend = facebookProfile.friends[i].name;
                     buttonComponents[0].onClick.AddListener(() => ViewFriendsCinema(idToSend, nameToSend));
+                    buttonComponents[1].onClick.AddListener(() => ViewFriendsCinema(idToSend, nameToSend));
 
                 }
             }
@@ -305,11 +306,9 @@ public class Controller : MonoBehaviour
             isMarbleFloor = data.marbleFloor;
             customerController.reputation = data.reputation;
             foodArea = data.foodArea;
-
+            
             options.Load(data.options);
             
-
-
             int boxLevel = data.boxOfficeLevel;
             OtherObjectScript.CreateStaffSlot(1, new Vector3(37.8f, 12.3f, 0));
 
@@ -533,7 +532,7 @@ public class Controller : MonoBehaviour
         {
             Vector3 pos = new Vector3(ShopController.otherObjects[i].xPos, ShopController.otherObjects[i].yPos * 0.8f, 0);
             
-            DimensionTuple t = shopController.GetBounds(itemToAddID);
+            DimensionTuple t = shopController.GetBounds(ShopController.otherObjects[i].type);
 
             shopController.AddObject(pos, i, height, ShopController.otherObjects[i].type, true);
 
@@ -557,6 +556,25 @@ public class Controller : MonoBehaviour
         }
 
         dayLabel.text = "DAY: " + currDay.ToString();
+
+
+        // create staff slots for food area if not null
+        if (foodArea != null)
+        {
+            GameObject go = GameObject.FindGameObjectWithTag("Food Area");
+            Vector2 pos = go.transform.position;
+
+            for (int i = 0; i < foodArea.tableStatus + 1; i++) { 
+                OtherObjectScript.CreateStaffSlot(2, pos + new Vector2(3 + (2.5f * i), 7.95f));
+            }
+
+            if (foodArea.tableStatus == 1)
+            {
+                foodQueue.Upgrade();
+            }
+        }
+
+        NewShowTimes();
 
     }
     
@@ -1820,6 +1838,8 @@ public class Controller : MonoBehaviour
 
                 GameObject theObject = shopController.AddObject(pos, id, height, itemToAddID, false);
 
+                //GameObject theObject = GameObject.Find(objectSelected);
+
                 SpriteRenderer[] subImages = theObject.GetComponentsInChildren<SpriteRenderer>();
 
                 for (int j = 0; j < subImages.Length; j++)
@@ -1834,14 +1854,14 @@ public class Controller : MonoBehaviour
                     subImages[2].enabled = foodArea.hasPopcorn;
                     subImages[3].enabled = foodArea.hasIceCream;
 
-                    int baseOrder = subImages[0].sortingOrder - 6;
-
-                    subImages[0].sortingOrder = baseOrder;
+                    int baseOrder = subImages[0].sortingOrder;
+                    
+                    subImages[0].sortingOrder = baseOrder - 2;
                     subImages[1].sortingOrder = baseOrder + 1;
                     subImages[2].sortingOrder = baseOrder + 1;
                     subImages[3].sortingOrder = baseOrder + 1;
                     subImages[4].sortingOrder = baseOrder + 1;
-                    subImages[5].sortingOrder = baseOrder - 1;
+                    subImages[5].sortingOrder = baseOrder - 5;
 
 
                     GameObject[] go = GameObject.FindGameObjectsWithTag("Staff Slot 2");
@@ -1878,14 +1898,10 @@ public class Controller : MonoBehaviour
                     }
                 }
 
-
-
-
+                
                 // check staff position
                 CheckStaffPosition(theObject);
-
-
-
+                
 
             }
             itemToAddID = -1;
@@ -2032,8 +2048,6 @@ public class Controller : MonoBehaviour
             //pos.y += yCorrection;
             pos.y += 0.8f; // gap at bottom
 
-            shopController.AddScreen(ShopController.theScreens[newID], pos, height);
-
             GameObject screenThing = shopController.AddScreen(ShopController.theScreens[newID], pos, height);
 
             // check staff position
@@ -2072,26 +2086,29 @@ public class Controller : MonoBehaviour
 
             SpriteRenderer[] subImages = theObject.GetComponentsInChildren<SpriteRenderer>();
 
-            try
+            if (itemToAddID == 7)
             {
-                subImages[1].enabled = foodArea.hasHotFood;
-                subImages[2].enabled = foodArea.hasPopcorn;
-                subImages[3].enabled = foodArea.hasIceCream;
-                subImages[4].enabled = true;
-                subImages[5].enabled = true;
+                try
+                {
+                    subImages[1].enabled = foodArea.hasHotFood;
+                    subImages[2].enabled = foodArea.hasPopcorn;
+                    subImages[3].enabled = foodArea.hasIceCream;
+                    subImages[4].enabled = true;
+                    subImages[5].enabled = true;
 
-                int baseOrder = subImages[0].sortingOrder - 6;
-                subImages[0].sortingOrder = baseOrder;
-                subImages[1].sortingOrder = baseOrder + 1;
-                subImages[2].sortingOrder = baseOrder + 1;
-                subImages[3].sortingOrder = baseOrder + 1;
-                subImages[4].sortingOrder = baseOrder + 1;
-                subImages[5].sortingOrder = baseOrder - 1;
+                    int baseOrder = subImages[0].sortingOrder;
+                    subImages[0].sortingOrder = baseOrder - 2;
+                    subImages[1].sortingOrder = baseOrder + 1;
+                    subImages[2].sortingOrder = baseOrder + 1;
+                    subImages[3].sortingOrder = baseOrder + 1;
+                    subImages[4].sortingOrder = baseOrder + 1;
+                    subImages[5].sortingOrder = baseOrder - 5;
 
-                OtherObjectScript.CreateStaffSlot(2, theObject.transform.position + new Vector3(3, 7.95f, 0));
-                NewShowTimes();
+                    OtherObjectScript.CreateStaffSlot(2, theObject.transform.position + new Vector3(3, 7.95f, 0));
+                    NewShowTimes();
+                }
+                catch (Exception) { }
             }
-            catch (Exception) { }
         }
         itemToAddID = -1;
 
@@ -2450,7 +2467,7 @@ public class Controller : MonoBehaviour
                 break;
             }
         }
-
+    
     }
 
     /// <summary>

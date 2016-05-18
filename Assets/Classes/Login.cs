@@ -54,18 +54,9 @@ namespace Assets.Classes
 
             
             byte[] bytes = System.Convert.FromBase64String(code);
-            //System.IO.File.WriteAllBytes(Application.persistentDataPath + "/test.test", bytes);
 
 
-            //System.IO.StreamWriter file2 = new System.IO.StreamWriter("C:/Users/asuth/Documents/test.icles", false);
-
-            //StreamWriter sw = new StreamWriter(Application.persistentDataPath + "/test.icles");
-            //sw.Write(bytes);
-
-            //file2.Write(bytes);
-
-
-            System.IO.File.WriteAllBytes(Application.persistentDataPath + "/test.icles", bytes);
+            System.IO.File.WriteAllBytes(Application.persistentDataPath + "/temp.data", bytes);
 
             //sw.Close();
             //file2.Close();
@@ -75,8 +66,7 @@ namespace Assets.Classes
             BinaryFormatter formatter = new BinaryFormatter();
 
             // read the contents of the save game file
-            //FileStream file = File.Open(Application.persistentDataPath + "/test.icles", FileMode.Open);
-            FileStream file = File.Open(Application.persistentDataPath + "/test.icles", FileMode.Open);
+            FileStream file = File.Open(Application.persistentDataPath + "/temp.data", FileMode.Open);
             file.Position = 0;
             
             // deserialise the data and store it

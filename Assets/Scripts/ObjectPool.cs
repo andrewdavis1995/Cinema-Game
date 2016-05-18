@@ -58,6 +58,7 @@ namespace Assets.Scripts
 
             // if no object available, make a new one
             GameObject go = AddNewItem();
+            poolSize++;
 
             // if still no solution, return null
             return go;

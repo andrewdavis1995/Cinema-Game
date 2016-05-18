@@ -65,6 +65,7 @@ public class CarpetRollScript : MonoBehaviour {
             if (carpet.transform.position.x > 80)
             {
                 shouldRun = false;
+                carpet.SetActive(false);
             }
 
             // update the image of all tiles

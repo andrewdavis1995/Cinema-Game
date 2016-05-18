@@ -500,8 +500,8 @@ public class Controller : MonoBehaviour
                         // show the popup
                         GameObject giftPanel = GameObject.Find("GiftList");
                         giftPanel.GetComponent<Canvas>().enabled = true;
-                        
 
+                        DoAutosave();
 
                     }
 
@@ -2605,13 +2605,6 @@ public class Controller : MonoBehaviour
     void Save(string persPath)
     {
         BinaryFormatter formatter = new BinaryFormatter();
-        FileStream file = File.Create(persPath + "/saveState.gd");
-
-        PlayerData data = new PlayerData(ShopController.theScreens, carpetColour, staffMembers, filmShowings, financeController.GetNumCoins(), currDay, financeController.GetNumPopcorn(), ShopController.otherObjects, shopController.hasUnlockedRedCarpet, isMarbleFloor, customerController.reputation, boxOfficeLevel, foodArea, shopController.postersUnlocked, options);
-
-        formatter.Serialize(file, data);
-
-        file.Close();
 
         // save to database
         if (facebookProfile != null && facebookProfile.id.Length > 0)
@@ -2625,16 +2618,26 @@ public class Controller : MonoBehaviour
             fbFile.Close();
 
             byte[] ba = ConvertToByteArray(persPath);
-            
+
             string outputting = System.Text.Encoding.UTF8.GetString(ba);
-            
+
             UpdateDetails ud = new UpdateDetails();
             ud.DoUpdate(facebookProfile.id, ba);
-            
+
             saveState = 1;
 
         }
+        else
+        {
 
+            FileStream file = File.Create(persPath + "/saveState.gd");
+
+            PlayerData data = new PlayerData(ShopController.theScreens, carpetColour, staffMembers, filmShowings, financeController.GetNumCoins(), currDay, financeController.GetNumPopcorn(), ShopController.otherObjects, shopController.hasUnlockedRedCarpet, isMarbleFloor, customerController.reputation, boxOfficeLevel, foodArea, shopController.postersUnlocked, options);
+
+            formatter.Serialize(file, data);
+
+            file.Close();
+        }
         
     }
 

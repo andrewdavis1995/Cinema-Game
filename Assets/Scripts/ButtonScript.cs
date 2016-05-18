@@ -178,7 +178,7 @@ public class ButtonScript : MonoBehaviour {
     {
         popup.SetActive(false);
 
-        NewGame();
+        SceneManager.LoadScene(1);
     }
 
     public void WarningCancelled()

@@ -25,6 +25,8 @@ public class FBScript : MonoBehaviour {
     public GameObject facebookPanel;
     public GameObject loggedInPanel;
 
+    public GameObject popup;
+
     public Text txtLoggedInAs;
 
     public List<FacebookFriend> friendList = new List<FacebookFriend>();
@@ -39,14 +41,14 @@ public class FBScript : MonoBehaviour {
 
     void SetInit()
     {
-        if (FB.IsLoggedIn)
-        {
-            Debug.Log("LOGGED IN ALREADY");
-        }
-        else
-        {
-            Debug.Log("NOT YET LOGGED IN");
-        }
+        //if (FB.IsLoggedIn)
+        //{
+        //    Debug.Log("LOGGED IN ALREADY");
+        //}
+        //else
+        //{
+        //    Debug.Log("NOT YET LOGGED IN");
+        //}
         FB.LogOut();
     }
 
@@ -61,7 +63,7 @@ public class FBScript : MonoBehaviour {
             Time.timeScale = 1;
         }
     }
-
+    
     public void FBLogin()
     {
 
@@ -82,14 +84,13 @@ public class FBScript : MonoBehaviour {
     {
         if (result.Error != null)
         {
-            Debug.Log("ERROR!!");
+            // display error popup
+            popup.SetActive(true);
         }
         else
         {
             if (FB.IsLoggedIn)
             {
-                Debug.Log("SUCCESS");
-
                 FB.API("/me?fields=first_name,last_name", HttpMethod.GET, DisplayUsername);
                 FB.API("/me/friends?fields=first_name,last_name", HttpMethod.GET, DisplayFriends);
                 //FB.API("me/picture?type=square&height=128&width=128", HttpMethod.GET, DisplayProfilePic);
@@ -97,7 +98,8 @@ public class FBScript : MonoBehaviour {
             }
             else
             {
-                Debug.Log("FAIL");
+                // display error popup
+                popup.SetActive(true);
             }
         }
     }
@@ -127,10 +129,7 @@ public class FBScript : MonoBehaviour {
             string friendFBID = GetDataValueForKey((Dictionary<string, object>)(theList[i]), "id");
             string first_name = GetDataValueForKey((Dictionary<string, object>)(theList[i]), "first_name");
             string last_name = GetDataValueForKey((Dictionary<string, object>)(theList[i]), "last_name");
-
             
-            Debug.Log(friendFBID + " --> " + first_name + " " + last_name);
-
             FacebookFriend fwend = new FacebookFriend();
             fwend.name = first_name + " " + last_name;
             fwend.id = friendFBID;
@@ -201,7 +200,12 @@ public class FBScript : MonoBehaviour {
         id = "";
         facebookPanel.SetActive(true);
         loggedInPanel.SetActive(false);
-    }   
+    }
+
+    public void HidePopup()
+    {
+        popup.SetActive(false);
+    }
 
 }
 

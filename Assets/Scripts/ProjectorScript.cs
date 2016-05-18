@@ -105,13 +105,7 @@ public class ProjectorScript : MonoBehaviour
         // get the current clicks remaining for the associated screen
         int prevClicks = ShopController.theScreens[id - 1].GetClicksRemaining();
 
-
-
-        Debug.Log(prevClicks);
-
-
-
-
+        
         // update the clicks
         int remaining = ShopController.theScreens[id - 1].ProjectorClicked();
 

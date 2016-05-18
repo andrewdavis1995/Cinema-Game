@@ -471,6 +471,9 @@ public class TileManager : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// print to a file to check tile states
+    /// </summary>
     public void ShowOutput()
     {
         try
@@ -483,7 +486,7 @@ public class TileManager : MonoBehaviour
                 {
                     file.Write(floor.floorTiles[i, j].inUse + " ");
                 }
-                //Debug.Log(lineOutput);
+                // (lineOutput);
                 file.WriteLine();
             }
 

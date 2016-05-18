@@ -19,9 +19,13 @@ public class Controller : MonoBehaviour
     #region Variables
 
     public static string friendID = "";
+    public static int numPopcorn = 0;
+    public static int popcornSpent = 0;
 
     public GameObject confirmBtn;
     public CarpetRollScript carpetController;
+
+    public Transform giftObject;
 
     public Options options;
 
@@ -428,6 +432,85 @@ public class Controller : MonoBehaviour
             shopController.ShowPosters(0);
             shopController.ShowPosters(1);
 
+
+            if (popcornSpent > 0)
+            {
+                financeController.RemovePopcorn(Controller.popcornSpent);
+                financeController.popcornLabel.text = financeController.GetNumPopcorn().ToString();
+                Controller.popcornSpent = 0;
+                DoAutosave();
+            }
+
+            string fbID = FBScript.current.id;
+
+            try
+            {
+                if (isOwned)
+                {
+                    Gifting g = new Gifting();
+                    List<String> gifts = g.GetGifts(fbID);
+
+                    if (gifts.Count > 0)
+                    {
+
+                        List<int> counts = new List<int>();
+                        List<string> names = new List<string>();
+
+
+                        // group together - i.e. Susan McDonaldman: 3
+                        for (int i = 0; i < gifts.Count; i++)
+                        {
+
+                            bool found = false;
+
+                            for (int checkLoop = 0; checkLoop < names.Count; checkLoop++)
+                            {
+                                if (names[checkLoop].Equals(gifts[i]))
+                                {
+                                    found = true;
+                                    counts[checkLoop]++;
+                                    break;
+                                }
+                            }
+
+                            if (!found)
+                            {
+                                names.Add(gifts[i]);
+                                counts.Add(1);
+                            }
+                        }
+
+                        financeController.AddPopcorn(gifts.Count);
+
+                        for (int i = 0; i < names.Count; i++)
+                        {
+                            // add the element / objects
+                            Transform t = Instantiate(giftObject, new Vector2(0, 0), Quaternion.identity) as Transform;
+                            // set parent to the element container
+
+                            Transform giftContainer = GameObject.Find("GiftContainer").transform;
+
+                            t.SetParent(giftContainer);
+                            // change the values
+                            Text[] txts = t.GetComponentsInChildren<Text>();
+                            txts[0].text = names[i];
+                            txts[1].text = counts[i].ToString();
+                        }
+
+                        // show the popup
+                        GameObject giftPanel = GameObject.Find("GiftList");
+                        giftPanel.GetComponent<Canvas>().enabled = true;
+                        
+
+
+                    }
+
+                }
+            }
+            catch (Exception)
+            {
+                popupController.ShowPopup(0, "Error getting Gifts");
+            }
         }
         
         #endregion
@@ -601,9 +684,8 @@ public class Controller : MonoBehaviour
     /// </summary>
     public void ViewFriendsCinema(string fbid, string name)
     {
-        Debug.Log(fbid);
-
         Controller.isOwned = false;
+        Controller.numPopcorn = numPopcorn;
 
         Login l = new Login();
         PlayerData friendData = l.DoLogin(fbid);
@@ -1012,7 +1094,6 @@ public class Controller : MonoBehaviour
             if (staffMenuList[0] == null)
             {
                 staffMenuList = GameObject.FindGameObjectsWithTag("StaffInfoItem").ToList();
-                Debug.Log("FIXED!!!");
             }
         }
         catch (Exception) { }
@@ -2072,7 +2153,6 @@ public class Controller : MonoBehaviour
             popupController.warningIcon.enabled = true;
 
             popupController.warningLabel.text = warning1 + screenList + warning2;
-            Debug.Log("CAUTION: " + screenList + " ARE UNREACHABLE. YOUR CUSTOMERS FOR THIS SCREEN WILL NOT REACH THE SCREEN AND WILL LEAVE - RUINING THE REPUTATION OF YOUR FINE CINEMA!");
         }
         else
         {
@@ -2550,9 +2630,7 @@ public class Controller : MonoBehaviour
             
             UpdateDetails ud = new UpdateDetails();
             ud.DoUpdate(facebookProfile.id, ba);
-
-            Debug.Log("Saved to Database");
-
+            
             saveState = 1;
 
         }

@@ -77,10 +77,6 @@ public class QuestionScript : MonoBehaviour
         sm = staff;
         runGeneration = true;
         isButton = false;
-
-
-        Debug.Log("Started for " + sm.GetStaffname());
-
     }
 
     /// <summary>
@@ -119,8 +115,7 @@ public class QuestionScript : MonoBehaviour
         QuestionScript qs2 = ques.transform.GetComponent<QuestionScript>();
         qs.isButton = true;
         qs.sm = sm;
-
-        Debug.Log("Created for " + sm.GetStaffname());
+        
         #endregion
         
     }
@@ -154,8 +149,6 @@ public class QuestionScript : MonoBehaviour
 
             // update the clicks
             int remaining = sm.QuestionClicked();
-            
-            Debug.Log( remaining + " remaining for " + sm.GetStaffname());
 
             // if that was the last click... FIXED!!!
             if (prevClicks == 1)

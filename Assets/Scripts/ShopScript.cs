@@ -109,7 +109,6 @@ public class ShopScript : MonoBehaviour
                 else
                 {
                     // inform the user that the Red Carpet has already been purchased
-                    Debug.Log("Already Got it you silly sausage!");
                     popupController.ShowPopup(5, "You already own this object!");
                 }
                 break;
@@ -129,7 +128,6 @@ public class ShopScript : MonoBehaviour
                 else
                 {
                     // inform the user that they have already purchased the Food Area
-                    Debug.Log("Already Got it you stupid sausage!");
                     popupController.ShowPopup(5, "You already own this object!");
                 }
                 break;

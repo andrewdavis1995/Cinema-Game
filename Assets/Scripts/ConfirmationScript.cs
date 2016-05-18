@@ -140,7 +140,7 @@ public class ConfirmationScript : MonoBehaviour {
         int cost = int.Parse(parameters[1]);
 
         // if the user has enough coins / popcorn to afford the action
-        if ((financeController.GetNumCoins() >= cost && parameters[2].Equals("0")) || (financeController.GetNumPopcorn() >= cost && parameters[2].Equals("1")) || actionCode == 6)
+        if ((financeController.GetNumCoins() >= cost && parameters[2].Equals("0") && actionCode != 13) || (financeController.GetNumPopcorn() >= cost && parameters[2].Equals("1") && actionCode != 13) || actionCode == 6 || (actionCode == 13 && Controller.numPopcorn > 0))
         {
             // hide the panel
             popupController.confirmationPanel.SetActive(false);
@@ -319,7 +319,19 @@ public class ConfirmationScript : MonoBehaviour {
                 #region Send Gift
                 case 13:
                     Gifting g = new Gifting();
-                    g.SendGift(parameters[3], parameters[4]);       // TODO: Actual values
+                    bool success = g.SendGift(parameters[3], parameters[4]);       // TODO: Actual values
+                    Controller.popcornSpent++;
+                    mainController.statusCode = 0;
+
+                    if (success)
+                    {
+                        popupController.ShowPopup(0, "Gift successfully sent!");
+                    }
+                    else
+                    {
+                        popupController.ShowPopup(0, "Uh-Oh! Something went wrong");
+                    }
+
                     break;
                     #endregion
             }

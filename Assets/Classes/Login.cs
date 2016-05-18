@@ -42,6 +42,7 @@ namespace Assets.Classes
             string code = cinemaData[0].InnerText;
 
 
+            response.Close();
 
 
             int mod4 = code.Length % 4;
@@ -81,14 +82,11 @@ namespace Assets.Classes
             // deserialise the data and store it
             try {
                 PlayerData pd = (PlayerData)formatter.Deserialize(file);
-
-                Debug.Log("Success");
-
+                
                 return pd;
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.Message);
                 return null;
             }
         }            

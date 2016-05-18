@@ -77,7 +77,7 @@ namespace Assets.Classes
 
             string blobData = sr.ReadToEnd();
             
-            Debug.Log(blobData);
+            response.Close();
 
         }
 

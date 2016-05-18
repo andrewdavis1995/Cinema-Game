@@ -65,28 +65,11 @@ public class mouseDrag : MonoBehaviour
 
     void Update()
     {
-        //Debug.Log(Input.mousePosition);
-        //Debug.Log("WtS: " + Camera.main.WorldToScreenPoint(Camera.main.transform.transform.position).x);
-        //Debug.Log("WtV: " + Camera.main.WorldToViewportPoint(Camera.main.transform.transform.position).x);
-        ////Debug.Log("VtS: " + Camera.main.ViewportToScreenPoint(Camera.main.transform.transform.position).x);
-        //Debug.Log("VtW: " + Camera.main.ViewportToWorldPoint(Camera.main.transform.transform.position).x);
-        //Debug.Log("StW: " + Camera.main.ScreenToWorldPoint(Camera.main.transform.transform.position).x); // this one
-        //Debug.Log("StV: " + Camera.main.ScreenToViewportPoint(Camera.main.transform.transform.position).x);
-
-        //Debug.Log("WtS: " + Camera.main.WorldToScreenPoint(Input.mousePosition).x);
-        //Debug.Log("WtV: " + Camera.main.WorldToViewportPoint(Input.mousePosition).x);
-        ////Debug.Log("VtS: " + Camera.main.ViewportToScreenPoint(Input.mousePosition).x);
-        //Debug.Log("VtW: " + Camera.main.ViewportToWorldPoint(Input.mousePosition).x);
-        //Debug.Log("StW: " + Camera.main.ScreenToWorldPoint(Input.mousePosition).x); // this one
-        ////Debug.Log("StV: " + Camera.main.ScreenToViewportPoint(Input.mousePosition).x);
-
         if (dragging && (mainController.statusCode < 2 || mainController.statusCode == 6))
         {
             DoDragging();
             mainController.statusCode = 1;
         }
-
-
     }
 
     // dodgy function

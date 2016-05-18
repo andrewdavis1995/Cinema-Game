@@ -296,9 +296,7 @@ public class ShopController : MonoBehaviour
             GameObject foodArea = GameObject.FindGameObjectWithTag("Food Area");
 
             SpriteRenderer[] srs = foodArea.GetComponentsInChildren<SpriteRenderer>();
-
-            Debug.Log(one + "|" + two + "|" + three);
-
+            
             srs[1].enabled = one;
             srs[3].enabled = two;
             srs[2].enabled = three;

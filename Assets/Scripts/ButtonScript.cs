@@ -56,6 +56,7 @@ public class ButtonScript : MonoBehaviour {
         loadGame = dataCopy;
         friendData = null;
         dataCopy = null;
+        Controller.numPopcorn = 0;
         SceneManager.LoadScene(1);
     }
     
@@ -177,15 +178,7 @@ public class ButtonScript : MonoBehaviour {
     {
         popup.SetActive(false);
 
-        string fbID = FBScript.current.id;
-        
-        loadImage.enabled = true;
-
-        // make the load game details = null
-        loadGame = null;
-        
-        // load the other scene
-        SceneManager.LoadScene("main screen");
+        NewGame();
     }
 
     public void WarningCancelled()

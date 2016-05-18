@@ -21,6 +21,8 @@ public class Popup_Controller : MonoBehaviour
 
     public GameObject reputationPage;
 
+    public Canvas giftMenu;
+
     public GameObject confirmationPanel;
 
     public GameObject popup;
@@ -100,6 +102,7 @@ public class Popup_Controller : MonoBehaviour
         mainController.tagSelected = "";
         mainController.upgradeLevelSelected = 0;
         mainController.selectedStaff = -1;
+        giftMenu.enabled = false;
     }
 
     /// <summary>
@@ -400,6 +403,6 @@ public class Popup_Controller : MonoBehaviour
         string userID = FBScript.current.id;
         string friendID = Controller.friendID;
 
-        ConfirmationScript.OptionSelected(13, new string[] { "send 1 popcorn to this friend?", "0", "1", userID, friendID }, "This will cost you: ");     // 3 = user ID, 4 = friend ID
+        ConfirmationScript.OptionSelected(13, new string[] { "send 1 popcorn to this friend?", "1", "1", userID, friendID }, "This will cost you: ");     // 3 = user ID, 4 = friend ID
     }
 }

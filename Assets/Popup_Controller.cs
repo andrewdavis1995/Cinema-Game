@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Popup_Controller : MonoBehaviour
 {
@@ -364,6 +365,9 @@ public class Popup_Controller : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Opens the settings popup
+    /// </summary>
     public void ShowSettings()
     {
         HideObjectInfo();
@@ -386,6 +390,9 @@ public class Popup_Controller : MonoBehaviour
         warningPanel.SetActive(!warningPanel.active);
     }
 
+    /// <summary>
+    /// Saves/Updates the chosen settings and closes the popup
+    /// </summary>
     public void SaveSettings()
     {
         mainController.statusCode = 0;
@@ -398,11 +405,22 @@ public class Popup_Controller : MonoBehaviour
         mainController.options.UpdateDetails(music, fx, auto);
     }
 
+    /// <summary>
+    /// When the option for sending a gift to a Facebook friend is clicked
+    /// </summary>
     public void SendGift()
     {
         string userID = FBScript.current.id;
         string friendID = Controller.friendID;
 
         ConfirmationScript.OptionSelected(13, new string[] { "send 1 popcorn to this friend?", "1", "1", userID, friendID }, "This will cost you: ");     // 3 = user ID, 4 = friend ID
+    }
+
+    /// <summary>
+    /// Return to the main menu
+    /// </summary>
+    public void BackToMenu()
+    {
+        SceneManager.LoadScene(0);
     }
 }

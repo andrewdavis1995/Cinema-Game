@@ -29,23 +29,8 @@ public class ButtonScript : MonoBehaviour {
         }
         catch (Exception) { }
         // check if a game has been saved (and is loadable)
-        CheckIfLoadExists();
     }
-
-    /// <summary>
-    /// Checks if there is a Saved Game available for loading
-    /// </summary>
-    void CheckIfLoadExists()
-    {
-        // if a file does not exist...
-        //if (!File.Exists(Application.persistentDataPath + "/saveState.gd"))
-        //{
-            // disable the load button
-            //loadButton.enabled = false;
-            //loadButton.image.color = Color.grey;
-        //}
-    }
-
+    
     /// <summary>
     /// Screw you guys...
     /// </summary>
@@ -85,6 +70,7 @@ public class ButtonScript : MonoBehaviour {
                 string name = FBScript.current.firstname + " " + FBScript.current.surname;
                 au.AddTheUser(id, name);
 
+                loadImage.enabled = true;
                 SceneManager.LoadScene(1);
             }
         }
@@ -99,6 +85,7 @@ public class ButtonScript : MonoBehaviour {
             }
             else
             {
+                loadImage.enabled = true;
                 SceneManager.LoadScene(1);
             }
         }
@@ -115,6 +102,7 @@ public class ButtonScript : MonoBehaviour {
         if (loadGame != null)
         {
             // open the other scene
+            loadImage.enabled = true;
             SceneManager.LoadScene("main screen");
         }
     }
@@ -125,8 +113,6 @@ public class ButtonScript : MonoBehaviour {
     /// <returns>The player details - to load into the game</returns>
     PlayerData Load()
     {
-
-        loadImage.enabled = true;
 
         if (FBScript.current.id.Length > 0)
         {
@@ -181,6 +167,7 @@ public class ButtonScript : MonoBehaviour {
     /// </summary>
     public void GoToRules()
     {
+        loadImage.enabled = true;
         SceneManager.LoadScene(3);
     }
 
@@ -188,6 +175,7 @@ public class ButtonScript : MonoBehaviour {
     {
         popup.SetActive(false);
 
+        loadImage.enabled = true;
         SceneManager.LoadScene(1);
     }
 

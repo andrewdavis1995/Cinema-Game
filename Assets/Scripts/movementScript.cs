@@ -198,6 +198,7 @@ public class movementScript : MonoBehaviour {
                 int move = customer.shouldMoveUp;
                 customer.shouldMoveUp = 0;
                 transform.Translate(0, move * 0.8f, 0);
+                GetComponent<SpriteRenderer>().sortingOrder--;
             }
             if (customer.moveToServingSlot > -1)
             {

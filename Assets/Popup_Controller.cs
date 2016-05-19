@@ -94,6 +94,9 @@ public class Popup_Controller : MonoBehaviour
         objectInfo.SetActive(false);
         closeInfo.SetActive(false);
         staffMenu.gameObject.SetActive(false);
+        reputationPage.SetActive(false);
+        popupBox.SetActive(false);
+        
         colourPicker.SetActive(false);
         staffMemberInfo.SetActive(false);
         friendList.GetComponentsInParent<Canvas>()[0].enabled = false;

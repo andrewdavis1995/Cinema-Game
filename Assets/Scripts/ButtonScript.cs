@@ -42,6 +42,7 @@ public class ButtonScript : MonoBehaviour {
         friendData = null;
         dataCopy = null;
         Controller.numPopcorn = 0;
+        ButtonScript.friendData = null;
         SceneManager.LoadScene(1);
     }
     

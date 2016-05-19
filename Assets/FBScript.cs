@@ -206,6 +206,7 @@ public class FBScript : MonoBehaviour {
         id = "";
         facebookPanel.SetActive(true);
         loggedInPanel.SetActive(false);
+        ButtonScript.loadGame = null;
     }
 
     public void HidePopup()

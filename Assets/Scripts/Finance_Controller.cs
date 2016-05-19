@@ -5,8 +5,8 @@ using UnityEngine.UI;
 public class Finance_Controller : MonoBehaviour
 {
 
-    int totalCoins = 40000;
-    int numPopcorn = 15;
+    int totalCoins = 450;
+    int numPopcorn = 4;
 
     public Text coinLabel;
     public Text popcornLabel;

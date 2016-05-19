@@ -25,16 +25,16 @@ public class OtherObject
     {
         switch (objectSelected)
         {
-            case "NEW SCREEN": return 500;
+            case "NEW SCREEN": return 1000;
             case "NEW PLANT": return 80;
             case "NEW BUST": return 7;
-            case "NEW VENDING MACHINE": return 90;
-            case "NEW FOOD AREA": return 5000;
-            case "Screen": return 500;
+            case "NEW VENDING MACHINE": return 150;
+            case "NEW FOOD AREA": return 7000;
+            case "Screen": return 1000;
             case "Plant": return 80;
             case "Bust": return 7;
-            case "Vending Machine": return 90;
-            case "Food Area": return 5000;
+            case "Vending Machine": return 150;
+            case "Food Area": return 7000;
             default: return 0;
         }
     }

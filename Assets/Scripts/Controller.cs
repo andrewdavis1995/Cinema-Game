@@ -246,7 +246,7 @@ public class Controller : MonoBehaviour
         // get Player data. If not null, load game
         if (ButtonScript.loadGame == null)
         {
-            financeController.Inititalise(40000, 15);
+            financeController.Inititalise(450, 4);
 
             carpetColour = GetColourFromID(1);
 

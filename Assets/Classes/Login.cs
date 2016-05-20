@@ -57,10 +57,7 @@ namespace Assets.Classes
 
 
             System.IO.File.WriteAllBytes(Application.persistentDataPath + "/temp.data", bytes);
-
-            //sw.Close();
-            //file2.Close();
-
+            
 
             // create a Binary Formatter
             BinaryFormatter formatter = new BinaryFormatter();

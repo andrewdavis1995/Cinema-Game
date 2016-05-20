@@ -9,14 +9,6 @@ using System;
 
 [RequireComponent(typeof(BoxCollider2D))]
 
-/*
-
-    All comments (other than this one!) in this file represent steps that need to be added
-    TOTAL COMMENTS REMAINING: 3
-
-*/
-
-
 public class mouseDrag : MonoBehaviour
 {
 
@@ -75,8 +67,6 @@ public class mouseDrag : MonoBehaviour
     // dodgy function
     void CheckForOutOfBounds()
     {
-        // between - 40 and - 10
-        //Debug.Log("StW: " + Camera.main.ScreenToWorldPoint(transform.position).x); // this one
         float theX = Camera.main.ScreenToWorldPoint(transform.position).x;
         if (theX < -40)
         {
@@ -92,31 +82,16 @@ public class mouseDrag : MonoBehaviour
             tmp.z = -10f;
             Camera.main.transform.position = tmp;
         }
-
-        //float theY = Camera.main.ScreenToWorldPoint(transform.position).y;
-        //Debug.Log("StW: " + Camera.main.ScreenToWorldPoint(transform.position).y); // this one
-        //if (theY < -12)
-        //{
-        //    Vector3 tmp = Camera.main.transform.position;
-        //    tmp.z = -10f;
-        //    Camera.main.transform.position = tmp;
-        //}
-        //if (theY > -25f)
-        //{
-        //    Vector3 tmp = Camera.main.transform.position;
-        //    tmp.y = -15f;
-        //    tmp.z = -10f;
-        //    Camera.main.transform.position = tmp;
-        //}
     }
     
     void OnMouseDown()
     {
+        // if dragging is valid
         if ((mainController.statusCode < 2) && staffMember.GetClicksRemaining() < 1 && Controller.isOwned)
         {
             dragging = true;
 
-
+            // set the images for the customer
             SpriteRenderer[] subImages = GetComponentsInChildren<SpriteRenderer>(); 
             foreach (SpriteRenderer sr in subImages)
             {
@@ -131,6 +106,8 @@ public class mouseDrag : MonoBehaviour
 
             transform.Translate(new Vector3(0, 0, 1));
 
+
+            // show the attributes
             attributeTexts[0].text = staffMember.GetStaffname();
             
             int[] values = staffMember.GetAttributes();
@@ -144,6 +121,7 @@ public class mouseDrag : MonoBehaviour
 
             int posInPost = -1;
 
+            // show the available slots
             for (int i = 0; i < mainController.staffSlot.Count; i++)
             {
                 Bounds b1 = mainController.staffSlot[i].GetComponent<Renderer>().bounds;
@@ -151,8 +129,6 @@ public class mouseDrag : MonoBehaviour
                 b1.extents = b1.extents * 1.5f;
 
                 Bounds staffBounds = transform.GetComponent<SpriteRenderer>().bounds;
-
-                //Bounds newStaffBounds = new Bounds(staffBounds.center, new Vector3(0.25f, 0.25f, 1));
 
 
                 if (b1.Intersects(staffBounds))
@@ -378,6 +354,9 @@ public class mouseDrag : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Move the customer
+    /// </summary>
     void DoDragging()
     {
 
@@ -444,6 +423,11 @@ public class mouseDrag : MonoBehaviour
         //CheckForOutOfBounds();
     }
     
+    /// <summary>
+    /// get the bounds for an object - to see if a staff member is hidden behind it
+    /// </summary>
+    /// <param name="go"></param>
+    /// <returns></returns>
     public static Bounds GetObjectHiddenBounds(GameObject go)
     {
         Bounds toReturn = new Bounds();
@@ -465,6 +449,13 @@ public class mouseDrag : MonoBehaviour
         return toReturn;
     }
 
+    /// <summary>
+    /// check if a staff member is hidden
+    /// </summary>
+    /// <param name="staffBounds"></param>
+    /// <param name="gameObjectList"></param>
+    /// <param name="screenObjectList"></param>
+    /// <returns></returns>
     public static GameObject CheckHiddenBehind(Bounds staffBounds, List<GameObject> gameObjectList, List<GameObject> screenObjectList)
     {
         GameObject toHideBehind = null;
@@ -540,6 +531,9 @@ public class mouseDrag : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// check if a staff member is hidden behind a wall
+    /// </summary>
     void CheckWallCollision()
     {
         Bounds charBounds = transform.GetComponent<Renderer>().bounds;

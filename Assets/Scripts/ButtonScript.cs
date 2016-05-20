@@ -17,7 +17,7 @@ public class ButtonScript : MonoBehaviour {
     public static string owner;
     
     Button loadButton;      // the button to load a game
-    public Image loadImage;
+    public Image loadImage; // the "Loading..." image
     public GameObject popup;
      
     void Start()
@@ -28,14 +28,14 @@ public class ButtonScript : MonoBehaviour {
             loadButton = (Button)GameObject.Find("LoadButton").GetComponent<Button>();
         }
         catch (Exception) { }
-        // check if a game has been saved (and is loadable)
     }
     
     /// <summary>
-    /// Screw you guys...
+    /// Go back to the players own cinema, from friends' cinema
     /// </summary>
     public void GoHome()
     {
+        // reset all the friend related variables
         Controller.isOwned = true;
         Controller.friendID = "";
         loadGame = dataCopy;
@@ -114,7 +114,7 @@ public class ButtonScript : MonoBehaviour {
     /// <returns>The player details - to load into the game</returns>
     PlayerData Load()
     {
-
+        // if the user has logged in to Facebook
         if (FBScript.current.id.Length > 0)
         {
             string fbID = FBScript.current.id;

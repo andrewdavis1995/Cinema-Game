@@ -47,7 +47,7 @@ public class TileManager : MonoBehaviour
 
         floor = new Floor(height, width);
 
-        // part of this code was cooperated on with Flatmate
+        // part of this code was cooperated on with Flatmate - Tristan Haley
         for (int x = 0; x < floor.height; x++)
         {
             for (int y = 0; y < floor.width; y++)
@@ -55,9 +55,7 @@ public class TileManager : MonoBehaviour
                 GameObject newTile = new GameObject();
                 SpriteRenderer tilesRenderer = newTile.AddComponent<SpriteRenderer>();
                 FloorTile currentTile = floor.GetTileByCoord(x, y);
-
-                //rectTransform.localScale = rectTransform.localScale - new Vector3(0, 0.2f, 0);
-
+                
                 newTile.name = "FloorPanel~" + x + "~" + y;
                 newTile.tag = "Floor Tile";
 

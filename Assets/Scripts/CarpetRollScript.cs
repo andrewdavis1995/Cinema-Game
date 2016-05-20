@@ -88,6 +88,9 @@ public class CarpetRollScript : MonoBehaviour {
         }
 	}
 
+    /// <summary>
+    /// if the transition is in progress, finish changing the tile colours
+    /// </summary>
     public void FinishPlacement()
     {
         int x = (int)(carpet.transform.position.x) - 1;

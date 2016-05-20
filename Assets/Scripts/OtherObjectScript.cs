@@ -102,9 +102,7 @@ public class OtherObjectScript : MonoBehaviour {
         {
             s = popupController.boxOfficeIcon;
         }
-
-        // TODO: if box office or food court, change the sprite
-
+        
         // reset the status variables
         mainController.statusCode = 3;
 

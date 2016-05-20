@@ -25,12 +25,6 @@ namespace Assets.Classes
             request.Method = "POST";
             request.Timeout = 90000;
             request.ContentType = "text/xml;charset=UTF-8";
-            //request.ContentLength = theBlob.Length;
-           
-            
-            //UTF8Encoding encodedData = new UTF8Encoding();
-            //byte[] byteArray = encodedData.GetBytes(postData);
-
 
             Stream newStream = request.GetRequestStream();
             
@@ -50,8 +44,6 @@ namespace Assets.Classes
 
             byte[] result = rwerwer.ToArray();
 
-
-
             byte[] toSend = new byte[id.Length + byteput.Length + blobBytes.Length];
             chars.CopyTo(toSend, 0);
             idThings.CopyTo(toSend, chars.Length);
@@ -64,10 +56,7 @@ namespace Assets.Classes
 
 
             newStream.Write(toSend, 0, toSend.Length);
-
-            //newStream.Close();
             
-            //System.IO.File.WriteAllBytes("C:/Users/asuth/Documents/baba.txt", theBlob);
             
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
@@ -83,6 +72,3 @@ namespace Assets.Classes
 
     }
 }
-
-
-// ÿÿÿÿAssembly-CSharpPlayerDatatheScreenscarpetColourstaffMembersfilmShowingstotalCoinsnumPopcorncurrentDayotherObjectshasRedCarpetmarbleFloorreputationboxOfficeLevelfoodAreapostersScreenObject[]Assets.Classes.SaveableStaff[]FilmShowing[]OtherObject[]Assets.Classes.ReputationAssets.Classes.FoodArea 			@œ			ScreenObject	oƒ:×£°>^º)?€?Assets.Classes.SaveableStaffFilmShowing			OtherObjectAssets.Classes.Reputationoverall publicitystaffspeedfacilitiestotalSpeedValuesnumCustomersServedhighestReputationtotalCoinIncometotalQuestionCountcurrDay	ScreenObject screenNumbercapacityupgradeLevelconstructionInProgressconstructionTimeRemainingprojectorClicksRemainingcurrBrokenCountpointXpointYFilmShowingscreeningID screenNumticketsSoldtimeHtimeMtheFloorAssets.Classes.Floor			Assets.Classes.FloorfloorTileswidthheightAssets.Classes.FloorTile[,] P((PAssets.Classes.FloorTile																	!	"

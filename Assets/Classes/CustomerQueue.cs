@@ -85,7 +85,6 @@ namespace Assets.Classes
                 servingSlots[i] = copy[i];
             }
 
-            // add a new thread
 
             int index = 0;
 
@@ -94,6 +93,7 @@ namespace Assets.Classes
                 index = 1;
             }
 
+            // add a new thread
             Thread thr = new Thread(() => StaffThreadMethod(pos, sm.GetAttributeByIndex(index)));        // the first parameter is the slot, the second is the speed
             staffThreads[pos] = thr;
 
@@ -246,19 +246,7 @@ namespace Assets.Classes
 
                     // decrease the patience values of each customer in the queue
                     theQueue[i].DecreasePatience(value);
-
-
-                    //System.Random rand = new System.Random();
-                    //int r = rand.Next(0, 80);
                     
-                    //Debug.Log(r.ToString());
-
-                    //if (r == 4)
-                    //{
-                    //    // set a status variable in Customer = true
-                    //    theQueue[i].playSound = true;
-                    //}
-
 
                     // check if patience has run out
                     if (theQueue[i].GetPatience() < 1)

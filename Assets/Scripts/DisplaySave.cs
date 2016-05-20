@@ -27,7 +27,7 @@ public class DisplaySave : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-
+        // display the saved icon if suitable too
         prevState = currState;
         currState = Controller.saveState;
 

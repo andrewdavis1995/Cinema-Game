@@ -1602,15 +1602,7 @@ public class Controller : MonoBehaviour
         }
 
     }
-
-    /// <summary>
-    /// TEMPORARY - for the admin test button
-    /// </summary>
-    public void SkipDay()
-    {
-        NextDay(false, true);
-    }
-
+    
     /// <summary>
     /// After 7 days, move to next week - new show times etc
     /// </summary>

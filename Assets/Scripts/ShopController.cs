@@ -178,6 +178,7 @@ public class ShopController : MonoBehaviour
 
     public GameObject AddScreen(ScreenObject theScreen, Vector3 pos, int height)
     {
+        // create a new screen object
         GameObject instance = (GameObject)Instantiate(screenPrefab.gameObject, pos, Quaternion.identity);
         instance.GetComponent<Screen_Script>().theScreen = theScreen;
         instance.name = "Screen#" + theScreen.GetScreenNumber();
@@ -287,8 +288,6 @@ public class ShopController : MonoBehaviour
             }
 
             mainController.foodQueue = new CustomerQueue(70, pos.x + 3, (((pos.y / 0.8f) + 4) * 0.8f) - 1, 1);
-            //OtherObjectScript.CreateStaffSlot(2, pos + new Vector3(3, 7.95f, 0));
-
 
             bool one = Controller.foodArea.hasHotFood;
             bool two = Controller.foodArea.hasIceCream;

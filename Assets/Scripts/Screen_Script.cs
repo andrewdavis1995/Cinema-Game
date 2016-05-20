@@ -66,9 +66,7 @@ public class Screen_Script : MonoBehaviour {
             total = GetUpgradeTime(theScreen.GetUpgradeLevel());
             done = total - theScreen.GetDaysOfConstruction();
         }
-
-        // show the menu
-
+        
         // reset status variables
         theController.statusCode = 3;
 

@@ -12,7 +12,11 @@ public class QuestionScript : MonoBehaviour
     public bool isButton = false;
     int dayNum;
 
-
+    /// <summary>
+    /// get how often a question shoukd be asked
+    /// </summary>
+    /// <param name="days"></param>
+    /// <returns></returns>
     int GetQuestionFrequency(int days)
     {
         if (days == 0)
@@ -150,7 +154,7 @@ public class QuestionScript : MonoBehaviour
             // update the clicks
             int remaining = sm.QuestionClicked();
 
-            // if that was the last click... FIXED!!!
+            // if that was the last click... then it is FIXED!!!
             if (prevClicks == 1)
             {
                 sm.ResetClicks();

@@ -14,7 +14,6 @@ public class movementScript : MonoBehaviour {
     public delegate int GetTicketQueueSize();
     public static event GetTicketQueueSize getQueueTicketsSize;
 
-
     public delegate void AddToFoodQueue(Customer customer);
     public static event AddToFoodQueue addToQueueFood;
     
@@ -54,10 +53,6 @@ public class movementScript : MonoBehaviour {
     // Use this for initialization
     void Start ()
     {
-        //int sprite = UnityEngine.Random.Range(0, 3);
-
-        //Controller.queueDone += sortQueuePosition;
-
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();
         
         animator = GetComponent<Animator>();
@@ -108,12 +103,9 @@ public class movementScript : MonoBehaviour {
 
                 if (checkX1 && checkX2 && checkY1 && checkY2)
                 {
-
-                    //Vector3 bounceBack = -0.15f * customer.MovementVector;
-
+                    
                     if (customer.goingToFood && customer.pointsToVisit.Count < 2)
                     {
-                        //customer.nextPoint(false);
                         int queueLength = getQueueFoodSize();
 
                         Vector3 temp = gameObject.transform.position;
@@ -139,7 +131,6 @@ public class movementScript : MonoBehaviour {
 
                     else if (customer.NeedsTickets() && customer.pointsToVisit.Count < 2)
                     {
-                        //customer.nextPoint(false);
                         int queueLength = getQueueTicketsSize();
 
                         Vector3 temp = gameObject.transform.position;
@@ -165,9 +156,7 @@ public class movementScript : MonoBehaviour {
                     else
                     {
                         customer.NextPoint(false);
-                        //customer.SetTravellingTo(customer.pointsToVisit[0].x, customer.pointsToVisit[0].y);
                     }
-                    //customer.transform.Translate(bounceBack);
                 }
 
                 //actually move
@@ -183,13 +172,9 @@ public class movementScript : MonoBehaviour {
                 transform.Translate(movementVector);
             }
 
-
+            // check status variables and perform necessary updates 
             if (customer.queueDoneWith != -1)
             {
-                if (customer.queueDoneWith == 1)
-                {
-                    //transform.Translate(0, -1, 0);
-                }
                 transform.GetComponent<SpriteRenderer>().sortingOrder = 40 - (int)(transform.position.y / 0.8f) - 1;
                 customer.queueDoneWith = -1;
             }
@@ -239,33 +224,13 @@ public class movementScript : MonoBehaviour {
                 customer.MovementVector = new Vector3(0, -1, 0);
             }
 
-            //if (customer.playSound)
-            //{
-            //    customer.playSound = false;
-
-            //    AudioSource srcPlayer = transform.gameObject.GetComponent<AudioSource>();
-
-            //    if (customer.GetPatience() > 152)
-            //    {
-            //        srcPlayer.clip = neutralSound;
-            //    }
-            //    else
-            //    {
-            //        srcPlayer.clip = boredSound;
-            //    }
-
-            //    srcPlayer.Play();
-            //}
-
+            
             if (customer.leaving && customer.MovementVector.Equals(new Vector2(0, 0)))
             {
                 customer.MovementVector = new Vector2(0, -1);
                 transform.GetComponent<Animator>().SetTrigger("down");
             }
-
         }
-
-
     }
     
 

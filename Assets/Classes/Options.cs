@@ -27,7 +27,7 @@ namespace Assets.Classes
             {
                 musicLevel = m;
 
-                // turn the music down
+                // turn the music down/up
                 GameObject.Find("Music").GetComponent<AudioSource>().volume = ((float)musicLevel / 8f);
             }
 

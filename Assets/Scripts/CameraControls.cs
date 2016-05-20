@@ -33,12 +33,12 @@ public class CameraControls : MonoBehaviour
     {
         staff = GameObject.FindGameObjectsWithTag("Staff");
         endPos = transform.position;
-        //minLeft = mainController.floorTiles[0, 0].transform.position.x;
     }
 
     // Update is called once per frame
     void Update()
     {
+        // if it is allowable to 
         if (mainController.statusCode < 3 && mainController.statusCode != 1 || mainController.statusCode == 50)
         {
             vertExtent = Camera.main.orthographicSize;
@@ -50,6 +50,7 @@ public class CameraControls : MonoBehaviour
             minY = vertExtent;
             maxY = (40f - (Camera.main.orthographicSize * 1.25f)) * 0.8f;
 
+            // moving to a staff members position
             if (transform.position != endPos)
             {
                 transform.position = Vector3.Lerp(transform.position, endPos, Time.deltaTime * 5);
@@ -59,6 +60,8 @@ public class CameraControls : MonoBehaviour
                 mainController.statusCode = 6;
             }
 
+
+            // zooming
             if (Input.GetAxis("Mouse ScrollWheel") > 0)
             {
                 Camera.main.orthographicSize--;
@@ -77,7 +80,6 @@ public class CameraControls : MonoBehaviour
             {
                 Camera.main.orthographicSize = 15f;
             }
-
 
             if (Input.GetMouseButtonDown(0))
             {
@@ -113,8 +115,6 @@ public class CameraControls : MonoBehaviour
                 {
                     Camera.main.orthographicSize = 4f;
                 }
-
-
             }
 
             if (Input.GetMouseButton(0))

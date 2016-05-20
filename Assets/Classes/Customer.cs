@@ -78,7 +78,7 @@ public class Customer
 
         index = ID;
 
-        needsFood = Random.Range(0, 10) >= 5;         // 5
+        needsFood = Random.Range(0, 10) >= 5;         
         needsTickets = Random.Range(0, 10) >= 0;      // 3
         needsToilet = Random.Range(0, 10) >= 6;
 
@@ -165,10 +165,7 @@ public class Customer
 
     public void NextPoint(bool first)
     {
-        //if (!first)
-        //{
-        //    transform.Translate(-2 * MovementVector);
-        //}
+
 
         try
         {
@@ -223,7 +220,6 @@ public class Customer
                 y = -1;
                 trigger = "down";
             }
-            // ---------------------------------------------------------------------------------------------------------
 
 
             // generate a new movement vecctor
@@ -246,8 +242,6 @@ public class Customer
         if (needsTickets)
         {
             // find a path and set up the point list
-            //travellingToX = ticketsX;
-            //travellingToY = ticketsY;
 
             // 11, 40
             // 0, 40
@@ -263,7 +257,7 @@ public class Customer
             }
         }
 
-        // food, toilets go here
+        // toilets check go here
 
         else if (goingToFood)
         {
@@ -312,11 +306,6 @@ public class Customer
                 {
                     pointsToVisit.Add(copy[i]);
                 }
-
-                //float xPos = transform.position.x;
-                //float yPos = (transform.position.y) + 1;
-
-                //SetTravellingTo(xPos, 8000);
 
             }
             else
@@ -401,9 +390,7 @@ public class Customer
             pointsToVisit = new List<Coordinate>();
         }
 
-        customerController.numWalkouts++;
-        //mainController.allCustomers.RemoveAt(ind);
-       
+        customerController.numWalkouts++;       
     }
 
 }

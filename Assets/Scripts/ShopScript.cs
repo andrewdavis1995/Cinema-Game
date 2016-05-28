@@ -16,6 +16,10 @@ public class ShopScript : MonoBehaviour
     // used to initialise the variables
     void Start()
     {
+
+        string plat = Application.platform.ToString();
+        Debug.Log(plat);
+
         // find and set the variables
         closeBtn = GameObject.Find("Close Shop");
         mainController = GameObject.Find("Central Controller").GetComponent<Controller>();

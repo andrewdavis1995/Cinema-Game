@@ -30,17 +30,17 @@ public class CarpetRollScript : MonoBehaviour {
         
         // change the colour of the carpet image
         carpet.GetComponent<SpriteRenderer>().color = c;
-        carpet.transform.position = new Vector3(-2.62f, 17.97f, 0);
+        carpet.transform.position = new Vector3(0, 17.97f, 0);
         carpet.transform.localScale = new Vector3(5f, 24f, 1);
 
         // if the user has selected marble floor, hide the carpet animation image
         if (t.Length > 1)
         {
-            carpet.SetActive(false);
+            carpet.GetComponent<SpriteRenderer>().enabled = false;
         }
         else
         {
-            carpet.SetActive(true);
+            carpet.GetComponent<SpriteRenderer>().enabled = true;
         }
 
     }
@@ -65,7 +65,7 @@ public class CarpetRollScript : MonoBehaviour {
             if (carpet.transform.position.x > 80)
             {
                 shouldRun = false;
-                carpet.SetActive(false);
+                carpet.GetComponent<SpriteRenderer>().enabled = false;
             }
 
             // update the image of all tiles

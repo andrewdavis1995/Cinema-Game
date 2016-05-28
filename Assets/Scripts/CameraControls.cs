@@ -12,7 +12,7 @@ public class CameraControls : MonoBehaviour
 
     public Vector3 endPos = new Vector3(0, 0, -10);
 
-    public float orthographicZoomSpeed = .33f;
+    public float orthographicZoomSpeed = .2f;
 
     GameObject[] staff;
 

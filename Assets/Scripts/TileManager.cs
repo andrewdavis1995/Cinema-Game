@@ -507,6 +507,21 @@ public class TileManager : MonoBehaviour
         mouseDownCount = 0;
         mouseDown = false;
     }
-          
+
+    public static int GetAccessLevelForSlot(string name)
+    {
+        int type = int.Parse(name.Substring(10));
+
+        if (type == 1)
+        {
+            return 1;
+        }
+        else if (type == 2)
+        {
+            return 2;
+        }
+
+        return 1;
+    }     
 
 }

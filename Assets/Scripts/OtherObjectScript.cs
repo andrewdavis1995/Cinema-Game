@@ -24,8 +24,13 @@ public class OtherObjectScript : MonoBehaviour {
     public static void CreateStaffSlot(int type, Vector3 pos)
     {
         // instantiate a new slot and name/tag/disable it
-        mainController.staffSlot.Add(Instantiate(mainController.slotPrefab, pos, Quaternion.identity) as Transform);
-        mainController.staffSlot[mainController.staffSlot.Count - 1].GetComponent<SpriteRenderer>().enabled = false;
+        Transform t = (Instantiate(mainController.slotPrefab, pos, Quaternion.identity) as Transform);
+
+        mainController.staffSlot.Add(t);
+
+        SpriteRenderer[] srs = t.GetComponentsInChildren<SpriteRenderer>();
+        foreach (SpriteRenderer sr in srs) { sr.enabled = false; }
+
         mainController.staffSlot[mainController.staffSlot.Count - 1].name = "StaffSlot" + (mainController.staffSlot.Count - 1);
         mainController.staffSlot[mainController.staffSlot.Count - 1].tag = "Slot Type " + type;
         // initialise the slot to not be in use

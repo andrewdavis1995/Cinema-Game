@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2015
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinema-Game.CSharp.Plugins", "Cinema-Game.CSharp.Plugins.csproj", "{5B7937BA-DB97-D916-2597-236A75714BBE}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinema-Game.CSharp", "Cinema-Game.CSharp.csproj", "{539914C6-5EA4-5613-FF5D-087ABA9E286D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinema-Game.CSharp.Editor", "Cinema-Game.CSharp.Editor.csproj", "{BAB2BDCB-4FBC-4D1A-BA06-547B33F0168B}"
@@ -11,6 +13,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5B7937BA-DB97-D916-2597-236A75714BBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B7937BA-DB97-D916-2597-236A75714BBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B7937BA-DB97-D916-2597-236A75714BBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B7937BA-DB97-D916-2597-236A75714BBE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{539914C6-5EA4-5613-FF5D-087ABA9E286D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{539914C6-5EA4-5613-FF5D-087ABA9E286D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{539914C6-5EA4-5613-FF5D-087ABA9E286D}.Release|Any CPU.ActiveCfg = Release|Any CPU

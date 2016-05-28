@@ -23,6 +23,8 @@ public class mouseDrag : MonoBehaviour
     public delegate void UpdateStaffJob(int index, int job, int posInPost, bool add);
     public static event UpdateStaffJob changeStaffJob;
 
+    public Sprite[] starImages;
+
     public delegate List<StaffMember> getFullStaffList();
 
     Text[] attributeTexts;
@@ -97,12 +99,20 @@ public class mouseDrag : MonoBehaviour
             {
                 sr.sortingOrder = TileManager.floor.height + 7;
             }
-            subImages[3].sortingOrder++;
-            subImages[0].sortingOrder--;
+            
+            subImages[1].sortingOrder += 2;
+            subImages[2].sortingOrder += 1;
+            subImages[3].sortingOrder += 3;
+            subImages[4].sortingOrder += 2;
+            subImages[5].sortingOrder += 3;
+            subImages[6].sortingOrder += 1;
+
             subImages[0].color = staffMember.GetColourByIndex(0);
             subImages[1].color = staffMember.GetColourByIndex(2);
             subImages[2].color = staffMember.GetColourByIndex(2);
             subImages[3].color = staffMember.GetColourByIndex(1);
+            subImages[4].color = staffMember.GetColourByIndex(1);
+            subImages[6].color = new Color(1, 1, 1, 1);
 
             transform.Translate(new Vector3(0, 0, 1));
 
@@ -116,6 +126,10 @@ public class mouseDrag : MonoBehaviour
             {
                 attributeTexts[i].text = values[i - 1].ToString();
             }
+
+            int level = staffMember.GetLevel();
+
+            attributeImages[6].fillAmount = 0.25f * level;
 
             staffAttributePanel.SetActive(true);
 
@@ -185,7 +199,26 @@ public class mouseDrag : MonoBehaviour
             {
                 if (!mainController.slotState[i])
                 {
-                    mainController.staffSlot[i].GetComponent<Renderer>().enabled = true;
+                    SpriteRenderer[] srs = mainController.staffSlot[i].GetComponentsInChildren<SpriteRenderer>();
+                    foreach (SpriteRenderer sr in srs) { sr.enabled = true; }
+
+                    // get the level required to use this slot
+                    int levReq = TileManager.GetAccessLevelForSlot(mainController.staffSlot[i].tag);
+                    int currLev = staffMember.GetLevel();
+
+                    // change color
+                    if (currLev >= levReq)
+                    {
+                        srs[0].color = new Color(0, 1, 0, 0.8f);
+                    }
+                    else
+                    {
+                        srs[0].color = new Color(1, 0, 0, 0.8f);
+                    }
+
+                    // change star outputs
+                    srs[2].sprite = starImages[levReq - 1];
+
                 }
             }
 
@@ -237,7 +270,8 @@ public class mouseDrag : MonoBehaviour
 
             for (int i = 0; i < mainController.staffSlot.Count; i++)
             {
-                mainController.staffSlot[i].GetComponent<Renderer>().enabled = false;
+                SpriteRenderer[] srs = mainController.staffSlot[i].GetComponentsInChildren<SpriteRenderer>();
+                foreach (SpriteRenderer sr in srs) { sr.enabled = false; }
             }
 
             triggerSet = false;
@@ -259,45 +293,62 @@ public class mouseDrag : MonoBehaviour
                 {
                     if (ValidDrop(i))
                     {
-                        // add to list of staff at ticket booth
-                        if (changeStaffJob != null)
+                        // get the level required to use this slot
+                        int levReq = TileManager.GetAccessLevelForSlot(mainController.staffSlot[i].tag);
+                        int currLev = staffMember.GetLevel();
+
+                        // change color
+                        if (currLev >= levReq)
                         {
-                            int target = 0;
-
-                            if (mainController.staffSlot[i].tag.Contains("1"))
+                            // add to list of staff at ticket booth
+                            if (changeStaffJob != null)
                             {
-                                // a ticket slot
-                                target = 1;
-                            }
-                            else
-                            {
-                                target = 2;
-                            }
+                                int target = 0;
 
-                            mainController.slotState[i] = true;
-
-                            GameObject[] slots = GameObject.FindGameObjectsWithTag("Slot Type " + target);
-
-                            int posInPost = -1;
-                            for (int j = 0; j < slots.Length; j++)
-                            {
-                                if (slots[j].name.Equals(mainController.staffSlot[i].name))
+                                if (mainController.staffSlot[i].tag.Contains("1"))
                                 {
-                                    posInPost = j;
-                                    break;
+                                    // a ticket slot
+                                    target = 1;
                                 }
-                            }
+                                else
+                                {
+                                    target = 2;
+                                }
 
-                            if (target == 2)
+                                mainController.slotState[i] = true;
+
+                                GameObject[] slots = GameObject.FindGameObjectsWithTag("Slot Type " + target);
+
+                                int posInPost = -1;
+                                for (int j = 0; j < slots.Length; j++)
+                                {
+                                    if (slots[j].name.Equals(mainController.staffSlot[i].name))
+                                    {
+                                        posInPost = j;
+                                        break;
+                                    }
+                                }
+
+                                if (target == 2)
+                                {
+                                    transform.Translate(0, 0.27f, 0);
+                                }
+
+                                mainController.UpdateStaffJob(staffMember.GetIndex(), target, posInPost, true);
+                            }
+                        }
+                        else
+                        {
+                            // back away...
+                            if (b1.Intersects(newStaff))
                             {
-                                transform.Translate(0, 0.27f, 0);
+                                transform.position = new Vector3(transform.position.x, transform.position.y + 2, 0);
                             }
-
-                            mainController.UpdateStaffJob(staffMember.GetIndex(), target, posInPost, true);
                         }
                     }
                     else
                     {
+                        // back away...
                         if (b1.Intersects(newStaff))
                         {
                             transform.position = new Vector3(transform.position.x, transform.position.y + 2, 0);
@@ -379,18 +430,22 @@ public class mouseDrag : MonoBehaviour
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             mousePos = new Vector3(mousePos.x, mousePos.y, 0f);
 
-            if (b1.Contains(mousePos))
+            if (b1.Contains(mousePos) )
             {
-                mainController.staffSlot[i].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("empty slot 2");
-                // lock to pos
-                Vector3 position = mainController.staffSlot[i].transform.position;
-                position.y -= 1.8f;
-                transform.position = position;
+                // get the level required to use this slot
+                int levReq = TileManager.GetAccessLevelForSlot(mainController.staffSlot[i].tag);
+                int currLev = staffMember.GetLevel();
+
+                // change color
+                if (currLev >= levReq)
+                {
+                    // lock to pos
+                    Vector3 position = mainController.staffSlot[i].transform.position;
+                    position.y -= 1.8f;
+                    transform.position = position;
+                }
+
                 // TODO: change image / animation of staff ?
-            }
-            else
-            {
-                mainController.staffSlot[i].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("empty slot");
             }
 
         }
@@ -399,19 +454,19 @@ public class mouseDrag : MonoBehaviour
 
         if (Camera.main.WorldToScreenPoint(transform.position).x > UnityEngine.Screen.width - 50)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0.3f, 0, 0);
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0.2f, 0, 0);
         }
         if (Camera.main.WorldToScreenPoint(transform.position).x < 100)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(-0.3f, 0, 0);
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(-0.2f, 0, 0);
         }
         if (Camera.main.WorldToScreenPoint(transform.position).y > UnityEngine.Screen.height - 100)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, 0.3f, 0);
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, 0.2f, 0);
         }
         if (Camera.main.WorldToScreenPoint(transform.position).y < 50)
         {
-            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, -0.3f, 0);
+            Camera.main.transform.position = Camera.main.transform.position + new Vector3(0, -0.2f, 0);
         }
 
         Camera.main.GetComponent<CameraControls>().endPos = Camera.main.transform.position;

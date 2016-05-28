@@ -277,5 +277,36 @@ namespace Assets.Classes
             attributes[index]++;
         }
 
+        /// <summary>
+        /// Get the total rating for the staff member - used for their appearance
+        /// </summary>
+        /// <returns>The total after adding all the attributes together</returns>
+        public int GetAttributeTotal()
+        {
+            return attributes[0] + attributes[1] + attributes[2] + attributes[3];
+        }
+
+
+        public int GetLevel()
+        {
+
+            int total = GetAttributeTotal();
+
+            if (total > 14)
+            {
+                return 4;
+            }
+            else if (total > 10)
+            {
+                return 3;
+            }
+            else if (total > 6)
+            {
+                return 2;
+            }
+            else { 
+                return 1;
+            }
+        }
     }
 }

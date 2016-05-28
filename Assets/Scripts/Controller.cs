@@ -22,6 +22,8 @@ public class Controller : MonoBehaviour
     public static int numPopcorn = 0;
     public static int popcornSpent = 0;
 
+    public Sprite[] collarImages;
+
     public GameObject confirmBtn;
     public CarpetRollScript carpetController;
 
@@ -246,7 +248,7 @@ public class Controller : MonoBehaviour
         // get Player data. If not null, load game
         if (ButtonScript.loadGame == null)
         {
-            financeController.Inititalise(450, 4);
+            financeController.Inititalise(45000, 4);
 
             carpetColour = GetColourFromID(1);
 
@@ -367,11 +369,11 @@ public class Controller : MonoBehaviour
                 Sprite hairSprite = null;
                 Sprite extraSprite = null;
 
-                if (hair != 6)
+                if (hair != 9)
                 {
                     hairSprite = aS.hairStyles[hair];
                 }
-                if (extras != 3)
+                if (extras != 5)
                 {
                     extraSprite = aS.extraImages[extras];
                 }
@@ -837,6 +839,14 @@ public class Controller : MonoBehaviour
         components[3].color = colours[1];
         components[4].color = colours[1];
 
+        components[0].sortingOrder = xPos;
+        components[1].sortingOrder = xPos + 2;
+        components[2].sortingOrder = xPos + 1;
+        components[3].sortingOrder = xPos + 3;
+        components[4].sortingOrder = xPos + 2;
+        components[5].sortingOrder = xPos + 3;
+        components[6].sortingOrder = xPos + 1;
+
         // TODO: sort the colour if not 0 or 2
         components[3].sprite = AppearanceScript.hairStyle;
         components[4].sprite = AppearanceScript.extraOption;
@@ -891,6 +901,16 @@ public class Controller : MonoBehaviour
         b2.onClick.AddListener(() => ViewStaffMemberInfo(staff.GetIndex()));
 
         staffMenuList.Add(go);
+
+
+
+
+        // check if the collar needs to change
+        int totalAttribute = staff.GetLevel();
+        
+                
+        SpriteRenderer collar = goStaff.transform.FindChild("collar").GetComponent<SpriteRenderer>();
+        collar.sprite = collarImages[totalAttribute - 1];
 
     }
 
@@ -957,6 +977,11 @@ public class Controller : MonoBehaviour
             imgs[9 + (i * 4)].fillAmount = 0.25f * attributes[i];
         }
 
+
+        // work out their level
+        int lev = staffMembers[staffID].GetLevel();
+        imgs[24].fillAmount = 0.25f * (lev);
+
     }
 
     /// <summary>
@@ -987,6 +1012,18 @@ public class Controller : MonoBehaviour
         int attributeEffected = staffMembers[selectedStaff].GetAttributes()[index];
 
         imgs[9 + (index * 4)].fillAmount = 0.25f * attributeEffected;
+
+        // check if the collar needs to change
+        int lev = staffMembers[selectedStaff].GetLevel();
+
+        GameObject[] staffs = GameObject.FindGameObjectsWithTag("Staff");
+
+        SpriteRenderer collar = staffs[selectedStaff].transform.FindChild("collar").GetComponent<SpriteRenderer>();
+        collar.sprite = collarImages[lev - 1];
+
+        
+        imgs[24].fillAmount = 0.25f * (lev);
+
     }
 
     /// <summary>
@@ -1233,9 +1270,7 @@ public class Controller : MonoBehaviour
     {
         carpetColour = GetColourFromID(id);
         Sprite[] s = GetSpriteFromID(id);
-
-        carpetController = GameObject.Find("CarpetController").GetComponent<CarpetRollScript>();
-
+        
         if (carpetController != null)
         {
             // check if the script is already running
@@ -1978,10 +2013,11 @@ public class Controller : MonoBehaviour
         for (int i = 0; i < staff.Length; i++)
         {
             SpriteRenderer[] srs = staff[i].GetComponentsInChildren<SpriteRenderer>();
-            for (int j = 0; j < 5; j++)
+            for (int j = 0; j < 7; j++)
             {
                 srs[j].enabled = true;
             }
+            srs[5].enabled = false;
 
             // sort z position
             staff[i].transform.position = new Vector3(staff[i].transform.position.x, staff[i].transform.position.y, -1);
@@ -2113,19 +2149,21 @@ public class Controller : MonoBehaviour
 
         statusCode = 0;
 
-        GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
-        for (int i = 0; i < staff.Length; i++)
-        {
-            SpriteRenderer[] srs = staff[i].GetComponentsInChildren<SpriteRenderer>();
-            for (int j = 0; j < 4; j++)
-            {
-                srs[j].enabled = true;
-            }
+        //GameObject[] staff = GameObject.FindGameObjectsWithTag("Staff");
+        //for (int i = 0; i < staff.Length; i++)
+        //{
+        //    SpriteRenderer[] srs = staff[i].GetComponentsInChildren<SpriteRenderer>();
+        //    for (int j = 0; j < 6; j++)
+        //    {
+        //        srs[j].enabled = true;
+        //    }
 
-            // sort z position
-            staff[i].transform.position = new Vector3(staff[i].transform.position.x, staff[i].transform.position.y, -1);
+        //    srs[5].enabled = false;
 
-        }
+        //    // sort z position
+        //    staff[i].transform.position = new Vector3(staff[i].transform.position.x, staff[i].transform.position.y, -1);
+
+        //}
 
         ReShowStaffAndBuildings();
 

@@ -25,7 +25,7 @@ public class AppearanceScript : MonoBehaviour {
     static SpriteRenderer extras;
 
     // the lists of colours to use for each component
-    Color[] shirtColours = new Color[6];
+    Color[] shirtColours = new Color[9];
     Color[] hairColours = new Color[5];
     Color[] skinTones = new Color[3];
 
@@ -40,7 +40,7 @@ public class AppearanceScript : MonoBehaviour {
     int newCount = 1;       // if a new game, count how many are required
 
     int hairID = 0;         // hair sprite chosen
-    int extrasID = 3;       // extras sprite chosen
+    int extrasID = 5;       // extras sprite chosen
 
 
     public Controller mainController;      // the instance of Controller to use
@@ -69,10 +69,13 @@ public class AppearanceScript : MonoBehaviour {
         shirtColours[3] = new Color(1, 0.878f, 0);
         shirtColours[4] = new Color(0.514f, 0, 0.329f);
         shirtColours[5] = new Color(1, 1, 1);
+        shirtColours[6] = new Color(0.627f, 0.925f, 0.961f);
+        shirtColours[7] = new Color(0.263f, 0.263f, 0.361f);
+        shirtColours[8] = new Color(1, 0, 0.686f);
 
         // hair colours
         hairColours[0] = new Color(0.427f, 0.251f, 0.133f);
-        hairColours[1] = new Color(0.690f, 0.690f, 0.392f);
+        hairColours[1] = new Color(1f, 1f, 0.435f);
         hairColours[2] = new Color(0, 0, 0);
         hairColours[3] = new Color(1, 0.443f, 0.094f);
         hairColours[4] = new Color(0.471f, 0.471f, 0.471f);
@@ -173,7 +176,7 @@ public class AppearanceScript : MonoBehaviour {
         hairID = index;
 
         // bald check   
-        if (index != 6)
+        if (index != 9)
         {
             hair.sprite = hairStyles[index];
         }
@@ -191,7 +194,7 @@ public class AppearanceScript : MonoBehaviour {
     {
         hair.color = hairColours[index];
 
-        if (extras.sprite == extraImages[0] || extras.sprite == extraImages[2])
+        if (extras.sprite == extraImages[0] || extras.sprite == extraImages[2] || extras.sprite == extraImages[3])
         {
             extras.color = hairColours[index];
         }
@@ -223,7 +226,7 @@ public class AppearanceScript : MonoBehaviour {
     {
         extrasID = index;
 
-        if (index != 3)
+        if (index != 5)
         {
             extras.sprite = extraImages[index];
 
@@ -326,7 +329,7 @@ public class AppearanceScript : MonoBehaviour {
         colours[1] = hairColours[0];
 
         hairID = 0;
-        extrasID = 3;
+        extrasID = 5;
     }
 
 }
